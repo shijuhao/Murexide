@@ -38,7 +38,7 @@ class MainActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             if (tokenStorage.isLoggedIn()) {
-                token = savedToken
+                token = tokenStorage.getToken()
                 isLoggedIn = true
             }
         }
