@@ -7,34 +7,40 @@ option java_outer_classname = "ConversationProto";
 option java_multiple_files = true;
 
 // 响应状态
-message Status {
+message ConversationStatus {
     int64 number = 1;
     int32 code = 2;
     string msg = 3;
 }
 
+// 请求标识符
+message ConversationListSend {
+    string md5 = 2;
+}
+
 // 列出对话
 message ConversationList {
-    Status status = 1;
+    ConversationStatus status = 1;
     repeated ConversationData data = 2;
-    int32 total = 3;
-    string request_id = 4;
+    int64 total = 3;
+    string md5 = 4;
     
     message ConversationData {
         string chat_id = 1;
-        int32 chat_type = 2;
-        string name = 3;
+        int64 chat_type = 2;
+        string remark = 3;
         string chat_content = 4;
         int64 timestamp_ms = 5;
-        int32 unread_message = 6;
-        int32 at = 7;
+        int64 unread_message = 6;
+        int64 at = 7;
         int64 avatar_id = 8;
         string avatar_url = 9;
-        int32 do_not_disturb = 11;
-        int64 timestamp = 12;
+        int64 do_not_disturb = 11;
+        int64 send_timestamp = 12;
         AtData at_data = 14;
-        int32 certification_level = 16;
-
+        string name = 15;
+        int64 certification_level = 16;
+        
         message AtData {
             int64 unknown = 1;
             string mentioned_id = 2;
