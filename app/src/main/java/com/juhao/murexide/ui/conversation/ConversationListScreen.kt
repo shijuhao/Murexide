@@ -23,7 +23,7 @@ fun ConversationListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    when (uiState) {
+    when (val state = uiState) {
         is ConversationUiState.Loading -> {
             Box(
                 modifier = modifier.fillMaxSize(),
@@ -33,7 +33,7 @@ fun ConversationListScreen(
             }
         }
         is ConversationUiState.Success -> {
-            if (uiState.conversations.isEmpty()) {
+            if (state.conversations.isEmpty()) {
                 Box(
                     modifier = modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -45,7 +45,7 @@ fun ConversationListScreen(
                     modifier = modifier.fillMaxSize(),
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
-                    items(uiState.conversations, key = { it.chatId }) { conversation ->
+                    items(state.conversations, key = { it.chatId }) { conversation ->
                         ConversationItem(
                             conversation = conversation,
                             onClick = { onConversationClick(conversation.chatId) }
@@ -60,7 +60,7 @@ fun ConversationListScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("加载失败: ${uiState.message}")
+                    Text("加载失败: ${state.message}")
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(onClick = { viewModel.refresh() }) {
                         Text("重试")

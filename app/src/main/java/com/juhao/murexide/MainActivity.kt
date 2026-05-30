@@ -50,14 +50,16 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     } else {
-                        LoginScreen { successToken ->
-                            lifecycleScope.launch {
-                                tokenStorage.saveToken(successToken)
-                                token = successToken
-                                isLoggedIn = true
-                                Toast.makeText(this@MainActivity, "登录成功", Toast.LENGTH_SHORT).show()
+                        LoginScreen(
+                            onLoginSuccess = { successToken ->
+                                lifecycleScope.launch {
+                                    tokenStorage.saveToken(successToken)
+                                    token = successToken
+                                    isLoggedIn = true
+                                    Toast.makeText(this@MainActivity, "登录成功", Toast.LENGTH_SHORT).show()
+                                }
                             }
-                        }
+                        )
                     }
                 }
             }
