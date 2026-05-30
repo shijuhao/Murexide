@@ -30,17 +30,15 @@ class MainActivity : ComponentActivity() {
         val tokenStorage = TokenStorage(this)
         
         setContent {
-            var isLoggedIn by remember { mutableStateOf(true) }
             var token by remember { mutableStateOf("") }
             
-            LaunchedEffect(Unit) {
-                isLoggedIn = tokenStorage.isLoggedIn()
+            lifecycleScope.launch {
                 token = tokenStorage.getToken() ?: ""
             }
             
             MurexideTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    if (isLoggedIn) {
+                    if (token != "") {
                         MainScreen(token) {
                             lifecycleScope.launch {
                                 tokenStorage.clearToken()
