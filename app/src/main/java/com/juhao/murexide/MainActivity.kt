@@ -42,7 +42,6 @@ class MainActivity : ComponentActivity() {
                         MainScreen(token) {
                             lifecycleScope.launch {
                                 tokenStorage.clearToken()
-                                isLoggedIn = false
                                 token = ""
                                 Toast.makeText(this@MainActivity, "已登出", Toast.LENGTH_SHORT).show()
                             }
@@ -53,7 +52,6 @@ class MainActivity : ComponentActivity() {
                                 lifecycleScope.launch {
                                     tokenStorage.saveToken(successToken)
                                     token = successToken
-                                    isLoggedIn = true
                                     Toast.makeText(this@MainActivity, "登录成功", Toast.LENGTH_SHORT).show()
                                 }
                             }
