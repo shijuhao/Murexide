@@ -5,14 +5,12 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
-import androidx.compose.material3.adaptive.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +30,6 @@ import com.juhao.murexide.ui.login.LoginActivity
 import com.juhao.murexide.ui.conversation.ConversationListScreen
 import com.juhao.murexide.ui.theme.MurexideTheme
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.ui.unit.dp
 
 private data class NavItem(
@@ -91,76 +88,37 @@ fun MainScreen(token: String, onLogout: () -> Unit) {
     BoxWithConstraints {
         val useNavigationRail = maxWidth >= 600.dp
 
-        NavigationSuiteScaffold(
-            navigationSuiteItems = {
-                navItems.forEach { item ->
-                    val isSelected = currentRoute == item.route
-                    item(
-                        icon = { Icon(item.icon, contentDescription = item.title) },
-                        label = {
-                            AnimatedVisibility(
-                                visible = isSelected,
-                                enter = fadeIn() + expandVertically(),
-                                exit = fadeOut() + shrinkVertically()
-                            ) {
-                                Text(item.title)
-                            }
-                        },
-                        selected = isSelected,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
+        Scaffold(
+            topBar = {
+                MainTopAppBar(
+                    currentRoute = currentRoute,
+                    onLogout = onLogout
+                )
+            },
+            bottomBar = {
+                if (!useNavigationRail) {
+                    MainNavigationBar(
+                        currentRoute = currentRoute,
+                        onNavigate = { route ->
+                            navController.navigateToTopLevelRoute(route)
                         }
                     )
                 }
-            },
-            layoutType = if (useNavigationRail) NavigationSuiteType.NavigationRail
-                         else NavigationSuiteType.NavigationBar,
-            header = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = when (currentRoute) {
-                                "conversations" -> stringResource(R.string.app_name)
-                                "contacts" -> "通讯录"
-                                else -> "我的"
-                            }
-                        )
-                    },
-                    actions = {
-                        when (currentRoute) {
-                            "conversations" -> {
-                                IconButton(onClick = {}) {
-                                    Icon(Lucide.Plus, contentDescription = "添加")
-                                }
-                            }
-                            "contacts" -> {
-                            }
-                            else -> {
-                                IconButton(onClick = onLogout) {
-                                    Icon(Lucide.LogOut, contentDescription = "登出")
-                                }
-                                IconButton(onClick = { }) {
-                                    Icon(Lucide.Settings, contentDescription = "设置")
-                                }
-                            }
-                        }
-                    }
-                )
             }
         ) {
-            NavHost(
-                navController = navController,
-                startDestination = "conversations",
-                modifier = Modifier.fillMaxSize()
-            ) {
-                composable("conversations") {
-                    ConversationListScreen(
+            if (useNavigationRail) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(it)
+                ) {
+                    MainNavigationRail(
+                        currentRoute = currentRoute,
+                        onNavigate = { route ->
+                            navController.navigateToTopLevelRoute(route)
+                        }
+                    )
+                    MainNavHost(
                         token = token,
                         onConversationClick = { currentChat ->
                             ChatActivity.start(
@@ -170,26 +128,151 @@ fun MainScreen(token: String, onLogout: () -> Unit) {
                                 chatName = currentChat.displayName,
                                 chatAvatar = currentChat.avatarUrl,
                             )
-                        }
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxSize(),
+                        navController = navController
                     )
                 }
-                composable("contacts") {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text("联系人", style = MaterialTheme.typography.headlineMedium)
+            } else {
+                MainNavHost(
+                    token = token,
+                    onConversationClick = { currentChat ->
+                        ChatActivity.start(
+                            context = context,
+                            chatId = currentChat.chatId,
+                            chatType = currentChat.chatType,
+                            chatName = currentChat.displayName,
+                            chatAvatar = currentChat.avatarUrl,
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(it),
+                    navController = navController
+                )
+            }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun MainTopAppBar(
+    currentRoute: String?,
+    onLogout: () -> Unit,
+) {
+    TopAppBar(
+        title = {
+            Text(
+                text = when (currentRoute) {
+                    "conversations" -> stringResource(R.string.app_name)
+                    "contacts" -> "通讯录"
+                    else -> "我的"
+                }
+            )
+        },
+        actions = {
+            when (currentRoute) {
+                "conversations" -> {
+                    IconButton(onClick = {}) {
+                        Icon(Lucide.Plus, contentDescription = "添加")
                     }
                 }
-                composable("mine") {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text("我的", style = MaterialTheme.typography.headlineMedium)
+
+                "mine" -> {
+                    IconButton(onClick = onLogout) {
+                        Icon(Lucide.LogOut, contentDescription = "登出")
+                    }
+                    IconButton(onClick = { }) {
+                        Icon(Lucide.Settings, contentDescription = "设置")
                     }
                 }
             }
         }
+    )
+}
+
+@Composable
+private fun MainNavigationBar(
+    currentRoute: String?,
+    onNavigate: (String) -> Unit,
+) {
+    NavigationBar {
+        navItems.forEach { item ->
+            val selected = currentRoute == item.route
+            NavigationBarItem(
+                selected = selected,
+                onClick = { onNavigate(item.route) },
+                icon = { Icon(item.icon, contentDescription = item.title) },
+                label = { Text(item.title) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun MainNavigationRail(
+    currentRoute: String?,
+    onNavigate: (String) -> Unit,
+) {
+    NavigationRail {
+        navItems.forEach { item ->
+            val selected = currentRoute == item.route
+            NavigationRailItem(
+                selected = selected,
+                onClick = { onNavigate(item.route) },
+                icon = { Icon(item.icon, contentDescription = item.title) },
+                label = { Text(item.title) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun MainNavHost(
+    token: String,
+    onConversationClick: (com.juhao.murexide.data.ConversationItem) -> Unit,
+    modifier: Modifier,
+    navController: androidx.navigation.NavHostController,
+) {
+    NavHost(
+        navController = navController,
+        startDestination = "conversations",
+        modifier = modifier
+    ) {
+        composable("conversations") {
+            ConversationListScreen(
+                token = token,
+                onConversationClick = onConversationClick
+            )
+        }
+        composable("contacts") {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("联系人", style = MaterialTheme.typography.headlineMedium)
+            }
+        }
+        composable("mine") {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("我的", style = MaterialTheme.typography.headlineMedium)
+            }
+        }
+    }
+}
+
+private fun androidx.navigation.NavHostController.navigateToTopLevelRoute(route: String) {
+    navigate(route) {
+        popUpTo(graph.findStartDestination().id) {
+            saveState = true
+        }
+        launchSingleTop = true
+        restoreState = true
     }
 }
