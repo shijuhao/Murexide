@@ -232,7 +232,8 @@ fun ChatScreen(
                                     isAdmin = uiState.isAdmin,
                                     isLastFromSender = isLastFromSender,
                                     isFirstFromSender = isFirstFromSender,
-                                    isOlderSameSender = isOlderSameSender
+                                    isOlderSameSender = isOlderSameSender,
+                                    isNewerSameSender = isNewerSameSender
                                 )
                             }
                         }
