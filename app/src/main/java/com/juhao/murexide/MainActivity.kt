@@ -182,6 +182,9 @@ private fun MainTopAppBar(
             when (currentRoute) {
                 "conversations" -> {
                     IconButton(onClick = {}) {
+                        Icon(Lucide.Search, contentDescription = "搜索")
+                    }
+                    IconButton(onClick = {}) {
                         Icon(Lucide.Plus, contentDescription = "添加")
                     }
                 }

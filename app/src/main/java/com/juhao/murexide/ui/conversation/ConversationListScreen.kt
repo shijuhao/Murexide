@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -14,6 +15,7 @@ import com.juhao.murexide.ui.components.Avatar
 import java.text.SimpleDateFormat
 import java.util.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConversationListScreen(
     token: String,
@@ -23,47 +25,45 @@ fun ConversationListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    when (val state = uiState) {
-        is ConversationUiState.Loading -> {
-            Box(
-                modifier = modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        }
-        is ConversationUiState.Success -> {
-            if (state.conversations.isEmpty()) {
-                Box(
-                    modifier = modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("暂无会话")
-                }
-            } else {
-                LazyColumn(
-                    modifier = modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(vertical = 8.dp)
-                ) {
-                    items(state.conversations, key = { it.chatId }) { conversation ->
-                        ConversationItem(
-                            conversation = conversation,
-                            onClick = { onConversationClick(conversation) }
-                        )
+    PullToRefreshBox(
+        isRefreshing = uiState is ConversationUiState.Loading,
+        onRefresh = { viewModel.refresh() },
+        modifier = modifier.fillMaxSize()
+    ) {
+        when (val state = uiState) {
+            is ConversationUiState.Success -> {
+                if (state.conversations.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("暂无会话")
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(vertical = 8.dp)
+                    ) {
+                        items(state.conversations, key = { it.chatId }) { conversation ->
+                            ConversationItem(
+                                conversation = conversation,
+                                onClick = { onConversationClick(conversation) }
+                            )
+                        }
                     }
                 }
             }
-        }
-        is ConversationUiState.Error -> {
-            Box(
-                modifier = modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("加载失败: ${state.message}")
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { viewModel.refresh() }) {
-                        Text("重试")
+            is ConversationUiState.Error -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("加载失败: ${state.message}")
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { viewModel.refresh() }) {
+                            Text("重试")
+                        }
                     }
                 }
             }
