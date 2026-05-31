@@ -32,7 +32,7 @@ class MessageRepository {
     ): Result<List<MessageItem>> {
         return withContext(Dispatchers.IO) {
             try {
-                val requestBody = requestProto = list_message_send(
+                val requestBody = list_message_send(
                     msg_count = msgCount.toLong(),
                     msg_id = msgId ?: "",
                     chat_type = chatType.toLong(),
