@@ -32,25 +32,12 @@ class MessageRepository {
     ): Result<List<MessageItem>> {
         return withContext(Dispatchers.IO) {
             try {
-                val requestBody = if (msgSeq == null && msgId == null) {
-                    val requestProto = list_message_send(
-                        msg_count = msgCount.toLong(),
-                        msg_id = "",
-                        chat_type = chatType.toLong(),
-                        chat_id = chatId
-                    )
-                    requestProto.encode().toRequestBody("application/octet-stream".toMediaType())
-                } else {
-                    val requestProto = list_message_by_mid_seq_send(
-                        msg_seq = msgSeq ?: 0L,
-                        chat_type = chatType.toLong(),
-                        chat_id = chatId,
-                        unknown = 0L,
-                        msg_count = msgCount.toLong(),
-                        msg_id = msgId ?: ""
-                    )
-                    requestProto.encode().toRequestBody("application/octet-stream".toMediaType())
-                }
+                val requestBody = requestProto = list_message_send(
+                    msg_count = msgCount.toLong(),
+                    msg_id = msgId ?: "",
+                    chat_type = chatType.toLong(),
+                    chat_id = chatId
+                ).encode().toRequestBody("application/octet-stream".toMediaType())
 
                 val httpRequest = Request.Builder()
                     .url("$baseUrl/v1/msg/list-message")

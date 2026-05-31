@@ -129,7 +129,7 @@ fun MessageInput(
                     onValueChange = onTextChange,
                     modifier = Modifier.weight(1f),
                     placeholder = { Text("输入消息...") },
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(12.dp),
                     maxLines = 5,
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
