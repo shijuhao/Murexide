@@ -140,7 +140,7 @@ fun MessageInput(
                     enabled = inputText.isNotBlank() || selectedImages.isNotEmpty()
                 ) {
                     Icon(
-                        Lucide.Send,
+                        Lucide.SendHorizontal,
                         contentDescription = "发送"
                     )
                 }
