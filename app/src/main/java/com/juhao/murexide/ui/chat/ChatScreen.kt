@@ -1,6 +1,11 @@
 package com.juhao.murexide.ui.chat
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -135,16 +140,14 @@ fun ChatScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         AsyncImage(
                             model = chatAvatar,
                             contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .size(36.dp)
-                                .clip(androidx.compose.foundation.shape.CircleShape)
+                                .clip(CircleShape)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
@@ -158,153 +161,66 @@ fun ChatScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Lucide.ArrowLeft,
-                            contentDescription = "返回"
-                        )
+                        Icon(Lucide.ArrowLeft, contentDescription = "返回")
                     }
                 }
             )
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-                if (uiState.isLoading && uiState.messages.isEmpty()) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                } else if (uiState.error != null && uiState.messages.isEmpty()) {
-                    Text(
-                        text = "错误: ${uiState.error}",
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                } else {
-                    PullToRefreshBox(
-                        isRefreshing = uiState.isRefreshing,
-                        onRefresh = { viewModel.refresh() },
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        LazyColumn(
-                            state = listState,
-                            modifier = Modifier.fillMaxSize(),
-                            reverseLayout = true,
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+        },
+        bottomBar = {
+            Column {
+                AnimatedVisibility(
+                    visible = uiState.replyTo != null,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
+                    uiState.replyTo?.let { repliedMessage ->
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
                         ) {
-                            if (uiState.isLoadingMore) {
-                                item {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator()
-                                    }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(3.dp)
+                                        .height(32.dp)
+                                        .background(
+                                            MaterialTheme.colorScheme.primary,
+                                            RoundedCornerShape(2.dp)
+                                        )
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = repliedMessage.senderName,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    Text(
+                                        text = repliedMessage.content.ifEmpty { "消息" },
+                                        fontSize = 12.sp,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                IconButton(
+                                    onClick = { viewModel.clearReplyTo() },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(Lucide.X, contentDescription = "取消引用", modifier = Modifier.size(16.dp))
                                 }
                             }
-
-                            itemsIndexed(
-                                items = uiState.messages
-                            ) { index, message ->
-                                val newerMessage = if (index > 0) uiState.messages[index - 1] else null
-                                val olderMessage = if (index < uiState.messages.size - 1) uiState.messages[index + 1] else null
-                                
-                                val isFirstFromSender = newerMessage == null || newerMessage.senderId != message.senderId
-                                val isLastFromSender = olderMessage == null || olderMessage.senderId != message.senderId
-                                val isOlderSameSender = olderMessage != null && olderMessage.senderId == message.senderId
-                                val isNewerSameSender = newerMessage != null && newerMessage.senderId == message.senderId
-                                
-                                MessageBubble(
-                                    message = message,
-                                    onRecall = { viewModel.showRecallDialog(message.msgId) },
-                                    onEdit = { viewModel.showEditDialog(message) },
-                                    clipboardManager = clipboardManager,
-                                    onReply = { viewModel.setReplyTo(message) },
-                                    isAdmin = uiState.isAdmin,
-                                    isLastFromSender = isLastFromSender,
-                                    isFirstFromSender = isFirstFromSender,
-                                    isOlderSameSender = isOlderSameSender,
-                                    isNewerSameSender = isNewerSameSender
-                                )
-                            }
-                        }
-                    }
-
-                    AnimatedScrollToBottomButton(
-                        visible = showScrollToBottom,
-                        unreadCount = unreadCount,
-                        onClick = scrollToBottom,
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(16.dp)
-                    )
-                }
-            }
-
-            Column {
-                uiState.replyTo?.let { repliedMessage ->
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(
-                            topStart = 12.dp,
-                            topEnd = 12.dp
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .width(3.dp)
-                                    .height(32.dp)
-                                    .background(
-                                        MaterialTheme.colorScheme.primary,
-                                        androidx.compose.foundation.shape.RoundedCornerShape(2.dp)
-                                    )
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = repliedMessage.senderName,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                Text(
-                                    text = repliedMessage.content.ifEmpty { "消息" },
-                                    fontSize = 12.sp,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            IconButton(
-                                onClick = { viewModel.clearReplyTo() },
-                                modifier = Modifier.size(24.dp)
-                            ) {
-                                Icon(
-                                    Lucide.X,
-                                    contentDescription = "取消引用",
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
                         }
                     }
                 }
-
+    
                 MessageInput(
                     inputText = uiState.inputText,
                     selectedImages = uiState.selectedImages,
@@ -314,6 +230,78 @@ fun ChatScreen(
                     onAddImageClick = { },
                     onRemoveImage = { viewModel.removeImage(it) },
                     onToggleMarkdown = { viewModel.toggleMarkdown() }
+                )
+            }
+        }
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            if (uiState.isLoading && uiState.messages.isEmpty()) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else if (uiState.error != null && uiState.messages.isEmpty()) {
+                Text(
+                    text = "错误: ${uiState.error}",
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            } else {
+                PullToRefreshBox(
+                    isRefreshing = uiState.isRefreshing,
+                    onRefresh = { viewModel.refresh() },
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        reverseLayout = true,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        if (uiState.isLoadingMore) {
+                            item {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
+                            }
+                        }
+    
+                        itemsIndexed(items = uiState.messages) { index, message ->
+                            val newerMessage = if (index > 0) uiState.messages[index - 1] else null
+                            val olderMessage = if (index < uiState.messages.size - 1) uiState.messages[index + 1] else null
+    
+                            val isFirstFromSender = newerMessage == null || newerMessage.senderId != message.senderId
+                            val isLastFromSender = olderMessage == null || olderMessage.senderId != message.senderId
+                            val isOlderSameSender = olderMessage != null && !olderMessage.isRecalled && olderMessage.senderId == message.senderId
+                            val isNewerSameSender = newerMessage != null && !newerMessage.isRecalled && newerMessage.senderId == message.senderId
+    
+                            MessageBubble(
+                                message = message,
+                                onRecall = { viewModel.showRecallDialog(message.msgId) },
+                                onEdit = { viewModel.showEditDialog(message) },
+                                clipboardManager = clipboardManager,
+                                onReply = { viewModel.setReplyTo(message) },
+                                isAdmin = uiState.isAdmin,
+                                isLastFromSender = isLastFromSender,
+                                isFirstFromSender = isFirstFromSender,
+                                isOlderSameSender = isOlderSameSender,
+                                isNewerSameSender = isNewerSameSender
+                            )
+                        }
+                    }
+                }
+    
+                AnimatedScrollToBottomButton(
+                    visible = showScrollToBottom,
+                    unreadCount = unreadCount,
+                    onClick = scrollToBottom,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp)
                 )
             }
         }

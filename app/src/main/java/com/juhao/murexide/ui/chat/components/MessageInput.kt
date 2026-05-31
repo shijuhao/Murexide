@@ -43,6 +43,7 @@ fun MessageInput(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
+                .navigationBarsPadding()
         ) {
             if (selectedImages.isNotEmpty()) {
                 LazyRow(

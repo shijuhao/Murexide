@@ -5,6 +5,11 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -206,7 +211,15 @@ private fun MainNavigationBar(
                 selected = selected,
                 onClick = { onNavigate(item.route) },
                 icon = { Icon(item.icon, contentDescription = item.title) },
-                label = { Text(item.title) }
+                label = {
+                    AnimatedVisibility(
+                        visible = selected,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        Text(item.title)
+                    }
+                }
             )
         }
     }
@@ -224,7 +237,15 @@ private fun MainNavigationRail(
                 selected = selected,
                 onClick = { onNavigate(item.route) },
                 icon = { Icon(item.icon, contentDescription = item.title) },
-                label = { Text(item.title) }
+                label = {
+                    AnimatedVisibility(
+                        visible = selected,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        Text(item.title)
+                    }
+                }
             )
         }
     }

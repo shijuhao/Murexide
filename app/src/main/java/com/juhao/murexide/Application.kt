@@ -2,16 +2,15 @@ package com.juhao.murexide
 
 import android.app.Application
 import android.os.Build
-import coil.Coil
 import coil.ImageLoader
+import coil.ImageLoaderFactory
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
+import coil.crossfade
 
-class MyApplication : Application() {
-    override fun onCreate() {
-        super.onCreate()
-        
-        val imageLoader = ImageLoader.Builder(this)
+class MyApplication : Application(), ImageLoaderFactory {
+    override fun newImageLoader(): ImageLoader {
+        return ImageLoader.Builder(this)
             .components {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     add(ImageDecoderDecoder.Factory())
@@ -19,8 +18,7 @@ class MyApplication : Application() {
                     add(GifDecoder.Factory())
                 }
             }
+            .crossfade(true)
             .build()
-        
-        Coil.setImageLoader(imageLoader)
     }
 }
