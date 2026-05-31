@@ -85,7 +85,7 @@ fun MessageBubble(
                 .padding(
                     start = 8.dp,
                     end = 8.dp,
-                    top = if (isOlderSameSender) 1.dp else 4.dp,
+                    top = if (isOlderSameSender) 0.dp else 4.dp,
                     bottom = if (isNewerSameSender) 1.dp else 4.dp
                 ),
             verticalAlignment = Alignment.Bottom,
