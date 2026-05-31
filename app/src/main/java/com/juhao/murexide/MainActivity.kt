@@ -12,7 +12,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.*
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +33,8 @@ import com.juhao.murexide.ui.login.LoginActivity
 import com.juhao.murexide.ui.conversation.ConversationListScreen
 import com.juhao.murexide.ui.theme.MurexideTheme
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.unit.dp
 
 private data class NavItem(
     val route: String,
@@ -84,110 +86,109 @@ class MainActivity : ComponentActivity() {
 fun MainScreen(token: String, onLogout: () -> Unit) {
     val context = LocalContext.current
     val navController = rememberNavController()
-    val adaptiveInfo = currentWindowAdaptiveInfo()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val useNavigationRail = adaptiveInfo.windowSizeClass.windowWidthSizeClass
-        >= WindowWidthSizeClass.EXPANDED
+    BoxWithConstraints {
+        val useNavigationRail = maxWidth >= 600.dp
 
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            navItems.forEach { item ->
-                val isSelected = currentRoute == item.route
-                item(
-                    icon = { Icon(item.icon, contentDescription = item.title) },
-                    label = {
-                        androidx.compose.animation.AnimatedVisibility(
-                            visible = isSelected,
-                            enter = fadeIn() + expandVertically(),
-                            exit = fadeOut() + shrinkVertically()
-                        ) {
-                            Text(item.title)
-                        }
-                    },
-                    selected = isSelected,
-                    onClick = {
-                        navController.navigate(item.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+        NavigationSuiteScaffold(
+            navigationSuiteItems = {
+                navItems.forEach { item ->
+                    val isSelected = currentRoute == item.route
+                    item(
+                        icon = { Icon(item.icon, contentDescription = item.title) },
+                        label = {
+                            AnimatedVisibility(
+                                visible = isSelected,
+                                enter = fadeIn() + expandVertically(),
+                                exit = fadeOut() + shrinkVertically()
+                            ) {
+                                Text(item.title)
                             }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                )
-            }
-        },
-        layoutType = if (useNavigationRail) NavigationSuiteType.NavigationRail
-                     else NavigationSuiteType.NavigationBar,
-        header = {
-            TopAppBar(
-                title = { 
-                    Text(
-                        text = when (currentRoute) {
-                            "conversations" -> stringResource(R.string.app_name)
-                            "contacts" -> "通讯录"
-                            else -> "我的"
+                        },
+                        selected = isSelected,
+                        onClick = {
+                            navController.navigate(item.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
                     )
-                },
-                actions = {
-                    when (currentRoute) {
-                        "conversations" -> {
-                            IconButton(onClick = {}) {
-                                Icon(Lucide.Plus, contentDescription = "添加")
-                            }
-                        }
-                        "contacts" -> {
-                        
-                        }
-                        else -> {
-                            IconButton(onClick = onLogout) {
-                                Icon(Lucide.LogOut, contentDescription = "登出")
-                            }
-                            IconButton(onClick = { }) {
-                                Icon(Lucide.Settings, contentDescription = "设置")
-                            }
-                        }
-                    }
                 }
-            )
-        }
-    ) {
-        NavHost(
-            navController = navController,
-            startDestination = "conversations",
-            modifier = Modifier.fillMaxSize()
-        ) {
-            composable("conversations") {
-                ConversationListScreen(
-                    token = token,
-                    onConversationClick = { currentChat ->
-                        ChatActivity.start(
-                            context = context,
-                            chatId = currentChat.chatId,
-                            chatType = currentChat.chatType,
-                            chatName = currentChat.displayName,
-                            chatAvatar = currentChat.avatarUrl,
+            },
+            layoutType = if (useNavigationRail) NavigationSuiteType.NavigationRail
+                         else NavigationSuiteType.NavigationBar,
+            header = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = when (currentRoute) {
+                                "conversations" -> stringResource(R.string.app_name)
+                                "contacts" -> "通讯录"
+                                else -> "我的"
+                            }
                         )
+                    },
+                    actions = {
+                        when (currentRoute) {
+                            "conversations" -> {
+                                IconButton(onClick = {}) {
+                                    Icon(Lucide.Plus, contentDescription = "添加")
+                                }
+                            }
+                            "contacts" -> {
+                            }
+                            else -> {
+                                IconButton(onClick = onLogout) {
+                                    Icon(Lucide.LogOut, contentDescription = "登出")
+                                }
+                                IconButton(onClick = { }) {
+                                    Icon(Lucide.Settings, contentDescription = "设置")
+                                }
+                            }
+                        }
                     }
                 )
             }
-            composable("contacts") {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("联系人", style = MaterialTheme.typography.headlineMedium)
+        ) {
+            NavHost(
+                navController = navController,
+                startDestination = "conversations",
+                modifier = Modifier.fillMaxSize()
+            ) {
+                composable("conversations") {
+                    ConversationListScreen(
+                        token = token,
+                        onConversationClick = { currentChat ->
+                            ChatActivity.start(
+                                context = context,
+                                chatId = currentChat.chatId,
+                                chatType = currentChat.chatType,
+                                chatName = currentChat.displayName,
+                                chatAvatar = currentChat.avatarUrl,
+                            )
+                        }
+                    )
                 }
-            }
-            composable("mine") {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("我的", style = MaterialTheme.typography.headlineMedium)
+                composable("contacts") {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("联系人", style = MaterialTheme.typography.headlineMedium)
+                    }
+                }
+                composable("mine") {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("我的", style = MaterialTheme.typography.headlineMedium)
+                    }
                 }
             }
         }

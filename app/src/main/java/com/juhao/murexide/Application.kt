@@ -12,7 +12,7 @@ class MyApplication : Application() {
         super.onCreate()
         
         val imageLoader = ImageLoader.Builder(this)
-            .componentRegistry {
+            .components {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                     add(ImageDecoderDecoder.Factory())
                 } else {
