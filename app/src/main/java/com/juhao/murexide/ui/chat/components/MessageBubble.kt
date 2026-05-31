@@ -299,7 +299,7 @@ fun MessageBubble(
                     url = message.senderAvatar,
                     size = 36.dp
                 )
-            } else if (!isMine) {
+            } else if (isMine) {
                 Spacer(modifier = Modifier.width(44.dp))
             }
         }
