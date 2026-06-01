@@ -1,7 +1,7 @@
 package com.juhao.murexide
 
 import android.content.Intent
-import com.juhao.mixue.ui.settings.SettingsActivity
+import com.juhao.murexide.ui.settings.SettingsActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
