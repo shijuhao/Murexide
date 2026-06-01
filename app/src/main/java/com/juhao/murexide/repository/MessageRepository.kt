@@ -27,7 +27,6 @@ class MessageRepository {
         chatId: String,
         chatType: Int,
         msgId: String? = null,
-        msgSeq: Long? = null,
         msgCount: Int = 20
     ): Result<List<MessageItem>> {
         return withContext(Dispatchers.IO) {

@@ -33,7 +33,7 @@ class ChatViewModel(
     private val _editDialog = MutableStateFlow(EditDialogState())
     val editDialog: StateFlow<EditDialogState> = _editDialog.asStateFlow()
 
-    private var currentMsgSeq: Long? = null
+    private var currentMsgId: Long? = null
     private var isLoadingMore = false
 
     init {
@@ -48,7 +48,6 @@ class ChatViewModel(
                 token = token,
                 chatId = chatId,
                 chatType = chatType,
-                msgSeq = currentMsgSeq,
                 msgCount = 20
             ).onSuccess { messages ->
                 _uiState.update {
@@ -60,7 +59,7 @@ class ChatViewModel(
                     )
                 }
                 if (messages.isNotEmpty()) {
-                    currentMsgSeq = messages.last().msgSeq
+                    currentMsgId = messages.last().msgId
                 }
             }.onFailure { error ->
                 _uiState.update {
@@ -84,7 +83,7 @@ class ChatViewModel(
                 token = token,
                 chatId = chatId,
                 chatType = chatType,
-                msgSeq = currentMsgSeq,
+                msgId = currentMsgId,
                 msgCount = 20
             ).onSuccess { messages ->
                 if (messages.isNotEmpty()) {
@@ -95,7 +94,7 @@ class ChatViewModel(
                             hasMore = true
                         )
                     }
-                    currentMsgSeq = messages.last().msgSeq
+                    currentMsgId = messages.last().msgId
                 } else {
                     _uiState.update { it.copy(isLoadingMore = false, hasMore = false) }
                 }
@@ -108,7 +107,7 @@ class ChatViewModel(
     }
 
     fun refresh() {
-        currentMsgSeq = null
+        currentMsgId = null
         loadMessages()
     }
 
