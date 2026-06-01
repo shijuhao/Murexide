@@ -189,7 +189,7 @@ fun MessageBubble(
                                 )
                             }
 
-                            if (message.hasImages && message.imageUrl != null) {
+                            if (message.imageUrl != null) {
                                 message.imageUrl?.let { url ->
                                     val builder = ImageRequest.Builder(context)
                                         .data(url)

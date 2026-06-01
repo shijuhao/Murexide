@@ -20,7 +20,7 @@ data class MessageItem(
     val quoteMsgId: String? = null,
     val quoteMsgText: String? = null,
     val quoteImageUrl: String? = null,
-    val images: List<String> = emptyList(),
+    val imageUrl: String? = null,
     val audioUrl: String? = null,
     val audioTime: Int? = null,
     val videoUrl: String? = null,
@@ -52,12 +52,6 @@ data class MessageItem(
 
     val isAudioMessage: Boolean
         get() = contentType == 11
-
-    val hasImages: Boolean
-        get() = images.isNotEmpty() || (!imageUrl.isNullOrBlank())
-
-    val imageUrl: String?
-        get() = images.firstOrNull()
 
     companion object {
         const val CONTENT_TYPE_TEXT = 1

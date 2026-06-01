@@ -68,12 +68,7 @@ class MessageRepository {
                                     quoteMsgId = msg.quote_msg_id.takeIf { it.isNotEmpty() },
                                     quoteMsgText = msg.content?.quote_msg_text?.takeIf { it.isNotEmpty() },
                                     quoteImageUrl = msg.content?.quote_image_url?.takeIf { it.isNotEmpty() },
-                                    images = listOfNotNull(
-                                        msg.content?.image_url?.takeIf { it.isNotEmpty() },
-                                        msg.content?.video_url?.takeIf { it.isNotEmpty() },
-                                        msg.content?.audio_url?.takeIf { it.isNotEmpty() }
-                                    ).filter { it.contains("image") || it.contains("jpg") || it.contains("png") || it.contains("jpeg") },
-                                    audioUrl = msg.content?.audio_url?.takeIf { it.isNotEmpty() },
+                                    imageUrl = msg.content?.image_url?.takeIf { it.isNotEmpty() }, 
                                     audioTime = if ((msg.content?.audio_time ?: 0) > 0) msg.content?.audio_time?.toInt() else null,
                                     videoUrl = msg.content?.video_url?.takeIf { it.isNotEmpty() },
                                     fileUrl = msg.content?.file_url?.takeIf { it.isNotEmpty() },
@@ -267,7 +262,7 @@ class MessageRepository {
         }
     }
 
-    // TODO: 等待 Wire 生成 chat_ws_go_proto 后启用
+    // TODO: 等待写 ws 后启用
     /*
     fun parseWebSocketMessage(data: ByteArray): MessageItem? {
         return try {
@@ -289,11 +284,7 @@ class MessageRepository {
                 quoteMsgId = msg.quote_msg_id.takeIf { it.isNotEmpty() } ?: "",
                 quoteMsgText = msg.content?.quote_msg_text?.takeIf { it.isNotEmpty() },
                 quoteImageUrl = msg.content?.quote_image_url?.takeIf { it.isNotEmpty() },
-                images = listOfNotNull(
-                    msg.content?.image_url?.takeIf { it.isNotEmpty() },
-                    msg.content?.video_url?.takeIf { it.isNotEmpty() },
-                    msg.content?.audio_url?.takeIf { it.isNotEmpty() }
-                ),
+                imageUrl = msg.content?.image_url?.takeIf { it.isNotEmpty() },
                 audioUrl = msg.content?.audio_url?.takeIf { it.isNotEmpty() },
                 audioTime = if ((msg.content?.audio_time ?: 0) > 0) msg.content?.audio_time?.toInt() else null,
                 videoUrl = msg.content?.video_url?.takeIf { it.isNotEmpty() },
