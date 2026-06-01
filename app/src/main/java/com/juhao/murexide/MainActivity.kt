@@ -1,5 +1,7 @@
 package com.juhao.murexide
 
+import android.content.Intent
+import com.juhao.mixue.ui.settings.SettingsActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -168,6 +170,8 @@ private fun MainTopAppBar(
     currentRoute: String?,
     onLogout: () -> Unit,
 ) {
+    val context = LocalContext.current
+
     TopAppBar(
         title = {
             Text(
@@ -193,7 +197,9 @@ private fun MainTopAppBar(
                     IconButton(onClick = onLogout) {
                         Icon(Lucide.LogOut, contentDescription = "登出")
                     }
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = {
+                        context.startActivity(Intent(context, SettingsActivity::class.java))
+                    }) {
                         Icon(Lucide.Settings, contentDescription = "设置")
                     }
                 }

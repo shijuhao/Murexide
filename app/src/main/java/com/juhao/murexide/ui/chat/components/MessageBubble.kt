@@ -189,28 +189,26 @@ fun MessageBubble(
                                 )
                             }
 
-                            if (message.imageUrl != null) {
-                                message.imageUrl?.let { url ->
-                                    val builder = ImageRequest.Builder(context)
-                                        .data(url)
-                                    
-                                    if (url.contains("chat-img.jwznb.com") || 
-                                        url.contains("jwznb.com") || 
-                                        url.contains("myapp.jwznb.com")) {
-                                        builder.setHeader("Referer", "https://myapp.jwznb.com")
-                                    }
+                            message.imageUrl?.let { url ->
+                                val builder = ImageRequest.Builder(context)
+                                    .data(url)
                                 
-                                    Spacer(modifier = Modifier.height(2.dp))
-                                    AsyncImage(
-                                        model = builder.build(),
-                                        contentDescription = null,
-                                        contentScale = ContentScale.FillWidth,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .clickable { }
-                                    )
+                                if (url.contains("chat-img.jwznb.com") || 
+                                    url.contains("jwznb.com") || 
+                                    url.contains("myapp.jwznb.com")) {
+                                    builder.setHeader("Referer", "https://myapp.jwznb.com")
                                 }
+                            
+                                Spacer(modifier = Modifier.height(2.dp))
+                                AsyncImage(
+                                    model = builder.build(),
+                                    contentDescription = null,
+                                    contentScale = ContentScale.FillWidth,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .clickable { }
+                                )
                             }
 
                             Row(

@@ -26,6 +26,10 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ui.settings.SettingsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Murexide" />
+        <activity
             android:name=".ui.login.LoginActivity"
             android:exported="false"
             android:theme="@style/Theme.Murexide" />
