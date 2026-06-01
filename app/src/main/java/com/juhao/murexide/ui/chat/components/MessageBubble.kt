@@ -63,7 +63,7 @@ fun MessageBubble(
         ) {
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.þf),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.widthIn(max = 250.dp)
             ) {
