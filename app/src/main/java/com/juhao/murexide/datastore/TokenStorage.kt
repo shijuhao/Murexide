@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-private val Context.dataStore by preferencesDataStore(name = "app_preferences")
+val Context.dataStore by preferencesDataStore(name = "app_preferences")
 
 class TokenStorage(private val context: Context) {
     
