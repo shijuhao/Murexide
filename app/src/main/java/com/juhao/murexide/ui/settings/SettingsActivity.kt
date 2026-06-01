@@ -1,4 +1,4 @@
-package com.juhao.mixue.ui.settings
+package com.juhao.murexide.ui.settings
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

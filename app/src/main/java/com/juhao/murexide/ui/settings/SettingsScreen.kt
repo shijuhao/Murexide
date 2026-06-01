@@ -1,4 +1,4 @@
-package com.juhao.mixue.ui.settings
+package com.juhao.murexide.ui.settings
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
