@@ -29,7 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
+import com.juhao.murexide.ui.components.Avatar
 import com.composables.icons.lucide.*
 import com.juhao.murexide.ui.chat.components.EditMessageDialog
 import com.juhao.murexide.ui.chat.components.MessageBubble
@@ -143,13 +143,9 @@ fun ChatScreen(
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        AsyncImage(
-                            model = chatAvatar,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
+                        Avatar(
+                            url = chatAvatar,
+                            size = 36.dp
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
