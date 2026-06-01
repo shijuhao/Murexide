@@ -10,6 +10,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.juhao.murexide.datastore.SettingsStorage
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -52,6 +53,25 @@ fun MurexideTheme(
         }
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
+    }
+    
+    val systemUiController = rememberSystemUiController()
+    val useDarkIcons = !darkTheme
+    val view = LocalView.current
+
+    SideEffect {
+        systemUiController.run {
+            setStatusBarColor(color = Color.Transparent, darkIcons = useDarkIcons)
+            setNavigationBarColor(
+                color = Color.Transparent,
+                darkIcons = useDarkIcons,
+                navigationBarContrastEnforced = false
+            )
+        }
+        
+        if (!view.isInEditMode && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            (context as Activity).window.isNavigationBarContrastEnforced = false
+        }
     }
 
     MaterialTheme(

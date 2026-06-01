@@ -21,13 +21,13 @@ fun SettingsGroup(
 ) {
     if (items.isEmpty()) return
 
-    Column(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+    Column(modifier = modifier.padding(vertical = 8.dp)) {
         if (!title.isNullOrEmpty()) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+                modifier = Modifier.padding(start = 20.dp, bottom = 4.dp)
             )
         }
 
@@ -57,7 +57,7 @@ fun SettingsItemCell(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 4.dp, vertical = 12.dp),
+            .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -103,7 +103,7 @@ fun SettingsSwitchItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = isEnabled) { onCheckedChange(!checked) }
-            .padding(horizontal = 4.dp, vertical = 12.dp),
+            .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -163,7 +163,7 @@ fun SettingsDropdownItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { expanded = true }
-            .padding(horizontal = 4.dp, vertical = 12.dp),
+            .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(

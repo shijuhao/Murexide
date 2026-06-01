@@ -1,4 +1,5 @@
 [versions]
+accompanistUIC = "0.36.0"
 agp = "9.1.1"
 coreKtx = "1.16.0"
 iconsLucide = "1.1.0"
@@ -18,6 +19,7 @@ datastore = "1.1.1"
 navigation = "2.8.4"
 
 [libraries]
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistUIC" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 icons-lucide = { module = "com.composables:icons-lucide", version.ref = "iconsLucide" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
