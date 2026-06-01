@@ -41,8 +41,7 @@ fun ConversationListScreen(
                 }
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(vertical = 8.dp)
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     items(state.conversations, key = { it.chatId }) { conversation ->
                         ConversationItem(

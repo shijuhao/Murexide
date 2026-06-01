@@ -174,34 +174,41 @@ fun MessageBubble(
                                         Box(
                                             modifier = Modifier
                                                 .width(3.dp)
-                                                .height(32.dp)
+                                                .height(24.dp)
                                                 .background(
                                                     MaterialTheme.colorScheme.primary,
                                                     RoundedCornerShape(2.dp)
                                                 )
                                         )
                                         Spacer(modifier = Modifier.width(8.dp))
-                                        Column {
-                                            if (message.quoteImageUrl != null) {
-                                                AsyncImage(
-                                                    model = message.quoteImageUrl,
-                                                    contentDescription = null,
-                                                    contentScale = ContentScale.Crop,
-                                                    modifier = Modifier
-                                                        .fillMaxWidth()
-                                                        .height(100.dp)
-                                                        .clip(RoundedCornerShape(4.dp))
-                                                        .padding(top = 4.dp)
-                                                )
+                                        if (message.quoteImageUrl != null) {
+                                            val builder = ImageRequest.Builder(context)
+                                                .data(message.quoteImageUrl)
+                                            
+                                            if (message.quoteImageUrl.contains("chat-img.jwznb.com") || 
+                                                message.quoteImageUrl.contains("jwznb.com") || 
+                                                message.quoteImageUrl.contains("myapp.jwznb.com")) {
+                                                builder.setHeader("Referer", "https://myapp.jwznb.com")
                                             }
-                                            Text(
-                                                text = quoteText,
-                                                fontSize = 12.sp,
-                                                maxLines = 2,
-                                                overflow = TextOverflow.Ellipsis,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            
+                                            AsyncImage(
+                                                model = builder.build(),
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .size(60.dp)
+                                                    .clip(RoundedCornerShape(12.dp))
                                             )
+                                            Spacer(modifier = Modifier.width(8.dp))
                                         }
+                                        Text(
+                                            text = quoteText,
+                                            fontSize = 12.sp,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     }
                                 }
                             }
