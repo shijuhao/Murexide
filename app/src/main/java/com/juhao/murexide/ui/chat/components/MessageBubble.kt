@@ -142,7 +142,7 @@ fun MessageBubble(
                                         Box(
                                             modifier = Modifier
                                                 .width(3.dp)
-                                                .height(24.dp)
+                                                .height(22.dp)
                                                 .background(
                                                     MaterialTheme.colorScheme.primary,
                                                     RoundedCornerShape(2.dp)
@@ -184,7 +184,7 @@ fun MessageBubble(
                                 Text(
                                     text = message.content,
                                     fontSize = 14.sp,
-                                    lineHeight = 18.sp,
+                                    lineHeight = 20.sp,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
@@ -219,7 +219,7 @@ fun MessageBubble(
                                 Text(
                                     text = timestampDisplay,
                                     fontSize = 8.sp,
-                                    lineHeight = 10.sp,
+                                    lineHeight = 12.sp,
                                     maxLines = 1,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                 )
@@ -227,7 +227,7 @@ fun MessageBubble(
                                     Text(
                                         text = "已编辑",
                                         fontSize = 8.sp,
-                                        lineHeight = 10.sp,
+                                        lineHeight = 12.sp,
                                         maxLines = 1,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                         modifier = Modifier.padding(start = 4.dp)
