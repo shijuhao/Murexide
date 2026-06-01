@@ -48,54 +48,69 @@ fun SettingsScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
         ) {
-            SettingsGroup(title = "通用") {
-                SettingsDropdownItem(
-                    icon = Lucide.SunMoon,
-                    title = "主题模式",
-                    subtitle = when (themeMode) {
-                        "system" -> "跟随系统"
-                        "dark" -> "深色模式"
-                        "light" -> "浅色模式"
-                        else -> "跟随系统"
-                    },
-                    options = listOf(
-                        "system" to "跟随系统",
-                        "dark" to "深色模式",
-                        "light" to "浅色模式"
-                    ),
-                    selectedValue = themeMode,
-                    onOptionSelected = { selected ->
-                        ThemeState.themeMode.value = selected
-                        scope.launch {
-                            settingsStorage.setThemeMode(selected)
-                        }
+            SettingsGroup(
+                title = "通用",
+                items = listOf(
+                    {
+                        SettingsDropdownItem(
+                            icon = Lucide.SunMoon,
+                            title = "主题模式",
+                            subtitle = when (themeMode) {
+                                "system" -> "跟随系统"
+                                "dark" -> "深色模式"
+                                "light" -> "浅色模式"
+                                else -> "跟随系统"
+                            },
+                            options = listOf(
+                                "system" to "跟随系统",
+                                "dark" to "深色模式",
+                                "light" to "浅色模式"
+                            ),
+                            selectedValue = themeMode,
+                            onOptionSelected = { selected ->
+                                ThemeState.themeMode.value = selected
+                                scope.launch {
+                                    settingsStorage.setThemeMode(selected)
+                                }
+                            }
+                        )
                     }
                 )
-            }
+            )
 
-            SettingsGroup(title = "外观") {
-                SettingsSwitchItem(
-                    icon = Lucide.User,
-                    title = "圆角正方形头像",
-                    subtitle = "将好友和群组头像显示为圆角正方形",
-                    checked = squareAvatar,
-                    onCheckedChange = { checked ->
-                        squareAvatar = checked
-                        scope.launch {
-                            settingsStorage.setSquareAvatar(checked)
-                        }
+            SettingsGroup(
+                title = "外观",
+                items = listOf(
+                    {
+                        SettingsSwitchItem(
+                            icon = Lucide.User,
+                            title = "圆角正方形头像",
+                            subtitle = "将好友和群组头像显示为圆角正方形",
+                            checked = squareAvatar,
+                            onCheckedChange = { checked ->
+                                squareAvatar = checked
+                                scope.launch {
+                                    settingsStorage.setSquareAvatar(checked)
+                                }
+                            }
+                        )
                     }
                 )
-            }
+            )
 
-            SettingsGroup(title = "关于") {
-                SettingsItemCell(
-                    icon = Lucide.Info,
-                    title = "关于",
-                    subtitle = "版本号、开发者信息",
-                    onClick = { /* TODO */ }
+            SettingsGroup(
+                title = "关于",
+                items = listOf(
+                    {
+                        SettingsItemCell(
+                            icon = Lucide.Info,
+                            title = "关于",
+                            subtitle = "版本号、开发者信息",
+                            onClick = { /* TODO */ }
+                        )
+                    }
                 )
-            }
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
         }
