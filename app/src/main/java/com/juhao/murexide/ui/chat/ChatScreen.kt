@@ -155,8 +155,7 @@ fun ChatScreen(
                         Column {
                             Text(
                                 text = chatName,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp
+                                fontSize = 18.sp
                             )
                         }
                     }

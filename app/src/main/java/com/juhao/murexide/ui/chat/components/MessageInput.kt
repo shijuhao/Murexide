@@ -92,7 +92,7 @@ fun MessageInput(
             ) {
                 IconButton(
                     onClick = onAddImageClick,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
                         Lucide.Image,
@@ -103,7 +103,7 @@ fun MessageInput(
 
                 IconButton(
                     onClick = onToggleMarkdown,
-                    modifier = Modifier.size(40.dp),
+                    modifier = Modifier.size(36.dp),
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = if (isMarkdown)
                             MaterialTheme.colorScheme.primary
@@ -118,11 +118,11 @@ fun MessageInput(
                     Text(
                         text = "M",
                         fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                        fontSize = 16.sp
+                        fontSize = 18.sp
                     )
                 }
 
-                Spacer(modifier = Modifier.width(5.dp))
+                Spacer(modifier = Modifier.width(2.dp))
 
                 TextField(
                     value = inputText,
@@ -143,7 +143,7 @@ fun MessageInput(
 
                 IconButton(
                     onClick = onSendClick,
-                    modifier = Modifier.size(40.dp),
+                    modifier = Modifier.size(36.dp),
                     enabled = inputText.isNotBlank() || selectedImages.isNotEmpty()
                 ) {
                     Icon(

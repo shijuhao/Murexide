@@ -63,7 +63,7 @@ fun MessageBubble(
         ) {
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.þf),
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.widthIn(max = 250.dp)
             ) {
@@ -218,13 +218,17 @@ fun MessageBubble(
                                 Text(
                                     text = timestampDisplay,
                                     fontSize = 8.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    lineHeight = 8.sp,
+                                    maxLines = 1,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                 )
                                 if (message.isEdited) {
                                     Text(
                                         text = "已编辑",
                                         fontSize = 8.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                        lineHeight = 8.sp,
+                                        maxLines = 1,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                         modifier = Modifier.padding(start = 4.dp)
                                     )
                                 }
