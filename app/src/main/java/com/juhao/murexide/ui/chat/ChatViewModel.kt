@@ -33,7 +33,7 @@ class ChatViewModel(
     private val _editDialog = MutableStateFlow(EditDialogState())
     val editDialog: StateFlow<EditDialogState> = _editDialog.asStateFlow()
 
-    private var currentMsgId: Long? = null
+    private var currentMsgId: String? = null
     private var isLoadingMore = false
 
     init {
