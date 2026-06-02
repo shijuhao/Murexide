@@ -7,7 +7,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +29,8 @@ fun MessageInput(
     onRemoveImage: (Int) -> Unit,
     onToggleMarkdown: () -> Unit
 ) {
+    var showMenu by remember { mutableStateOf(false) }
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
@@ -90,39 +92,60 @@ fun MessageInput(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                IconButton(
-                    onClick = onAddImageClick,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        Lucide.Image,
-                        contentDescription = "添加图片",
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
+                Box {
+                    IconButton(
+                        onClick = { showMenu = true },
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            Lucide.Plus,
+                            contentDescription = "更多",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("图片") },
+                            onClick = {
+                                showMenu = false
+                                onAddImageClick()
+                            },
+                            leadingIcon = {
+                                Icon(Lucide.Image, contentDescription = null)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Markdown") },
+                            onClick = {
+                                showMenu = false
+                                onToggleMarkdown()
+                            },
+                            leadingIcon = {
+                                Text(
+                                    text = "M",
+                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                    fontSize = 18.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            },
+                            trailingIcon = {
+                                if (isMarkdown) {
+                                    Icon(
+                                        Lucide.Check,
+                                        contentDescription = "已开启",
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                        )
+                    }
                 }
 
-                IconButton(
-                    onClick = onToggleMarkdown,
-                    modifier = Modifier.size(36.dp),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = if (isMarkdown)
-                            MaterialTheme.colorScheme.primary
-                        else
-                            Color.Transparent,
-                        contentColor = if (isMarkdown)
-                            MaterialTheme.colorScheme.onPrimary
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                ) {
-                    Text(
-                        text = "M",
-                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                        fontSize = 18.sp
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(2.dp))
+                Spacer(modifier = Modifier.width(5.dp))
 
                 TextField(
                     value = inputText,
@@ -136,9 +159,10 @@ fun MessageInput(
                         unfocusedContainerColor = Color.Transparent,
                         focusedIndicatorColor = MaterialTheme.colorScheme.primary,
                         unfocusedIndicatorColor = Color.Transparent
-                    )
+                    ),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp)
                 )
-
+                
                 Spacer(modifier = Modifier.width(5.dp))
 
                 IconButton(
