@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -128,7 +127,7 @@ fun MessageInput(
                             leadingIcon = {
                                 Text(
                                     text = "M",
-                                    fontWeight = FontWeight.Bold,
+                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                                     fontSize = 18.sp,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
@@ -146,24 +145,23 @@ fun MessageInput(
                     }
                 }
 
-                Spacer(modifier = Modifier.width(2.dp))
+                Spacer(modifier = Modifier.width(3.dp))
 
-                OutlinedTextField(
+                TextField(
                     value = inputText,
                     onValueChange = onTextChange,
                     modifier = Modifier.weight(1f),
                     placeholder = { Text("输入消息...") },
                     shape = RoundedCornerShape(12.dp),
                     maxLines = 5,
-                    colors = OutlinedTextFieldDefaults.colors(
+                    colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = Color.Transparent
-                    ),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp)
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        unfocusedIndicatorColor = Color.Transparent
+                    )
                 )
-
+                
                 Spacer(modifier = Modifier.width(5.dp))
 
                 IconButton(
