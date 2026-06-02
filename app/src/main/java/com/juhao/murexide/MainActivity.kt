@@ -46,8 +46,8 @@ private data class NavItem(
 )
 
 private val navItems = listOf(
-    NavItem("conversations", "消息", Lucide.MessageCircle),
-    NavItem("contacts", "联系人", Lucide.Users),
+    NavItem("conversations", "消息", Lucide.MessageSquare),
+    NavItem("contacts", "通讯录", Lucide.BookUser),
     NavItem("mine", "我的", Lucide.User),
 )
 
@@ -283,7 +283,7 @@ private fun MainNavHost(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("联系人", style = MaterialTheme.typography.headlineMedium)
+                Text("通讯录", style = MaterialTheme.typography.headlineMedium)
             }
         }
         composable("mine") {

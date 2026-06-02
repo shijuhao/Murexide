@@ -83,7 +83,7 @@ fun SettingsScreen(
                 items = listOf(
                     {
                         SettingsSwitchItem(
-                            icon = Lucide.User,
+                            icon = Lucide.SquareUserRound,
                             title = "圆角正方形头像",
                             subtitle = "将好友和群组头像显示为圆角正方形",
                             checked = squareAvatar,
