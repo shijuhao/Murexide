@@ -133,7 +133,8 @@ fun ChatScreen(
                         
                         val newerMessage = if (firstVisibleIndex > 0) uiState.messages.getOrNull(firstVisibleIndex - 1) else null
                         val olderMessage = if (firstVisibleIndex < uiState.messages.size - 1) uiState.messages.getOrNull(firstVisibleIndex + 1) else null
-                        val hasOtherSameSender = (newerMessage != null && !newerMessage.isRecalled && newerMessage.senderId == message.senderId) ||
+                        val isLastFromSender = olderMessage == null || olderMessage.isRecalled || olderMessage.senderId != message.senderId
+                        val hasOtherSameSender = (newerMessage != null && !newerMessage.isRecalled && newerMessage.senderId == message.senderId && !isLastFromSender) ||
                                                  (olderMessage != null && !olderMessage.isRecalled && olderMessage.senderId == message.senderId)
                         
                         if (hasEnoughSpace) {
