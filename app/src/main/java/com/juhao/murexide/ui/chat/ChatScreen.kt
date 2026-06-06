@@ -167,8 +167,9 @@ fun ChatScreen(
                 floatingAvatarUrl = url
                 floatingAvatarIsMine = isMine
             } else {
-                val topMessage = if (topVisibleMessageIndex != null && topVisibleMessageIndex >= 0 && topVisibleMessageIndex < uiState.messages.size) {
-                    uiState.messages[topVisibleMessageIndex]
+                val currentTopIndex = topVisibleMessageIndex
+                val topMessage = if (currentTopIndex != null && currentTopIndex >= 0 && currentTopIndex < uiState.messages.size) {
+                    uiState.messages[currentTopIndex]
                 } else {
                     null
                 }
@@ -180,8 +181,7 @@ fun ChatScreen(
                                         topMessage.senderAvatar == lastAvatarSenderId &&
                                         topMessage.senderAvatar.isNotEmpty()
                 
-                if (shouldKeepDisplay) {
-                } else {
+                if (!shouldKeepDisplay) {
                     continuousAvatarDisplay = false
                     lastAvatarSenderId = ""
                     showFloatingAvatar = false
