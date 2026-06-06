@@ -67,9 +67,6 @@ fun ChatScreen(
     var showFloatingAvatar by remember { mutableStateOf(false) }
     var floatingAvatarUrl by remember { mutableStateOf("") }
     var floatingAvatarIsMine by remember { mutableStateOf(false) }
-    
-    var topMessageHasEnoughSpace by remember { mutableStateOf(false) }
-    var lastTopIndex by remember { mutableStateOf<Int?>(null) }
 
     val topVisibleMessageIndex by remember {
         derivedStateOf {
@@ -83,13 +80,6 @@ fun ChatScreen(
         }
     }
     
-    LaunchedEffect(topVisibleMessageIndex) {
-        if (lastTopIndex != topVisibleMessageIndex) {
-            lastTopIndex = topVisibleMessageIndex
-            topMessageHasEnoughSpace = false
-        }
-    }
-
     LaunchedEffect(Unit) {
         viewModel.toastMessage.collect { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
@@ -169,8 +159,6 @@ fun ChatScreen(
             }
     
             val (show, url, isMine) = floatingAvatarState
-            
-            topMessageHasEnoughSpace = show
     
             if (show) {
                 showFloatingAvatar = true
@@ -358,7 +346,7 @@ fun ChatScreen(
                             }
                             
                             val avatarAlignment = if (isTopVisibleItem && shouldShowItemAvatar) {
-                                if (topMessageHasEnoughSpace) Alignment.Bottom else Alignment.Top
+                                Alignment.Top
                             } else {
                                 Alignment.Bottom
                             }
