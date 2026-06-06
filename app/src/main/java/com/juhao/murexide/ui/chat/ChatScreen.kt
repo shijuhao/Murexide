@@ -67,8 +67,11 @@ fun ChatScreen(
     var showFloatingAvatar by remember { mutableStateOf(false) }
     var floatingAvatarUrl by remember { mutableStateOf("") }
     var floatingAvatarIsMine by remember { mutableStateOf(false) }
-
+    
     var topItemAvatarAlignment by remember { mutableStateOf(Alignment.Bottom) }
+    
+    var continuousAvatarDisplay by remember { mutableStateOf(false) }
+    var lastAvatarSenderId by remember { mutableStateOf("") }
 
     val topVisibleMessageIndex by remember {
         derivedStateOf {
@@ -130,6 +133,8 @@ fun ChatScreen(
                         
                         if (hasEnoughSpace) {
                             Triple(true, message.senderAvatar, message.isMine)
+                        } else if (continuousAvatarDisplay && lastAvatarSenderId == message.senderAvatar && message.senderAvatar.isNotEmpty()) {
+                            Triple(true, message.senderAvatar, message.isMine)
                         } else {
                             Triple(false, "", false)
                         }
@@ -155,34 +160,54 @@ fun ChatScreen(
             val (show, url, isMine) = floatingAvatarState
 
             if (show) {
+                continuousAvatarDisplay = true
+                lastAvatarSenderId = url
                 topItemAvatarAlignment = Alignment.Bottom
                 showFloatingAvatar = true
                 floatingAvatarUrl = url
                 floatingAvatarIsMine = isMine
             } else {
-                showFloatingAvatar = false
-                floatingAvatarUrl = ""
-                floatingAvatarIsMine = false
-            
-                val layoutInfo = listState.layoutInfo
-                val visibleItems = layoutInfo.visibleItemsInfo
-                if (visibleItems.isNotEmpty()) {
-                    val topVisibleItem = visibleItems.minByOrNull { it.index }
-                    if (topVisibleItem != null) {
-                        val firstVisibleIndex = topVisibleItem.index
-                        val message = uiState.messages.getOrNull(firstVisibleIndex)
-                        if (message != null && !message.isRecalled) {
-                            val newerMessage = if (firstVisibleIndex > 0) uiState.messages.getOrNull(firstVisibleIndex - 1) else null
-                            val isFirstFromSender = newerMessage == null || newerMessage.isRecalled || newerMessage.senderId != message.senderId
-                            topItemAvatarAlignment = if (isFirstFromSender) Alignment.Top else Alignment.Bottom
+                val topMessage = if (topVisibleMessageIndex != null && topVisibleMessageIndex >= 0 && topVisibleMessageIndex < uiState.messages.size) {
+                    uiState.messages[topVisibleMessageIndex]
+                } else {
+                    null
+                }
+                
+                val shouldKeepDisplay = continuousAvatarDisplay && 
+                                        lastAvatarSenderId.isNotEmpty() && 
+                                        topMessage != null && 
+                                        !topMessage.isRecalled &&
+                                        topMessage.senderAvatar == lastAvatarSenderId &&
+                                        topMessage.senderAvatar.isNotEmpty()
+                
+                if (shouldKeepDisplay) {
+                } else {
+                    continuousAvatarDisplay = false
+                    lastAvatarSenderId = ""
+                    showFloatingAvatar = false
+                    floatingAvatarUrl = ""
+                    floatingAvatarIsMine = false
+                    
+                    val layoutInfo = listState.layoutInfo
+                    val visibleItems = layoutInfo.visibleItemsInfo
+                    if (visibleItems.isNotEmpty()) {
+                        val topVisibleItem = visibleItems.minByOrNull { it.index }
+                        if (topVisibleItem != null) {
+                            val firstVisibleIndex = topVisibleItem.index
+                            val message = uiState.messages.getOrNull(firstVisibleIndex)
+                            if (message != null && !message.isRecalled) {
+                                val newerMessage = if (firstVisibleIndex > 0) uiState.messages.getOrNull(firstVisibleIndex - 1) else null
+                                val isFirstFromSender = newerMessage == null || newerMessage.isRecalled || newerMessage.senderId != message.senderId
+                                topItemAvatarAlignment = if (isFirstFromSender) Alignment.Top else Alignment.Bottom
+                            } else {
+                                topItemAvatarAlignment = Alignment.Bottom
+                            }
                         } else {
                             topItemAvatarAlignment = Alignment.Bottom
                         }
                     } else {
                         topItemAvatarAlignment = Alignment.Bottom
                     }
-                } else {
-                    topItemAvatarAlignment = Alignment.Bottom
                 }
             }
         }
