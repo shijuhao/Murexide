@@ -121,24 +121,17 @@ fun ChatScreen(
                     if (message == null || message.isRecalled) {
                         Triple(false, "", false)
                     } else {
-                        val newerMessage = if (firstVisibleIndex > 0) uiState.messages.getOrNull(firstVisibleIndex - 1) else null
-                        val isFirstFromSender = newerMessage == null || newerMessage.isRecalled || newerMessage.senderId != message.senderId
+                        val itemHeightDp = with(density) { topVisibleItem.size.toDp() }.value
+                        val visibleHeightDp = with(density) { 
+                            (topVisibleItem.size + topVisibleItem.offset.coerceAtMost(0)).toDp() 
+                        }.value
                         
-                        if (!isFirstFromSender) {
-                            Triple(false, "", false)
+                        val hasEnoughSpace = visibleHeightDp >= 44 && itemHeightDp >= 44
+                        
+                        if (hasEnoughSpace) {
+                            Triple(true, message.senderAvatar, message.isMine)
                         } else {
-                            val itemHeightDp = with(density) { topVisibleItem.size.toDp() }.value
-                            val visibleHeightDp = with(density) { 
-                                (topVisibleItem.size + topVisibleItem.offset.coerceAtMost(0)).toDp() 
-                            }.value
-                            
-                            val hasEnoughSpace = visibleHeightDp >= 44 && itemHeightDp >= 44
-                            
-                            if (hasEnoughSpace) {
-                                Triple(true, message.senderAvatar, message.isMine)
-                            } else {
-                                Triple(false, "", false)
-                            }
+                            Triple(false, "", false)
                         }
                     }
                 }
@@ -170,7 +163,7 @@ fun ChatScreen(
                 showFloatingAvatar = false
                 floatingAvatarUrl = ""
                 floatingAvatarIsMine = false
-
+            
                 val layoutInfo = listState.layoutInfo
                 val visibleItems = layoutInfo.visibleItemsInfo
                 if (visibleItems.isNotEmpty()) {
@@ -363,7 +356,7 @@ fun ChatScreen(
                             val isTopVisibleItem = index == topVisibleMessageIndex
 
                             val shouldShowItemAvatar = if (isTopVisibleItem) {
-                                !showFloatingAvatar && isFirstFromSender
+                                !showFloatingAvatar
                             } else {
                                 isFirstFromSender
                             }
