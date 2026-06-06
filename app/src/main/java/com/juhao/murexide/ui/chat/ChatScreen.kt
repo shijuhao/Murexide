@@ -14,16 +14,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -34,13 +34,11 @@ import com.composables.icons.lucide.*
 import com.juhao.murexide.ui.chat.components.EditMessageDialog
 import com.juhao.murexide.ui.chat.components.MessageBubble
 import com.juhao.murexide.ui.chat.components.MessageInput
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
 fun ChatScreen(
     token: String,
@@ -53,6 +51,7 @@ fun ChatScreen(
         factory = ChatViewModelFactory(token, chatId, chatType)
     )
 ) {
+    val density = LocalDensity.current
     val context = LocalContext.current
     val clipboardManager = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
@@ -64,6 +63,24 @@ fun ChatScreen(
     var showScrollToBottom by remember { mutableStateOf(false) }
     var unreadCount by remember { mutableIntStateOf(0) }
     var firstMessageId by remember { mutableStateOf<String?>(null) }
+    
+    var showFloatingAvatar by remember { mutableStateOf(false) }
+    var floatingAvatarUrl by remember { mutableStateOf("") }
+    var floatingAvatarIsMine by remember { mutableStateOf(false) }
+
+    var topItemAvatarAlignment by remember { mutableStateOf(Alignment.Bottom) }
+
+    val topVisibleMessageIndex by remember {
+        derivedStateOf {
+            val layoutInfo = listState.layoutInfo
+            val visibleItems = layoutInfo.visibleItemsInfo
+            if (visibleItems.isNotEmpty()) {
+                visibleItems.minByOrNull { it.index }?.index
+            } else {
+                null
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.toastMessage.collect { message ->
@@ -75,40 +92,107 @@ fun ChatScreen(
         snapshotFlow {
             val layoutInfo = listState.layoutInfo
             val visibleItems = layoutInfo.visibleItemsInfo
-            if (visibleItems.isNotEmpty()) {
+
+            val shouldLoadMore = if (visibleItems.isNotEmpty()) {
                 val lastVisibleIndex = visibleItems.last().index
                 val totalItems = layoutInfo.totalItemsCount
                 lastVisibleIndex >= totalItems - 5 && uiState.hasMore && !uiState.isLoadingMore && !uiState.isRefreshing
             } else {
                 false
             }
-        }
-            .distinctUntilChanged()
-            .filter { it }
-            .collect { viewModel.loadMore() }
-    }
 
-    LaunchedEffect(listState) {
-        snapshotFlow {
-            val layoutInfo = listState.layoutInfo
-            val visibleItems = layoutInfo.visibleItemsInfo
-            if (visibleItems.isNotEmpty()) {
+            val atBottom = if (visibleItems.isNotEmpty()) {
                 val firstVisibleIndex = visibleItems.first().index
                 firstVisibleIndex == 0
             } else {
                 true
             }
-        }
-            .distinctUntilChanged()
-            .collect { atBottom ->
-                showScrollToBottom = !atBottom
-                if (atBottom) {
-                    unreadCount = 0
-                    if (uiState.messages.isNotEmpty()) {
-                        firstMessageId = uiState.messages.first().msgId
+
+            val floatingAvatarState = if (visibleItems.isEmpty() || uiState.messages.isEmpty()) {
+                Triple(false, "", false)
+            } else {
+                val topVisibleItem = visibleItems.minByOrNull { it.index }
+                if (topVisibleItem == null) {
+                    Triple(false, "", false)
+                } else {
+                    val firstVisibleIndex = topVisibleItem.index
+                    val message = uiState.messages.getOrNull(firstVisibleIndex)
+                    
+                    if (message == null || message.isRecalled) {
+                        Triple(false, "", false)
+                    } else {
+                        val newerMessage = if (firstVisibleIndex > 0) uiState.messages.getOrNull(firstVisibleIndex - 1) else null
+                        val isFirstFromSender = newerMessage == null || newerMessage.isRecalled || newerMessage.senderId != message.senderId
+                        
+                        if (!isFirstFromSender) {
+                            Triple(false, "", false)
+                        } else {
+                            val itemHeightDp = with(density) { topVisibleItem.size.toDp() }.value
+                            val visibleHeightDp = with(density) { 
+                                (topVisibleItem.size + topVisibleItem.offset.coerceAtMost(0)).toDp() 
+                            }.value
+                            
+                            val hasEnoughSpace = visibleHeightDp >= 44 && itemHeightDp >= 44
+                            
+                            if (hasEnoughSpace) {
+                                Triple(true, message.senderAvatar, message.isMine)
+                            } else {
+                                Triple(false, "", false)
+                            }
+                        }
                     }
                 }
             }
+            
+            Triple(shouldLoadMore, atBottom, floatingAvatarState)
+        }
+        .collect { (shouldLoadMore, atBottom, floatingAvatarState) ->
+            if (shouldLoadMore) {
+                viewModel.loadMore()
+            }
+
+            showScrollToBottom = !atBottom
+            if (atBottom) {
+                unreadCount = 0
+                if (uiState.messages.isNotEmpty()) {
+                    firstMessageId = uiState.messages.first().msgId
+                }
+            }
+
+            val (show, url, isMine) = floatingAvatarState
+
+            if (show) {
+                topItemAvatarAlignment = Alignment.Bottom
+                showFloatingAvatar = true
+                floatingAvatarUrl = url
+                floatingAvatarIsMine = isMine
+            } else {
+                showFloatingAvatar = false
+                floatingAvatarUrl = ""
+                floatingAvatarIsMine = false
+
+                val layoutInfo = listState.layoutInfo
+                val visibleItems = layoutInfo.visibleItemsInfo
+                if (visibleItems.isNotEmpty()) {
+                    val topVisibleItem = visibleItems.minByOrNull { it.index }
+                    if (topVisibleItem != null) {
+                        val firstVisibleIndex = topVisibleItem.index
+                        val message = uiState.messages.getOrNull(firstVisibleIndex)
+                        if (message != null && !message.isRecalled) {
+                            val newerMessage = if (firstVisibleIndex > 0) uiState.messages.getOrNull(firstVisibleIndex - 1) else null
+                            val isFirstFromSender = newerMessage == null || newerMessage.isRecalled || newerMessage.senderId != message.senderId
+                            topItemAvatarAlignment = if (isFirstFromSender) Alignment.Top else Alignment.Bottom
+                        } else {
+                            topItemAvatarAlignment = Alignment.Bottom
+                        }
+                    } else {
+                        topItemAvatarAlignment = Alignment.Bottom
+                    }
+                } else {
+                    topItemAvatarAlignment = Alignment.Bottom
+                }
+            }
+        }
     }
 
     LaunchedEffect(uiState.messages) {
@@ -275,6 +359,20 @@ fun ChatScreen(
                             val isLastFromSender = olderMessage == null || olderMessage.isRecalled || olderMessage.senderId != message.senderId
                             val isOlderSameSender = olderMessage != null && !olderMessage.isRecalled && olderMessage.senderId == message.senderId
                             val isNewerSameSender = newerMessage != null && !newerMessage.isRecalled && newerMessage.senderId == message.senderId
+
+                            val isTopVisibleItem = index == topVisibleMessageIndex
+
+                            val shouldShowItemAvatar = if (isTopVisibleItem) {
+                                !showFloatingAvatar && isFirstFromSender
+                            } else {
+                                isFirstFromSender
+                            }
+
+                            val avatarAlignment = if (isTopVisibleItem && shouldShowItemAvatar) {
+                                topItemAvatarAlignment
+                            } else {
+                                Alignment.Bottom
+                            }
     
                             MessageBubble(
                                 message = message,
@@ -286,7 +384,9 @@ fun ChatScreen(
                                 isLastFromSender = isLastFromSender,
                                 isFirstFromSender = isFirstFromSender,
                                 isOlderSameSender = isOlderSameSender,
-                                isNewerSameSender = isNewerSameSender
+                                isNewerSameSender = isNewerSameSender,
+                                showAvatar = shouldShowItemAvatar,
+                                avatarAlignment = avatarAlignment
                             )
                         }
                     }
@@ -297,9 +397,22 @@ fun ChatScreen(
                     unreadCount = unreadCount,
                     onClick = scrollToBottom,
                     modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(16.dp)
+                        .align(Alignment.BottomCenter)
+                        .padding(12.dp)
                 )
+
+                if (showFloatingAvatar) {
+                    Column (
+                        modifier = Modifier
+                            .align(if (floatingAvatarIsMine) Alignment.BottomEnd else Alignment.BottomStart)
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Avatar(
+                            url = floatingAvatarUrl,
+                            size = 36.dp
+                        )
+                    }
+                }
             }
         }
     }
@@ -382,14 +495,16 @@ fun AnimatedScrollToBottomButton(
                 }
             }
         ) {
-            FloatingActionButton(
+            SmallFloatingActionButton (
                 onClick = onClick,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ) {
                 Icon(
                     imageVector = Lucide.ChevronDown,
-                    contentDescription = "滚动到底部"
+                    contentDescription = "滚动到底部",
+                    modifier = Modifier.size(16.dp)
                 )
             }
         }

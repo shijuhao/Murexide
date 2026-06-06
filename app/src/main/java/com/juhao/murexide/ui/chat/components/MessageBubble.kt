@@ -39,7 +39,9 @@ fun MessageBubble(
     isLastFromSender: Boolean = true,
     isFirstFromSender: Boolean = true,
     isOlderSameSender: Boolean = false,
-    isNewerSameSender: Boolean = false
+    isNewerSameSender: Boolean = false,
+    showAvatar: Boolean = true,
+    avatarAlignment: Alignment.Vertical = Alignment.Bottom
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val isMine = message.isMine
@@ -88,10 +90,10 @@ fun MessageBubble(
                     top = if (isOlderSameSender) 0.dp else 4.dp,
                     bottom = if (isNewerSameSender) 0.dp else 4.dp
                 ),
-            verticalAlignment = Alignment.Bottom,
+            verticalAlignment = avatarAlignment,
             horizontalArrangement = if (isMine) Arrangement.End else Arrangement.Start
         ) {
-            if (!isMine && isFirstFromSender) {
+            if (!isMine && isFirstFromSender && showAvatar) {
                 Avatar(
                     url = message.senderAvatar,
                     size = 36.dp
@@ -302,7 +304,7 @@ fun MessageBubble(
                 }
             }
 
-            if (isMine && isFirstFromSender) {
+            if (isMine && isFirstFromSender && showAvatar) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Avatar(
                     url = message.senderAvatar,
