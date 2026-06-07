@@ -174,6 +174,8 @@ private fun MainNavigationRail(
     onNavigate: (String) -> Unit,
 ) {
     NavigationRail {
+        Spacer(Modifier.height(16.dp))
+        
         navItems.forEach { item ->
             val selected = currentRoute == item.route
             NavigationRailItem(
