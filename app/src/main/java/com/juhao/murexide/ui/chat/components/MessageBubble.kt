@@ -61,7 +61,7 @@ fun MessageBubble(
                 set(Calendar.MILLISECOND, 0)
             }
         
-            return when {
+            when {
                 date.after(todayCalendar.time) -> SimpleDateFormat("HH:mm", Locale.getDefault()).format(date)
                 date.after(Date(todayCalendar.timeInMillis - 86400000)) -> "昨天 " + SimpleDateFormat("HH:mm", Locale.getDefault()).format(date)
                 else -> SimpleDateFormat("MM-dd HH:mm", Locale.getDefault()).format(date)
