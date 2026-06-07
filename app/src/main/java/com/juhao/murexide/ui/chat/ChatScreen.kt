@@ -74,7 +74,6 @@ fun ChatScreen(
             val layoutInfo = listState.layoutInfo
             val visibleItems = layoutInfo.visibleItemsInfo
             if (visibleItems.isNotEmpty()) {
-                showFloatingAvatar = true
                 visibleItems.minByOrNull { it.index }?.index
             } else {
                 null

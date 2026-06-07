@@ -13,12 +13,16 @@ import com.juhao.mixue.ui.components.*
 import com.juhao.murexide.datastore.SettingsStorage
 import com.juhao.murexide.ui.theme.ThemeState
 import kotlinx.coroutines.launch
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit
 ) {
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val scrollState = rememberScrollState()
+        
     val context = LocalContext.current
     val settingsStorage = remember { SettingsStorage(context) }
     val scope = rememberCoroutineScope()
@@ -31,9 +35,11 @@ fun SettingsScreen(
     }
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
                 title = { Text("设置") },
+                scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Lucide.ArrowLeft, contentDescription = "返回")
@@ -46,7 +52,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
         ) {
             SettingsGroup(
                 title = "通用",

@@ -25,6 +25,7 @@ import com.juhao.murexide.data.MessageItem
 import com.juhao.murexide.ui.chat.EditDialogState
 import com.juhao.murexide.ui.components.Avatar
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -49,8 +50,22 @@ fun MessageBubble(
 
     val timestampDisplay = remember(message.timestamp) {
         try {
-            val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
-            sdf.format(Date(message.timestamp))
+            val date = Date(message.timestamp)
+            val now = Date()
+        
+            val todayCalendar = Calendar.getInstance().apply {
+                time = now
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+        
+            return when {
+                date.after(todayCalendar.time) -> SimpleDateFormat("HH:mm", Locale.getDefault()).format(date)
+                date.after(Date(todayCalendar.timeInMillis - 86400000)) -> "昨天 " + SimpleDateFormat("HH:mm", Locale.getDefault()).format(date)
+                else -> SimpleDateFormat("MM-dd HH:mm", Locale.getDefault()).format(date)
+            }
         } catch (_: Exception) {
             ""
         }
