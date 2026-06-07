@@ -48,7 +48,12 @@ fun ConversationListScreen(
         PullToRefreshBox(
             isRefreshing = uiState is ConversationUiState.Loading,
             onRefresh = { viewModel.refresh() },
-            modifier = Modifier.fillMaxSize().padding(it)
+            modifier = Modifier
+                 .fillMaxSize()
+                 .padding(
+                    top = it.calculateTopPadding(),
+                    end = it.calculateRightPadding()
+                 )
         ) {
             val state = uiState
             if (state is ConversationUiState.Success) {

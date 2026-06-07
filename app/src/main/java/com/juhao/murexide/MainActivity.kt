@@ -226,7 +226,12 @@ private fun MainNavHost(
                 }
             ) {
                 Column(
-                    modifier = Modifier.fillMaxSize().padding(it),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            top = it.calculateTopPadding(),
+                            end = it.calculateRightPadding()
+                        ),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text("通讯录", style = MaterialTheme.typography.headlineMedium)
@@ -254,7 +259,12 @@ private fun MainNavHost(
                 }
             ) {
                 Column(
-                    modifier = Modifier.fillMaxSize().padding(it),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            top = it.calculateTopPadding(),
+                            end = it.calculateRightPadding()
+                        ),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text("我的", style = MaterialTheme.typography.headlineMedium)
