@@ -122,6 +122,7 @@ fun MainScreen(token: String, onLogout: () -> Unit) {
                             chatAvatar = currentChat.avatarUrl,
                         )
                     },
+                    onLogout = onLogout,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxSize(),
@@ -192,13 +193,17 @@ private fun MainNavigationRail(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainNavHost(
+    modifier: Modifier,
     token: String,
     onConversationClick: (com.juhao.murexide.data.ConversationItem) -> Unit,
-    modifier: Modifier,
+    onLogout: () -> Unit,
     navController: androidx.navigation.NavHostController,
 ) {
+    val context = LocalContext.current
+    
     NavHost(
         navController = navController,
         startDestination = "conversations",

@@ -12,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.juhao.murexide.R
+import com.composables.icons.lucide.*
 import com.juhao.murexide.ui.components.Avatar
 import java.text.SimpleDateFormat
 import java.util.*
