@@ -95,54 +95,22 @@ fun MainScreen(token: String, onLogout: () -> Unit) {
     BoxWithConstraints {
         val useNavigationRail = maxWidth >= 600.dp
 
-        Scaffold(
-            topBar = {
-                MainTopAppBar(
-                    currentRoute = currentRoute,
-                    onLogout = onLogout
-                )
-            },
-            bottomBar = {
-                if (!useNavigationRail) {
-                    MainNavigationBar(
-                        currentRoute = currentRoute,
-                        onNavigate = { route ->
-                            navController.navigateToTopLevelRoute(route)
-                        }
-                    )
-                }
-            }
+        Column (
+            modifier = Modifier.fillMaxSize()
         ) {
-            if (useNavigationRail) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(it)
-                ) {
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize()
+            ) {
+                if (useNavigationRail) {
                     MainNavigationRail(
                         currentRoute = currentRoute,
                         onNavigate = { route ->
                             navController.navigateToTopLevelRoute(route)
                         }
                     )
-                    MainNavHost(
-                        token = token,
-                        onConversationClick = { currentChat ->
-                            ChatActivity.start(
-                                context = context,
-                                chatId = currentChat.chatId,
-                                chatType = currentChat.chatType,
-                                chatName = currentChat.displayName,
-                                chatAvatar = currentChat.avatarUrl,
-                            )
-                        },
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxSize(),
-                        navController = navController
-                    )
                 }
-            } else {
                 MainNavHost(
                     token = token,
                     onConversationClick = { currentChat ->
@@ -155,57 +123,21 @@ fun MainScreen(token: String, onLogout: () -> Unit) {
                         )
                     },
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(it),
+                        .weight(1f)
+                        .fillMaxSize(),
                     navController = navController
+                )
+            }
+            if (!useNavigationRail) {
+                MainNavigationBar(
+                    currentRoute = currentRoute,
+                    onNavigate = { route ->
+                        navController.navigateToTopLevelRoute(route)
+                    }
                 )
             }
         }
     }
-}
-
-@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-private fun MainTopAppBar(
-    currentRoute: String?,
-    onLogout: () -> Unit,
-) {
-    val context = LocalContext.current
-
-    TopAppBar(
-        title = {
-            Text(
-                text = when (currentRoute) {
-                    "conversations" -> stringResource(R.string.app_name)
-                    "contacts" -> "通讯录"
-                    else -> "我的"
-                }
-            )
-        },
-        actions = {
-            when (currentRoute) {
-                "conversations" -> {
-                    IconButton(onClick = {}) {
-                        Icon(Lucide.Search, contentDescription = "搜索")
-                    }
-                    IconButton(onClick = {}) {
-                        Icon(Lucide.Plus, contentDescription = "添加")
-                    }
-                }
-
-                "mine" -> {
-                    IconButton(onClick = onLogout) {
-                        Icon(Lucide.LogOut, contentDescription = "登出")
-                    }
-                    IconButton(onClick = {
-                        context.startActivity(Intent(context, SettingsActivity::class.java))
-                    }) {
-                        Icon(Lucide.Settings, contentDescription = "设置")
-                    }
-                }
-            }
-        }
-    )
 }
 
 @Composable
@@ -279,19 +211,49 @@ private fun MainNavHost(
             )
         }
         composable("contacts") {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Scaffold (
+                topBar = {
+                    TopAppBar(
+                        title = {
+                            Text("通讯录")
+                        }
+                    )
+                }
             ) {
-                Text("通讯录", style = MaterialTheme.typography.headlineMedium)
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(it),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("通讯录", style = MaterialTheme.typography.headlineMedium)
+                }
             }
         }
         composable("mine") {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Scaffold (
+                topBar = {
+                    TopAppBar(
+                        title = {
+                            Text("我的")
+                        },
+                        actions = {
+                            IconButton(onClick = onLogout) {
+                                Icon(Lucide.LogOut, contentDescription = "登出")
+                            }
+                            IconButton(onClick = {
+                                context.startActivity(Intent(context, SettingsActivity::class.java))
+                            }) {
+                                Icon(Lucide.Settings, contentDescription = "设置")
+                            }
+                        }
+                    )
+                }
             ) {
-                Text("我的", style = MaterialTheme.typography.headlineMedium)
+                Column(
+                    modifier = Modifier.fillMaxSize().padding(it),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("我的", style = MaterialTheme.typography.headlineMedium)
+                }
             }
         }
     }
