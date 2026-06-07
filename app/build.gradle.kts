@@ -94,12 +94,10 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.gif)
 
-    implementation(libs.icons.lucide)
+    implementation(libs.androidx.material.icons.extended)
 
-    // Wire (Protobuf)
     implementation(libs.wire.runtime)
 
-    // DataStore
     implementation(libs.datastore.preferences)
     implementation(libs.datastore)
     

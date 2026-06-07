@@ -6,6 +6,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.composables.icons.lucide.*
 import com.juhao.murexide.data.MessageItem
 import com.juhao.murexide.ui.chat.EditDialogState
 import com.juhao.murexide.ui.components.Avatar
@@ -268,7 +272,7 @@ fun MessageBubble(
                             },
                             leadingIcon = {
                                 Icon(
-                                    Lucide.Copy,
+                                    Icons.Default.ContentCopy,
                                     contentDescription = null,
                                     modifier = Modifier.size(18.dp)
                                 )
@@ -283,7 +287,7 @@ fun MessageBubble(
                             onReply()
                         },
                         leadingIcon = {
-                            Icon(Lucide.MessageSquareQuote, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.FormatQuote, contentDescription = null, modifier = Modifier.size(18.dp))
                         }
                     )
 
@@ -295,7 +299,7 @@ fun MessageBubble(
                                 onRecall()
                             },
                             leadingIcon = {
-                                Icon(Lucide.Undo2, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = null, modifier = Modifier.size(18.dp))
                             }
                         )
                     }
@@ -309,7 +313,7 @@ fun MessageBubble(
                             },
                             leadingIcon = {
                                 Icon(
-                                    Lucide.Pencil,
+                                    Icons.Default.Edit,
                                     contentDescription = null,
                                     modifier = Modifier.size(18.dp)
                                 )

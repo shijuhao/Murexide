@@ -9,10 +9,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Key
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import com.composables.icons.lucide.Lucide
-import com.composables.icons.lucide.Key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
@@ -84,7 +84,7 @@ fun TokenInputDialog(
         onDismissRequest = onDismiss,
         icon = {
             Icon(
-                Lucide.Key,
+                Icons.Rounded.Key,
                 contentDescription = null
             )
         },

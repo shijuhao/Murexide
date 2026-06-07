@@ -6,6 +6,9 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Send
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,7 +19,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.composables.icons.lucide.*
 
 @Composable
 fun MessageInput(
@@ -77,7 +79,7 @@ fun MessageInput(
                                     )
                             ) {
                                 Icon(
-                                    Lucide.X,
+                                    Icons.Rounded.Close,
                                     contentDescription = "移除",
                                     modifier = Modifier.size(12.dp)
                                 )
@@ -98,7 +100,7 @@ fun MessageInput(
                         modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
-                            Lucide.Plus,
+                            Icons.Rounded.Add,
                             contentDescription = "更多",
                             tint = MaterialTheme.colorScheme.onSurface
                         )
@@ -115,7 +117,7 @@ fun MessageInput(
                                 onAddImageClick()
                             },
                             leadingIcon = {
-                                Icon(Lucide.Image, contentDescription = null)
+                                Icon(Icons.Rounded.Image, contentDescription = null)
                             }
                         )
                         DropdownMenuItem(
@@ -135,7 +137,7 @@ fun MessageInput(
                             trailingIcon = {
                                 if (isMarkdown) {
                                     Icon(
-                                        Lucide.Check,
+                                        Icons.Rounded.Check,
                                         contentDescription = "已开启",
                                         modifier = Modifier.size(18.dp)
                                     )
@@ -170,7 +172,7 @@ fun MessageInput(
                     enabled = inputText.isNotBlank() || selectedImages.isNotEmpty()
                 ) {
                     Icon(
-                        Lucide.SendHorizontal,
+                        Icons.AutoMirrored.Rounded.Send,
                         contentDescription = "发送"
                     )
                 }

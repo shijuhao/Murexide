@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,18 +28,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.composables.icons.lucide.*
 import com.juhao.murexide.datastore.TokenStorage
 import com.juhao.murexide.ui.chat.ChatActivity
 import com.juhao.murexide.ui.login.LoginActivity
 import com.juhao.murexide.ui.conversation.ConversationListScreen
+import com.juhao.murexide.ui.mine.MineScreen
 import com.juhao.murexide.ui.theme.MurexideTheme
 import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.dp
@@ -49,9 +50,9 @@ private data class NavItem(
 )
 
 private val navItems = listOf(
-    NavItem("conversations", "消息", Lucide.MessageSquare),
-    NavItem("contacts", "通讯录", Lucide.BookUser),
-    NavItem("mine", "我的", Lucide.User),
+    NavItem("conversations", "消息", Icons.Rounded.ChatBubbleOutline),
+    NavItem("contacts", "通讯录", Icons.Rounded.Contacts),
+    NavItem("mine", "我的", Icons.Rounded.Person),
 )
 
 class MainActivity : ComponentActivity() {
@@ -244,37 +245,13 @@ private fun MainNavHost(
             }
         }
         composable("mine") {
-            Scaffold (
-                topBar = {
-                    TopAppBar(
-                        title = {
-                            Text("我的")
-                        },
-                        actions = {
-                            IconButton(onClick = onLogout) {
-                                Icon(Lucide.LogOut, contentDescription = "登出")
-                            }
-                            IconButton(onClick = {
-                                context.startActivity(Intent(context, SettingsActivity::class.java))
-                            }) {
-                                Icon(Lucide.Settings, contentDescription = "设置")
-                            }
-                        }
-                    )
+            MineScreen(
+                token = token,
+                onLogout = onLogout,
+                onSettingsClick = {
+                    context.startActivity(Intent(context, SettingsActivity::class.java))
                 }
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(
-                            top = it.calculateTopPadding(),
-                            end = it.calculateRightPadding(LayoutDirection.Ltr)
-                        ),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text("我的", style = MaterialTheme.typography.headlineMedium)
-                }
-            }
+            )
         }
     }
 }

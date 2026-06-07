@@ -44,3 +44,32 @@ message request_list {
   int32 total = 3;
   int32 pending = 4;
 }
+
+// 请求通讯录列表
+message address_book_list_send {
+  string md5 = 2;
+}
+
+// 通讯录列表响应
+message address_book_list {
+  Status status = 1;
+  repeated Data data = 2;
+  string md5 = 3;
+
+  // 列表数据
+  message Data {
+    string list_name = 1; // 聊天对象列表名称，为"用户"，"我加入的群聊"，"机器人"
+    repeated Data_list data = 2;
+    int32 chat_type = 3;
+
+    // 聊天对象数据
+    message Data_list {
+      string chat_id = 1; // 聊天对象ID
+      string remark = 2; // 聊天对象备注名称
+      string avatar_url = 3; // 聊天对象头像url
+      int32 permisson_level = 4; // 群权限等级(普通用户无此项(数值为0或无此项),群主100,管理员2),只有群列表才有此项
+      bool noDisturb = 5; // 免打扰
+      string name = 8; // 聊天对象真实名称
+    }
+  }
+}

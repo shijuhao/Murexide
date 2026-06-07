@@ -30,14 +30,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.juhao.murexide.ui.components.Avatar
-import com.composables.icons.lucide.*
 import com.juhao.murexide.ui.chat.components.EditMessageDialog
 import com.juhao.murexide.ui.chat.components.MessageBubble
 import com.juhao.murexide.ui.chat.components.MessageInput
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
 
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
@@ -49,7 +51,18 @@ fun ChatScreen(
     chatAvatar: String,
     onBackClick: () -> Unit,
     viewModel: ChatViewModel = viewModel(
-        factory = ChatViewModelFactory(token, chatId, chatType)
+        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return ChatViewModel(
+                    token = token,
+                    chatId = chatId,
+                    chatType = chatType,
+                    userId = getUserIdFromToken(token),
+                    deviceId = getDeviceId()
+                ) as T
+            }
+        }
     )
 ) {
     val density = LocalDensity.current
@@ -220,7 +233,7 @@ fun ChatScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Lucide.ArrowLeft, contentDescription = "返回")
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "返回")
                     }
                 }
             )
@@ -273,7 +286,7 @@ fun ChatScreen(
                                     onClick = { viewModel.clearReplyTo() },
                                     modifier = Modifier.size(24.dp)
                                 ) {
-                                    Icon(Lucide.X, contentDescription = "取消引用", modifier = Modifier.size(16.dp))
+                                    Icon(Icons.Rounded.Close, contentDescription = "取消引用", modifier = Modifier.size(16.dp))
                                 }
                             }
                         }
@@ -424,6 +437,14 @@ fun ChatScreen(
     }
 }
 
+private fun getUserIdFromToken(token: String): String {
+    return token.split("-").firstOrNull()?.removePrefix("nj") ?: ""
+}
+
+private fun getDeviceId(): String {
+    return "android_${System.currentTimeMillis()}"
+}
+
 @Composable
 fun AnimatedScrollToBottomButton(
     visible: Boolean,
@@ -480,7 +501,7 @@ fun AnimatedScrollToBottomButton(
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ) {
                 Icon(
-                    imageVector = Lucide.ChevronDown,
+                    imageVector = Icons.Rounded.KeyboardArrowDown,
                     contentDescription = "滚动到底部",
                     modifier = Modifier.size(16.dp)
                 )

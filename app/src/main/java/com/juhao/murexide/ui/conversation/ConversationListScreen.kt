@@ -4,17 +4,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.LayoutDirection
 import com.juhao.murexide.R
-import com.composables.icons.lucide.*
 import com.juhao.murexide.ui.components.Avatar
 import java.text.SimpleDateFormat
 import java.util.*
@@ -27,20 +30,23 @@ fun ConversationListScreen(
     modifier: Modifier = Modifier,
     viewModel: ConversationViewModel = remember { ConversationViewModel(token) }
 ) {
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold (
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
                 title = {
                     Text(stringResource(R.string.app_name))
                 },
+                scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = {}) {
-                        Icon(Lucide.Search, contentDescription = "搜索")
+                        Icon(Icons.Rounded.Search, contentDescription = "搜索")
                     }
                     IconButton(onClick = {}) {
-                        Icon(Lucide.Plus, contentDescription = "添加")
+                        Icon(Icons.Rounded.Add, contentDescription = "添加")
                     }
                 }
             )

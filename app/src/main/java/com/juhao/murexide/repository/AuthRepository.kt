@@ -4,6 +4,7 @@ import com.juhao.murexide.data.CaptchaResponse
 import com.juhao.murexide.data.LoginRequest
 import com.juhao.murexide.data.LoginResponse
 import com.juhao.murexide.network.NetworkClient
+import com.juhao.murexide.proto.user.info
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -80,4 +81,56 @@ class AuthRepository {
             }
         }
     }
+
+    suspend fun getUserInfo(token: String): Result<UserInfo> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val request = Request.Builder()
+                    .url("$baseUrl/v1/user/info")
+                    .get()
+                    .header("token", token)
+                    .build()
+                
+                client.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        val responseBody = response.body.bytes()
+                        val userInfo = info.ADAPTER.decode(responseBody)
+                        
+                        if (userInfo.status?.code == 1 && userInfo.data_ != null) {
+                            val data = userInfo.data_
+                            Result.success(
+                                UserInfo(
+                                    id = data.id,
+                                    name = data.name,
+                                    avatarUrl = data.avatar_url,
+                                    phone = data.phone,
+                                    email = data.email,
+                                    coin = data.coin,
+                                    isVip = data.is_vip == 1,
+                                    invitationCode = data.invitation_code
+                                )
+                            )
+                        } else {
+                            Result.failure(Exception(userInfo.status?.msg ?: "获取用户信息失败"))
+                        }
+                    } else {
+                        Result.failure(Exception("HTTP error: ${response.code}"))
+                    }
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
 }
+
+data class UserInfo(
+    val id: String,
+    val name: String,
+    val avatarUrl: String,
+    val phone: String,
+    val email: String,
+    val coin: Double,
+    val isVip: Boolean,
+    val invitationCode: String
+)

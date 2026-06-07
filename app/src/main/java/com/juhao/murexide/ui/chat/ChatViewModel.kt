@@ -1,9 +1,11 @@
 package com.juhao.murexide.ui.chat
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.juhao.murexide.data.*
+import com.juhao.murexide.network.WebSocketManager
 import com.juhao.murexide.repository.MessageRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,8 +20,15 @@ class ChatViewModel(
     private val token: String,
     private val chatId: String,
     private val chatType: Int,
-    private val repository: MessageRepository = MessageRepository()
+    private val userId: String,
+    private val deviceId: String,
+    private val repository: MessageRepository = MessageRepository(),
+    private val wsManager: WebSocketManager = WebSocketManager()
 ) : ViewModel() {
+
+    companion object {
+        private const val TAG = "ChatViewModel"
+    }
 
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
@@ -38,6 +47,48 @@ class ChatViewModel(
 
     init {
         loadMessages()
+        setupWebSocket()
+    }
+
+    private fun setupWebSocket() {
+        viewModelScope.launch {
+            wsManager.messageFlow.collect { event ->
+                Log.d(TAG, "Received WS event: ${event::class.simpleName}")
+                when (event) {
+                    is WebSocketManager.WsEvent.NewMessage -> {
+                        Log.d(TAG, "New message: chatId=${event.message.chatId}, expected=$chatId, match=${event.message.chatId == chatId}")
+                        if (event.message.chatId == chatId && event.message.chatType == chatType) {
+                            Log.d(TAG, "Adding new message to UI")
+                            addReceivedMessage(event.message)
+                        }
+                    }
+                    is WebSocketManager.WsEvent.EditMessage -> {
+                        Log.d(TAG, "Edit message: chatId=${event.message.chatId}, expected=$chatId")
+                        if (event.message.chatId == chatId) {
+                            updateMessage(event.message)
+                        }
+                    }
+                    is WebSocketManager.WsEvent.StreamContent -> {
+                        Log.d(TAG, "Stream content: msgId=${event.msgId}")
+                        // 处理流式消息内容追加
+                        // TODO: 根据msgId找到对应消息并追加内容
+                    }
+                    is WebSocketManager.WsEvent.DraftUpdate -> {
+                        Log.d(TAG, "Draft update: chatId=${event.chatId}, expected=$chatId")
+                        if (event.chatId == chatId) {
+                            updateInputText(event.draft)
+                        }
+                    }
+                    is WebSocketManager.WsEvent.MessageDeleted -> {
+                        Log.d(TAG, "Message deleted: msgId=${event.msgId}")
+                        deleteMessage(event.msgId)
+                    }
+                    else -> {}
+                }
+            }
+        }
+        
+        wsManager.connect(userId, token, deviceId)
     }
 
     fun loadMessages() {
@@ -113,6 +164,8 @@ class ChatViewModel(
 
     fun updateInputText(text: String) {
         _uiState.update { it.copy(inputText = text) }
+        // 同步草稿到服务器
+        wsManager.sendDraftSync(chatId, text, deviceId)
     }
 
     fun toggleMarkdown() {
@@ -192,11 +245,12 @@ class ChatViewModel(
                 chatType = chatType
             ).onSuccess {
                 hideRecallDialog()
-                refresh()
+                deleteMessage(msgId)
                 _toastMessage.emit("撤回成功")
             }.onFailure { error ->
                 hideRecallDialog()
-                _toastMessage.emit(error.message ?: "撤回失败")
+                _toastMessage.emit("撤回失败: ${error.message}")
+                error.printStackTrace()
             }
         }
     }
@@ -239,11 +293,16 @@ class ChatViewModel(
                 contentType = contentType
             ).onSuccess {
                 hideEditDialog()
-                refresh()
+                val updatedMessage = message.copy(
+                    content = state.newContent,
+                    isEdited = true
+                )
+                updateMessage(updatedMessage)
                 _toastMessage.emit("编辑成功")
             }.onFailure { error ->
                 hideEditDialog()
-                _toastMessage.emit(error.message ?: "编辑失败")
+                _toastMessage.emit("编辑失败: ${error.message}")
+                error.printStackTrace()
             }
         }
     }
@@ -275,6 +334,11 @@ class ChatViewModel(
             )
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        wsManager.disconnect()
+    }
 }
 
 data class RecallDialogState(
@@ -292,12 +356,14 @@ data class EditDialogState(
 class ChatViewModelFactory(
     private val token: String,
     private val chatId: String,
-    private val chatType: Int
+    private val chatType: Int,
+    private val userId: String,
+    private val deviceId: String
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ChatViewModel::class.java)) {
-            return ChatViewModel(token, chatId, chatType) as T
+            return ChatViewModel(token, chatId, chatType, userId, deviceId) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

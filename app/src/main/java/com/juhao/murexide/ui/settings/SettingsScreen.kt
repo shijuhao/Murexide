@@ -3,13 +3,17 @@ package com.juhao.murexide.ui.settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.People
+import androidx.compose.material.icons.rounded.WbSunny
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.composables.icons.lucide.*
-import com.juhao.mixue.ui.components.*
+import com.juhao.murexide.ui.components.*
 import com.juhao.murexide.datastore.SettingsStorage
 import com.juhao.murexide.ui.theme.ThemeState
 import kotlinx.coroutines.launch
@@ -42,7 +46,7 @@ fun SettingsScreen(
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Lucide.ArrowLeft, contentDescription = "返回")
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "返回")
                     }
                 }
             )
@@ -52,71 +56,57 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .padding(horizontal = 8.dp)
                 .verticalScroll(scrollState)
         ) {
-            SettingsGroup(
-                title = "通用",
-                items = listOf(
-                    {
-                        SettingsDropdownItem(
-                            icon = Lucide.SunMoon,
-                            title = "主题模式",
-                            subtitle = when (themeMode) {
-                                "system" -> "跟随系统"
-                                "dark" -> "深色模式"
-                                "light" -> "浅色模式"
-                                else -> "跟随系统"
-                            },
-                            options = listOf(
-                                "system" to "跟随系统",
-                                "dark" to "深色模式",
-                                "light" to "浅色模式"
-                            ),
-                            selectedValue = themeMode,
-                            onOptionSelected = { selected ->
-                                ThemeState.themeMode.value = selected
-                                scope.launch {
-                                    settingsStorage.setThemeMode(selected)
-                                }
-                            }
-                        )
+            SettingsGroup(title = "通用") {
+                SettingsDropdownItem(
+                    icon = Icons.Rounded.WbSunny,
+                    title = "主题模式",
+                    subtitle = when (themeMode) {
+                        "system" -> "跟随系统"
+                        "dark" -> "深色模式"
+                        "light" -> "浅色模式"
+                        else -> "跟随系统"
+                    },
+                    options = listOf(
+                        "system" to "跟随系统",
+                        "dark" to "深色模式",
+                        "light" to "浅色模式"
+                    ),
+                    selectedValue = themeMode,
+                    onOptionSelected = { selected ->
+                        ThemeState.themeMode.value = selected
+                        scope.launch {
+                            settingsStorage.setThemeMode(selected)
+                        }
                     }
                 )
-            )
+            }
 
-            SettingsGroup(
-                title = "外观",
-                items = listOf(
-                    {
-                        SettingsSwitchItem(
-                            icon = Lucide.SquareUserRound,
-                            title = "圆角正方形头像",
-                            subtitle = "将好友和群组头像显示为圆角正方形",
-                            checked = squareAvatar,
-                            onCheckedChange = { checked ->
-                                squareAvatar = checked
-                                scope.launch {
-                                    settingsStorage.setSquareAvatar(checked)
-                                }
-                            }
-                        )
+            SettingsGroup(title = "外观") {
+                SettingsSwitchItem(
+                    icon = Icons.Rounded.People,
+                    title = "圆角正方形头像",
+                    subtitle = "将好友和群组头像显示为圆角正方形",
+                    checked = squareAvatar,
+                    onCheckedChange = { checked ->
+                        squareAvatar = checked
+                        scope.launch {
+                            settingsStorage.setSquareAvatar(checked)
+                        }
                     }
                 )
-            )
+            }
 
-            SettingsGroup(
-                title = "关于",
-                items = listOf(
-                    {
-                        SettingsItemCell(
-                            icon = Lucide.Info,
-                            title = "关于",
-                            subtitle = "版本号、开发者信息",
-                            onClick = { /* TODO */ }
-                        )
-                    }
+            SettingsGroup(title = "关于") {
+                SettingsItemCell(
+                    icon = Icons.Rounded.Info,
+                    title = "关于",
+                    subtitle = "版本号、开发者信息",
+                    onClick = { /* TODO */ }
                 )
-            )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
         }
