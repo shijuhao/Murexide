@@ -358,7 +358,7 @@ fun ChatScreen(
                             val isTopVisibleItem = index == topVisibleMessageIndex
 
                             val shouldShowItemAvatar = if (isTopVisibleItem) {
-                                !showFloatingAvatar && (isLastFromSender || isFirstFromSender)
+                                !showFloatingAvatar && ((isLastFromSender && avatarFollowEnabled) || isFirstFromSender)
                             } else {
                                 isFirstFromSender
                             }
