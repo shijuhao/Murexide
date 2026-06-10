@@ -33,6 +33,7 @@ import com.juhao.murexide.ui.components.Avatar
 import com.juhao.murexide.ui.chat.components.EditMessageDialog
 import com.juhao.murexide.ui.chat.components.MessageBubble
 import com.juhao.murexide.ui.chat.components.MessageInput
+import com.juhao.murexide.datastore.SettingsStorage
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -78,6 +79,8 @@ fun ChatScreen(
     var unreadCount by remember { mutableIntStateOf(0) }
     var firstMessageId by remember { mutableStateOf<String?>(null) }
     
+    val settingsStorage = remember { SettingsStorage(context) }
+    var avatarFollowEnabled by remember { mutableStateOf(false) }
     var showFloatingAvatar by remember { mutableStateOf(false) }
     var floatingAvatarUrl by remember { mutableStateOf("") }
     var floatingAvatarIsMine by remember { mutableStateOf(false) }
@@ -95,6 +98,7 @@ fun ChatScreen(
     }
     
     LaunchedEffect(Unit) {
+        avatarFollowEnabled = settingsStorage.getAvatarFollow()
         viewModel.toastMessage.collect { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
@@ -174,7 +178,7 @@ fun ChatScreen(
     
             val (show, url, isMine) = floatingAvatarState
     
-            if (show) {
+            if (show && avatarFollowEnabled) {
                 showFloatingAvatar = true
                 floatingAvatarUrl = url
                 floatingAvatarIsMine = isMine
@@ -359,7 +363,7 @@ fun ChatScreen(
                                 isFirstFromSender
                             }
                             
-                            val avatarAlignment = if (isTopVisibleItem && shouldShowItemAvatar) {
+                            val avatarAlignment = if (isTopVisibleItem && shouldShowItemAvatar && avatarFollowEnabled) {
                                 if (isLastFromSender) Alignment.Top else Alignment.Bottom
                             } else {
                                 Alignment.Bottom

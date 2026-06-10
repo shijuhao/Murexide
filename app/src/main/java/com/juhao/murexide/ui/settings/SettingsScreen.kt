@@ -5,9 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.People
-import androidx.compose.material.icons.rounded.WbSunny
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -33,9 +31,11 @@ fun SettingsScreen(
 
     val themeMode by ThemeState.themeMode
     var squareAvatar by remember { mutableStateOf(false) }
+    var avatarFollow by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         squareAvatar = settingsStorage.getSquareAvatar()
+        avatarFollow = settingsStorage.getAvatarFollow()
     }
 
     Scaffold(
@@ -94,6 +94,21 @@ fun SettingsScreen(
                         squareAvatar = checked
                         scope.launch {
                             settingsStorage.setSquareAvatar(checked)
+                        }
+                    }
+                )
+            }
+            
+            SettingsGroup(title = "实验性") {
+                SettingsSwitchItem(
+                    icon = Icons.Rounded.Animation,
+                    title = "聊天页头像跟随",
+                    subtitle = "头像跟随视角移动",
+                    checked = avatarFollow,
+                    onCheckedChange = { checked ->
+                        avatarFollow = checked
+                        scope.launch {
+                            settingsStorage.setAvatarFollow(checked)
                         }
                     }
                 )

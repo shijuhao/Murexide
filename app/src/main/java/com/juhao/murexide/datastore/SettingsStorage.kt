@@ -14,6 +14,7 @@ class SettingsStorage(private val context: Context) {
     companion object {
         private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
         private val SQUARE_AVATAR_KEY = booleanPreferencesKey("square_avatar")
+        private val AVATAR_FOLLOW_KEY = booleanPreferencesKey("avatar_follow")
     }
 
     // 主题模式
@@ -44,5 +45,20 @@ class SettingsStorage(private val context: Context) {
 
     suspend fun getSquareAvatar(): Boolean {
         return squareAvatarFlow.first()
+    }
+    
+    // 头像跟随 - 实验性
+    val avatarFollowFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[AVATAR_FOLLOW_KEY] ?: false
+    }
+
+    suspend fun setAvatarFollow(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[AVATAR_FOLLOW_KEY] = enabled
+        }
+    }
+
+    suspend fun getAvatarFollow(): Boolean {
+        return avatarFollowFlow.first()
     }
 }
