@@ -72,8 +72,8 @@ fun MessageInput(
             .navigationBarsPadding()
     ) {
         HorizontalDivider(
-            thickness = 0.5.dp,
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -81,15 +81,15 @@ fun MessageInput(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp),
-            color = MaterialTheme.colorScheme.surface,
+                .padding(horizontal = 8.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
             shape = RoundedCornerShape(24.dp),
             tonalElevation = 0.dp
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp)
+                    .padding(8.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -155,7 +155,7 @@ fun MessageInput(
                         onValueChange = onTextChange,
                         modifier = Modifier.weight(1f),
                         placeholder = { Text("输入消息...") },
-                        shape = RoundedCornerShape(12.dp),
+                        shape = RoundedCornerShape(6.dp),
                         maxLines = 5,
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
