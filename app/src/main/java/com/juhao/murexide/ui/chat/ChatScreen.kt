@@ -335,17 +335,6 @@ fun ChatScreen(
                         reverseLayout = true,
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        if (uiState.isLoadingMore) {
-                            item {
-                                Box(
-                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator()
-                                }
-                            }
-                        }
-    
                         itemsIndexed(items = uiState.messages) { index, message ->
                             val newerMessage = if (index > 0) uiState.messages[index - 1] else null
                             val olderMessage = if (index < uiState.messages.size - 1) uiState.messages[index + 1] else null
@@ -383,6 +372,17 @@ fun ChatScreen(
                                 showAvatar = shouldShowItemAvatar,
                                 avatarAlignment = avatarAlignment
                             )
+                        }
+                        
+                        if (uiState.isLoadingMore) {
+                            item {
+                                Box(
+                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
+                            }
                         }
                     }
                 }
