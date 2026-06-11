@@ -500,13 +500,13 @@ fun AnimatedScrollToBottomButton(
             SmallFloatingActionButton (
                 onClick = onClick,
                 shape = CircleShape,
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
                 contentColor = MaterialTheme.colorScheme.onSurfaceVariant
             ) {
                 Icon(
                     imageVector = Icons.Rounded.KeyboardArrowDown,
                     contentDescription = "滚动到底部",
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(18.dp)
                 )
             }
         }

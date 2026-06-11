@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -139,7 +140,7 @@ fun MessageInput(
                         }
                     }
 
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(5.dp))
 
                     OutlinedTextField(
                         value = inputText,
@@ -147,10 +148,9 @@ fun MessageInput(
                         modifier = Modifier.weight(1f),
                         placeholder = { Text("输入消息...") },
                         shape = RoundedCornerShape(24.dp),
-                        maxLines = 5
+                        maxLines = 5,
+                        textStyle = TextStyle(fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
                     )
-
-                    Spacer(modifier = Modifier.width(4.dp))
 
                     AnimatedVisibility(
                         visible = inputText.isNotBlank(),
@@ -161,14 +161,17 @@ fun MessageInput(
                             animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
                         ) + fadeOut(animationSpec = tween(150))
                     ) {
-                        IconButton(
-                            onClick = onSendClick,
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Icon(
-                                Icons.AutoMirrored.Rounded.Send,
-                                contentDescription = "发送"
-                            )
+                        Row {
+                            Spacer(modifier = Modifier.width(4.dp))
+                            IconButton(
+                                onClick = onSendClick,
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    Icons.AutoMirrored.Rounded.Send,
+                                    contentDescription = "发送"
+                                )
+                            }
                         }
                     }
                 }
