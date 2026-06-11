@@ -168,7 +168,7 @@ fun MessageInput(
                     Spacer(modifier = Modifier.width(5.dp))
 
                     AnimatedVisibility(
-                        visible = inputText.isNotBlank() || selectedImages.isNotEmpty(),
+                        visible = inputText.isNotBlank(),
                         enter = expandHorizontally(
                             animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
                         ) + fadeIn(animationSpec = tween(150)),
