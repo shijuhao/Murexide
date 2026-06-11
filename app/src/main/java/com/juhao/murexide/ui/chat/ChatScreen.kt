@@ -299,7 +299,6 @@ fun ChatScreen(
     
                 MessageInput(
                     inputText = uiState.inputText,
-                    selectedImages = uiState.selectedImages,
                     isMarkdown = uiState.isMarkdown,
                     onTextChange = { viewModel.updateInputText(it) },
                     onSendClick = { viewModel.sendMessage() },
