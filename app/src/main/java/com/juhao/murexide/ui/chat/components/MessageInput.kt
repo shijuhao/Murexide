@@ -57,8 +57,7 @@ fun MessageInput(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(horizontal = 6.dp),
+            .navigationBarsPadding(),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
         tonalElevation = 0.dp
     ) {
@@ -131,7 +130,7 @@ fun MessageInput(
                     onValueChange = onTextChange,
                     modifier = Modifier.weight(1f),
                     placeholder = { Text("输入消息...") },
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(20.dp),
                     maxLines = 5
                 )
                 
