@@ -55,9 +55,7 @@ fun MessageInput(
     var showMenu by remember { mutableStateOf(false) }
 
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .navigationBarsPadding(),
+        modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
         tonalElevation = 0.dp
     ) {
@@ -65,6 +63,7 @@ fun MessageInput(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
+                .navigationBarsPadding()
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -134,7 +133,7 @@ fun MessageInput(
                     maxLines = 5
                 )
                 
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(5.dp))
                 
                 IconButton(
                     onClick = {},
@@ -156,7 +155,7 @@ fun MessageInput(
                     ) + fadeOut(animationSpec = tween(150))
                 ) {
                     Row {
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(5.dp))
                         IconButton(
                             onClick = onSendClick,
                             modifier = Modifier.size(36.dp)
