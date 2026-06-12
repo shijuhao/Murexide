@@ -38,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -55,143 +54,122 @@ fun MessageInput(
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
-    Column(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
+            .padding(horizontal = 6.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+        tonalElevation = 0.dp
     ) {
-        HorizontalDivider(
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Surface(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 6.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-            shape = RoundedCornerShape(24.dp),
-            tonalElevation = 0.dp
+                .padding(8.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Box {
-                        IconButton(
-                            onClick = { showMenu = true },
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Icon(
-                                Icons.Rounded.Add,
-                                contentDescription = "更多",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-
-                        DropdownMenu(
-                            expanded = showMenu,
-                            onDismissRequest = { showMenu = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("图片") },
-                                onClick = {
-                                    showMenu = false
-                                    onAddImageClick()
-                                },
-                                leadingIcon = {
-                                    Icon(Icons.Rounded.Image, contentDescription = null)
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Markdown") },
-                                onClick = {
-                                    showMenu = false
-                                    onToggleMarkdown()
-                                },
-                                leadingIcon = {
-                                    Text(
-                                        text = "M",
-                                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                        fontSize = 18.sp,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                },
-                                trailingIcon = {
-                                    if (isMarkdown) {
-                                        Icon(
-                                            Icons.Rounded.Check,
-                                            contentDescription = "已开启",
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                    }
-                                }
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.width(5.dp))
-
-                    OutlinedTextField(
-                        value = inputText,
-                        onValueChange = onTextChange,
-                        modifier = Modifier.weight(1f),
-                        placeholder = { 
-                            Text(
-                                text = "输入消息...",
-                                fontSize = 14.sp
-                            ) 
-                        },
-                        shape = RoundedCornerShape(24.dp),
-                        maxLines = 5,
-                        textStyle = TextStyle(fontSize = 14.sp)
-                    )
-                    
-                    Spacer(modifier = Modifier.width(4.dp))
-                    
+                Box {
                     IconButton(
-                        onClick = {},
+                        onClick = { showMenu = true },
                         modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
-                            Icons.Rounded.Mood,
-                            contentDescription = "表情"
+                            Icons.Rounded.Add,
+                            contentDescription = "更多",
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
 
-                    AnimatedVisibility(
-                        visible = inputText.isNotBlank(),
-                        enter = expandHorizontally(
-                            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
-                        ) + fadeIn(animationSpec = tween(150)),
-                        exit = shrinkHorizontally(
-                            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
-                        ) + fadeOut(animationSpec = tween(150))
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
                     ) {
-                        Row {
-                            Spacer(modifier = Modifier.width(4.dp))
-                            IconButton(
-                                onClick = onSendClick,
-                                modifier = Modifier.size(36.dp)
-                            ) {
-                                Icon(
-                                    Icons.AutoMirrored.Rounded.Send,
-                                    contentDescription = "发送"
-                                )
+                        DropdownMenuItem(
+                            text = { Text("图片") },
+                            onClick = {
+                                showMenu = false
+                                onAddImageClick()
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Rounded.Image, contentDescription = null)
                             }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Markdown") },
+                            onClick = {
+                                showMenu = false
+                                onToggleMarkdown()
+                            },
+                            leadingIcon = {
+                                Text(
+                                    text = "M",
+                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                    fontSize = 18.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            },
+                            trailingIcon = {
+                                if (isMarkdown) {
+                                    Icon(
+                                        Icons.Rounded.Check,
+                                        contentDescription = "已开启",
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(5.dp))
+
+                OutlinedTextField(
+                    value = inputText,
+                    onValueChange = onTextChange,
+                    modifier = Modifier.weight(1f),
+                    placeholder = { Text("输入消息...") },
+                    shape = RoundedCornerShape(16.dp),
+                    maxLines = 5
+                )
+                
+                Spacer(modifier = Modifier.width(4.dp))
+                
+                IconButton(
+                    onClick = {},
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        Icons.Rounded.Mood,
+                        contentDescription = "表情"
+                    )
+                }
+
+                AnimatedVisibility(
+                    visible = inputText.isNotBlank(),
+                    enter = expandHorizontally(
+                        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
+                    ) + fadeIn(animationSpec = tween(150)),
+                    exit = shrinkHorizontally(
+                        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
+                    ) + fadeOut(animationSpec = tween(150))
+                ) {
+                    Row {
+                        Spacer(modifier = Modifier.width(4.dp))
+                        IconButton(
+                            onClick = onSendClick,
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Rounded.Send,
+                                contentDescription = "发送"
+                            )
                         }
                     }
                 }
             }
         }
-        
-        Spacer(modifier = Modifier.height(8.dp))
     }
 }
