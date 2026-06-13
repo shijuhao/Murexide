@@ -172,6 +172,7 @@ fun ConversationItem(
                     Spacer(modifier = Modifier.width(8.dp))
                     
                     Badges(
+                        doNotDisturb = conversation.doNotDisturb == 1,
                         hasUnread = conversation.hasUnread,
                         isAtMentioned = conversation.isAtMentioned,
                         unreadCount = conversation.unreadMessage
@@ -184,6 +185,7 @@ fun ConversationItem(
 
 @Composable
 private fun Badges(
+    doNotDisturb: Boolean,
     hasUnread: Boolean, 
     isAtMentioned: Boolean,
     unreadCount: Int,
@@ -200,8 +202,8 @@ private fun Badges(
         
         if (hasUnread) {
             Badge(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
+                containerColor = if (doNotDisturb) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.primary,
+                contentColor = if (doNotDisturb) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onPrimary
             ) {
                 Text("$unreadCount", style = MaterialTheme.typography.labelSmall)
             }

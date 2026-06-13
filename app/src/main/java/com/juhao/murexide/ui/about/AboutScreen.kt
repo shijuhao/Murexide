@@ -101,13 +101,7 @@ fun AboutScreen(
             }
 
             // 版权信息
-            SettingsGroup(title = "版权信息") {
-                SettingsItemCell(
-                    icon = Icons.Rounded.Copyright,
-                    title = "Copyright",
-                    subtitle = "© 2026 JuHao. All rights reserved.",
-                    onClick = { /* 不执行任何操作 */ }
-                )
+            SettingsGroup(title = "许可证") {
                 SettingsItemCell(
                     icon = Icons.Rounded.Book,
                     title = "许可证",
