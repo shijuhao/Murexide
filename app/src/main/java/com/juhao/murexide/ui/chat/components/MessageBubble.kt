@@ -136,7 +136,7 @@ fun MessageBubble(
                             containerColor = if (isMediaMsg)
                                 MaterialTheme.colorScheme.surface
                             else if (isMine)
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                             else
                                 MaterialTheme.colorScheme.surfaceContainer
                         )
@@ -251,7 +251,6 @@ fun MessageBubble(
                                                 contentDescription = null,
                                                 contentScale = ContentScale.FillWidth,
                                                 modifier = Modifier
-                                                    .clickable { }
                                                     .then(
                                                         if (isLastFromSender)
                                                             Modifier.clip(
@@ -262,6 +261,7 @@ fun MessageBubble(
                                                             )
                                                          else Modifier
                                                     )
+                                                    .clickable { }
                                             )
 
                                             Row(
