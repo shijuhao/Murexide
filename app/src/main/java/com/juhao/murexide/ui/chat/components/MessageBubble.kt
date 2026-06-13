@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -38,7 +39,7 @@ fun MessageBubble(
     message: MessageItem,
     onRecall: () -> Unit,
     onEdit: () -> Unit,
-    clipboardManager: androidx.compose.ui.platform.ClipboardManager,
+    clipboardManager: ClipboardManager,
     onReply: () -> Unit,
     isAdmin: Boolean = false,
     isLastFromSender: Boolean = true,
@@ -149,10 +150,7 @@ fun MessageBubble(
                                 ) {
                                     Surface(
                                         shape = RoundedCornerShape(50.dp),
-                                        color = if (isMine)
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                                        else
-                                            MaterialTheme.colorScheme.surfaceContainer
+                                        color = MaterialTheme.colorScheme.surfaceContainer
                                     ) {
                                         Text(
                                             text = message.senderName,

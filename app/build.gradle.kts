@@ -99,6 +99,10 @@ dependencies {
 
     implementation(libs.datastore.preferences)
     implementation(libs.datastore)
+
+    implementation(libs.multiplatform.markdown.renderer)
+    implementation(libs.multiplatform.markdown.renderer.m3)
+    implementation(libs.multiplatform.markdown.renderer.coil2)
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -1,7 +1,6 @@
 package com.juhao.murexide.ui.components
 
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,9 +20,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import coil3.compose.AsyncImage
+import coil.compose.AsyncImage
 import com.juhao.murexide.ui.webview.WebViewActivity
-import com.mikepenz.markdown.coil3.Coil3ImageTransformerImpl
+import com.mikepenz.markdown.coil2.Coil2ImageTransformerImpl
 import com.mikepenz.markdown.compose.components.markdownComponents
 import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownTypography
@@ -31,8 +30,6 @@ import org.intellij.markdown.ast.findChildOfType
 import org.intellij.markdown.ast.getTextInNode
 
 object MarkdownRenderer {
-    private const val TAG = "MarkdownRenderer"
-
     @Composable
     fun Render(
         modifier: Modifier = Modifier,
@@ -106,7 +103,7 @@ object MarkdownRenderer {
                 content = content,
                 modifier = modifier,
                 components = components,
-                imageTransformer = Coil3ImageTransformerImpl,
+                imageTransformer = Coil2ImageTransformerImpl,
                 typography = markdownTypography(
                     h1 = MaterialTheme.typography.headlineLarge,
                     h2 = MaterialTheme.typography.headlineMedium,

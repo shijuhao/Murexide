@@ -17,7 +17,7 @@ wire = "6.4.0"
 datastore = "1.1.1"
 multiplatformMarkdownRenderer = "0.40.2"
 multiplatformMarkdownRendererM3 = "0.40.2"
-multiplatformMarkdownRendererCoil3 = "0.40.2"
+multiplatformMarkdownRendererCoil2 = "0.40.2"
 navigation = "2.8.4"
 
 [libraries]
@@ -39,7 +39,7 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 
-multiplatform-markdown-renderer-coil3 = { module = "com.mikepenz:multiplatform-markdown-renderer-coil3", version.ref = "multiplatformMarkdownRendererCoil3" }
+multiplatform-markdown-renderer-coil2 = { module = "com.mikepenz:multiplatform-markdown-renderer-coil2", version.ref = "multiplatformMarkdownRendererCoil2" }
 multiplatform-markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "multiplatformMarkdownRendererM3" }
 multiplatform-markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "multiplatformMarkdownRenderer" }
 
