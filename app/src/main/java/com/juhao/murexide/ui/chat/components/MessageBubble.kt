@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -119,6 +120,8 @@ fun MessageBubble(
             } else if (!isMine) {
                 Spacer(modifier = Modifier.width(44.dp))
             }
+            
+            val isMediaMsg = message.contentType == MessageItem.CONTENT_TYPE_IMAGE || message.contentType == MessageItem.CONTENT_TYPE_STICKER
 
             Box(modifier = Modifier.weight(1f, fill = false)) {
                 Column(horizontalAlignment = if (isMine) Alignment.End else Alignment.Start) {
@@ -130,13 +133,15 @@ fun MessageBubble(
                             bottomEnd = if (isMine) if (isFirstFromSender) 16.dp else 4.dp else 16.dp
                         ),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (isMine)
+                            containerColor = if (isMediaMsg)
+                                MaterialTheme.colorScheme.surface
+                            else if (isMine)
                                 MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                             else
                                 MaterialTheme.colorScheme.surfaceContainer
                         )
                     ) {
-                        Column(modifier = Modifier.padding(8.dp)) {
+                        Column(modifier = Modifier.padding(if (isMediaMsg) 0.dp else 8.dp)) {
                             if (!isMine && isLastFromSender) {
                                 Text(
                                     text = message.senderName,
@@ -212,7 +217,8 @@ fun MessageBubble(
                                     }
                                 }
                                 
-                                MessageItem.CONTENT_TYPE_IMAGE -> {
+                                MessageItem.CONTENT_TYPE_IMAGE,
+                                MessageItem.CONTENT_TYPE_STICKER -> {
                                     message.imageUrl?.let { url ->
                                         val builder = ImageRequest.Builder(context)
                                             .data(url)
@@ -223,15 +229,42 @@ fun MessageBubble(
                                             builder.setHeader("Referer", "https://myapp.jwznb.com")
                                         }
                                     
-                                        AsyncImage(
-                                            model = builder.build(),
-                                            contentDescription = null,
-                                            contentScale = ContentScale.FillWidth,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clip(RoundedCornerShape(8.dp))
-                                                .clickable { }
-                                        )
+                                        Box {
+                                            AsyncImage(
+                                                model = builder.build(),
+                                                contentDescription = null,
+                                                contentScale = ContentScale.FillWidth,
+                                                modifier = Modifier.clickable { }
+                                            )
+
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                                modifier = Modifier
+                                                    .align(Alignment.BottomEnd)
+                                                    .padding(end = 12.dp, bottom = 12.dp)
+                                                    .background(
+                                                        color = Color.Black.copy(alpha = 0.6f),
+                                                        shape = RoundedCornerShape(4.dp)
+                                                    )
+                                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                                            ) {
+                                                if (message.contentType == MessageItem.CONTENT_TYPE_STICKER) {
+                                                    Icon(
+                                                        imageVector = Icons.Rounded.Mood,
+                                                        contentDescription = "mood",
+                                                        modifier = Modifier.size(12.dp),
+                                                        tint = Color.White.copy(alpha = 0.7f)
+                                                    )
+                                                }
+                                                Text(
+                                                    text = timestampDisplay,
+                                                    fontSize = 10.sp,
+                                                    lineHeight = 16.sp,
+                                                    maxLines = 1,
+                                                    color = Color.White.copy(alpha = 0.8f)
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                                 
@@ -297,25 +330,27 @@ fun MessageBubble(
                                 }
                             }
 
-                            Row(
-                                modifier = Modifier.align(if (isMine) Alignment.End else Alignment.Start)
-                            ) {
-                                Text(
-                                    text = timestampDisplay,
-                                    fontSize = 10.sp,
-                                    lineHeight = 16.sp,
-                                    maxLines = 1,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                )
-                                if (message.isEdited) {
+                            if (!isMediaMsg) {
+                                Row(
+                                    modifier = Modifier.align(if (isMine) Alignment.End else Alignment.Start)
+                                ) {
                                     Text(
-                                        text = "已编辑",
+                                        text = timestampDisplay,
                                         fontSize = 10.sp,
                                         lineHeight = 16.sp,
                                         maxLines = 1,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                        modifier = Modifier.padding(start = 4.dp)
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                     )
+                                    if (message.isEdited) {
+                                        Text(
+                                            text = "已编辑",
+                                            fontSize = 10.sp,
+                                            lineHeight = 16.sp,
+                                            maxLines = 1,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                            modifier = Modifier.padding(start = 4.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
