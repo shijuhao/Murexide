@@ -253,7 +253,7 @@ fun MessageBubble(
                                             ) {
                                                 Box(contentAlignment = Alignment.Center) {
                                                     Icon(
-                                                        imageVector = Icons.Rounded.InsertDriveFile,
+                                                        imageVector = getFileIcon(fileName),
                                                         contentDescription = null,
                                                         modifier = Modifier.size(24.dp),
                                                         tint = MaterialTheme.colorScheme.primary
