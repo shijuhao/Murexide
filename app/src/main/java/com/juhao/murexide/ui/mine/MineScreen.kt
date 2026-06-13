@@ -185,7 +185,7 @@ private fun MineContent(
         ) {
             StatItem(
                 icon = Icons.Rounded.MonetizationOn,
-                value = "${userInfo.coin.toInt()}",
+                value = "${userInfo.coin}",
                 label = "金币",
                 iconColor = MaterialTheme.colorScheme.primary
             )

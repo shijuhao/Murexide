@@ -6,12 +6,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.rounded.NavigateNext
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -22,17 +22,19 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun SettingsGroup(
-    title: String,
+    title: String = "",
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 12.dp, bottom = 8.dp)
-        )
+        if (title != "") {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(start = 12.dp, bottom = 8.dp)
+            )
+        }
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -65,7 +67,7 @@ fun SettingsItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+                .padding(horizontal = 20.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -291,4 +293,31 @@ fun SettingsDropdownItem(
             }
         }
     }
+}
+
+
+@Composable
+fun CustomItemCell(
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+    isEnabled: Boolean = true,
+    content: @Composable RowScope.() -> Unit
+) {
+    val alpha = if (isEnabled) 1f else 0.38f
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .alpha(alpha)
+            .then(
+                if (onClick != null && isEnabled) {
+                    Modifier.clickable(onClick = onClick)
+                } else {
+                    Modifier
+                }
+            )
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        content = content
+    )
 }

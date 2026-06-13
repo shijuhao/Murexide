@@ -16,6 +16,8 @@ import com.juhao.murexide.datastore.SettingsStorage
 import com.juhao.murexide.ui.theme.ThemeState
 import kotlinx.coroutines.launch
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import android.content.Intent
+import com.juhao.murexide.ui.about.AboutActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,11 +117,14 @@ fun SettingsScreen(
             }
 
             SettingsGroup(title = "关于") {
-                SettingsItemCell(
+                SettingsItem(
                     icon = Icons.Rounded.Info,
                     title = "关于",
                     subtitle = "版本号、开发者信息",
-                    onClick = { /* TODO */ }
+                    onClick = {
+                        val intent = Intent(context, AboutActivity::class.java)
+                        context.startActivity(intent)
+                    }
                 )
             }
 

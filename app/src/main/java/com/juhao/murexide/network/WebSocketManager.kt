@@ -124,7 +124,7 @@ class WebSocketManager {
             override fun run() {
                 if (isConnected) {
                     sendHeartbeat()
-                    webSocket?.let { ws ->
+                    webSocket?.let { _ ->
                         (client.dispatcher.executorService as? java.util.concurrent.ScheduledExecutorService)?.schedule(
                             this, HEARTBEAT_INTERVAL, TimeUnit.MILLISECONDS
                         )
@@ -132,8 +132,7 @@ class WebSocketManager {
                 }
             }
         }
-        
-        // 使用Handler或ScheduledExecutorService来定期发送心跳
+
         scheduleNextHeartbeat()
     }
 
@@ -191,9 +190,7 @@ class WebSocketManager {
         try {
             // 尝试解析JSON格式的消息
             val json = org.json.JSONObject(text)
-            val cmd = json.optString("cmd", "")
-            
-            when (cmd) {
+            when (val cmd = json.optString("cmd", "")) {
                 "heartbeat_ack" -> {
                     Log.d(TAG, "Heartbeat ACK received")
                 }
