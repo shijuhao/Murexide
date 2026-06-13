@@ -238,13 +238,14 @@ fun MessageBubble(
                                             )
 
                                             Row(
-                                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(3.dp),
                                                 modifier = Modifier
                                                     .align(Alignment.BottomEnd)
-                                                    .padding(end = 12.dp, bottom = 12.dp)
+                                                    .padding(end = 8.dp, bottom = 8.dp)
                                                     .background(
                                                         color = Color.Black.copy(alpha = 0.6f),
-                                                        shape = RoundedCornerShape(4.dp)
+                                                        shape = RoundedCornerShape(8.dp)
                                                     )
                                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                                             ) {
@@ -253,7 +254,7 @@ fun MessageBubble(
                                                         imageVector = Icons.Rounded.Mood,
                                                         contentDescription = "mood",
                                                         modifier = Modifier.size(12.dp),
-                                                        tint = Color.White.copy(alpha = 0.7f)
+                                                        tint = Color.White
                                                     )
                                                 }
                                                 Text(
@@ -261,7 +262,7 @@ fun MessageBubble(
                                                     fontSize = 10.sp,
                                                     lineHeight = 16.sp,
                                                     maxLines = 1,
-                                                    color = Color.White.copy(alpha = 0.8f)
+                                                    color = Color.White
                                                 )
                                             }
                                         }
