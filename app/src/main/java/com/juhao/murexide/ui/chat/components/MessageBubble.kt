@@ -240,14 +240,14 @@ fun MessageBubble(
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .clip(RoundedCornerShape(8.dp))
+                                                .clip(RoundedCornerShape(12.dp))
                                                 .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
                                                 .clickable { /* TODO: 打开/下载文件 */ }
                                                 .padding(12.dp),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Surface(
-                                                shape = RoundedCornerShape(16.dp),
+                                                shape = RoundedCornerShape(12.dp),
                                                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
                                                 modifier = Modifier.size(40.dp)
                                             ) {
@@ -267,6 +267,7 @@ fun MessageBubble(
                                                 Text(
                                                     text = fileName,
                                                     fontSize = 14.sp,
+                                                    lineHeight = 20.sp,
                                                     fontWeight = FontWeight.Bold,
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis,
@@ -277,6 +278,7 @@ fun MessageBubble(
                                                     Text(
                                                         text = formatFileSize(size),
                                                         fontSize = 12.sp,
+                                                        lineHeight = 18.sp,
                                                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                                         modifier = Modifier.padding(top = 2.dp)
                                                     )
@@ -440,6 +442,23 @@ fun EditMessageDialog(
             TextButton(onClick = onDismiss) { Text("取消") }
         }
     )
+}
+
+private fun getFileIcon(fileName: String): androidx.compose.ui.graphics.vector.ImageVector {
+    val extension = fileName.substringAfterLast('.', "").lowercase()
+    return when (extension) {
+        "apk" -> Icons.Rounded.Android
+        "pdf" -> Icons.Rounded.PictureAsPdf
+        "doc", "docx" -> Icons.Rounded.Description
+        "xls", "xlsx" -> Icons.Rounded.TableChart
+        "ppt", "pptx" -> Icons.Rounded.Slideshow
+        "zip", "rar", "7z", "tar", "gz" -> Icons.Rounded.FolderZip
+        "mp3", "wav", "aac", "flac", "ogg" -> Icons.Rounded.AudioFile
+        "mp4", "avi", "mkv", "mov", "flv" -> Icons.Rounded.VideoFile
+        "jpg", "jpeg", "png", "gif", "webp", "bmp", "svg" -> Icons.Rounded.Image
+        "txt", "md", "json", "xml", "html", "css", "js", "kt", "java" -> Icons.Rounded.Code
+        else -> Icons.Rounded.InsertDriveFile
+    }
 }
 
 private fun formatFileSize(size: Long): String {
