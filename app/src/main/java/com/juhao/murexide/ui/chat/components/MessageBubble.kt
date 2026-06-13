@@ -7,10 +7,8 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Undo
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.automirrored.rounded.Undo
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -201,35 +199,100 @@ fun MessageBubble(
                                 }
                             }
 
-                            if (message.content.isNotBlank()) {
-                                Text(
-                                    text = message.content,
-                                    fontSize = 14.sp,
-                                    lineHeight = 22.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-
-                            message.imageUrl?.let { url ->
-                                val builder = ImageRequest.Builder(context)
-                                    .data(url)
-                                
-                                if (url.contains("chat-img.jwznb.com") || 
-                                    url.contains("jwznb.com") || 
-                                    url.contains("myapp.jwznb.com")) {
-                                    builder.setHeader("Referer", "https://myapp.jwznb.com")
+                            when (message.contentType) {
+                                MessageItem.CONTENT_TYPE_TEXT,
+                                MessageItem.CONTENT_TYPE_MARKDOWN -> {
+                                    if (message.content.isNotBlank()) {
+                                        Text(
+                                            text = message.content,
+                                            fontSize = 14.sp,
+                                            lineHeight = 22.sp,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
                                 }
-                            
-                                Spacer(modifier = Modifier.height(2.dp))
-                                AsyncImage(
-                                    model = builder.build(),
-                                    contentDescription = null,
-                                    contentScale = ContentScale.FillWidth,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .clickable { }
-                                )
+                                
+                                MessageItem.CONTENT_TYPE_IMAGE -> {
+                                    message.imageUrl?.let { url ->
+                                        val builder = ImageRequest.Builder(context)
+                                            .data(url)
+                                        
+                                        if (url.contains("chat-img.jwznb.com") || 
+                                            url.contains("jwznb.com") || 
+                                            url.contains("myapp.jwznb.com")) {
+                                            builder.setHeader("Referer", "https://myapp.jwznb.com")
+                                        }
+                                    
+                                        AsyncImage(
+                                            model = builder.build(),
+                                            contentDescription = null,
+                                            contentScale = ContentScale.FillWidth,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .clickable { }
+                                        )
+                                    }
+                                }
+                                
+                                MessageItem.CONTENT_TYPE_FILE -> {
+                                    message.fileName?.let { fileName ->
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                                                .clickable { /* TODO: 打开/下载文件 */ }
+                                                .padding(12.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Surface(
+                                                shape = RoundedCornerShape(16.dp),
+                                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                                modifier = Modifier.size(40.dp)
+                                            ) {
+                                                Box(contentAlignment = Alignment.Center) {
+                                                    Icon(
+                                                        imageVector = Icons.Rounded.InsertDriveFile,
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(24.dp),
+                                                        tint = MaterialTheme.colorScheme.primary
+                                                    )
+                                                }
+                                            }
+                                            
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                            
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = fileName,
+                                                    fontSize = 14.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                                
+                                                message.fileSize?.let { size ->
+                                                    Text(
+                                                        text = formatFileSize(size),
+                                                        fontSize = 12.sp,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                        modifier = Modifier.padding(top = 2.dp)
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                MessageItem.CONTENT_TYPE_VIDEO -> {
+                                    // TODO: 视频消息 UI
+                                }
+                                
+                                MessageItem.CONTENT_TYPE_AUDIO -> {
+                                    // TODO: 音频消息 UI
+                                }
                             }
 
                             Row(
@@ -272,7 +335,7 @@ fun MessageBubble(
                             },
                             leadingIcon = {
                                 Icon(
-                                    Icons.Default.ContentCopy,
+                                    Icons.Rounded.ContentCopy,
                                     contentDescription = null,
                                     modifier = Modifier.size(18.dp)
                                 )
@@ -287,7 +350,7 @@ fun MessageBubble(
                             onReply()
                         },
                         leadingIcon = {
-                            Icon(Icons.Default.FormatQuote, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Rounded.FormatQuote, contentDescription = null, modifier = Modifier.size(18.dp))
                         }
                     )
 
@@ -299,7 +362,7 @@ fun MessageBubble(
                                 onRecall()
                             },
                             leadingIcon = {
-                                Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = null, modifier = Modifier.size(18.dp))
                             }
                         )
                     }
@@ -313,7 +376,7 @@ fun MessageBubble(
                             },
                             leadingIcon = {
                                 Icon(
-                                    Icons.Default.Edit,
+                                    Icons.Rounded.Edit,
                                     contentDescription = null,
                                     modifier = Modifier.size(18.dp)
                                 )
@@ -377,4 +440,13 @@ fun EditMessageDialog(
             TextButton(onClick = onDismiss) { Text("取消") }
         }
     )
+}
+
+private fun formatFileSize(size: Long): String {
+    return when {
+        size < 1024 -> "${size}B"
+        size < 1024 * 1024 -> "${size / 1024}KB"
+        size < 1024 * 1024 * 1024 -> "${"%.1f".format(size.toFloat() / (1024 * 1024))}MB"
+        else -> "${"%.2f".format(size.toFloat() / (1024 * 1024 * 1024))}GB"
+    }
 }

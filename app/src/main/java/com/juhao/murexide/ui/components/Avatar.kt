@@ -13,7 +13,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.juhao.murexide.datastore.SettingsStorage
-import kotlinx.coroutines.launch
+
+private var cachedSquareAvatar: Boolean? = null
 
 @Composable
 fun Avatar(
@@ -22,30 +23,35 @@ fun Avatar(
 ) {
     val context = LocalContext.current
     val settingsStorage = remember { SettingsStorage(context) }
-    val scope = rememberCoroutineScope()
-    var squareAvatar by remember { mutableStateOf(false) }
+    var squareAvatar by remember { mutableStateOf(cachedSquareAvatar) }
 
     LaunchedEffect(Unit) {
-        squareAvatar = settingsStorage.getSquareAvatar()
+        cachedSquareAvatar = settingsStorage.getSquareAvatar()
+        squareAvatar = cachedSquareAvatar
     }
 
-    val shape = if (squareAvatar) {
-        RoundedCornerShape(size / 6)
+    val shape = if (squareAvatar == true) {
+        RoundedCornerShape(size / 5)
     } else {
         CircleShape
     }
 
-    val builder = ImageRequest.Builder(context)
-        .data(url)
-        
-    if (url.contains("chat-img.jwznb.com") || 
-        url.contains("jwznb.com") || 
-        url.contains("myapp.jwznb.com")) {
-        builder.setHeader("Referer", "https://myapp.jwznb.com")
+    val imageRequest = remember(url) {
+        ImageRequest.Builder(context)
+            .data(url)
+            .apply {
+                if (url.contains("chat-img.jwznb.com") ||
+                    url.contains("jwznb.com") ||
+                    url.contains("myapp.jwznb.com")
+                ) {
+                    setHeader("Referer", "https://myapp.jwznb.com")
+                }
+            }
+            .build()
     }
 
     AsyncImage(
-        model = builder.build(),
+        model = imageRequest,
         contentDescription = null,
         modifier = Modifier
             .size(size)

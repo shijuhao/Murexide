@@ -35,24 +35,6 @@ data class MessageItem(
     val isMine: Boolean
         get() = direction == "right"
 
-    val isTextMessage: Boolean
-        get() = contentType == 1
-
-    val isImageMessage: Boolean
-        get() = contentType == 2
-
-    val isMarkdownMessage: Boolean
-        get() = contentType == 3
-
-    val isFileMessage: Boolean
-        get() = contentType == 4
-
-    val isVideoMessage: Boolean
-        get() = contentType == 10
-
-    val isAudioMessage: Boolean
-        get() = contentType == 11
-
     companion object {
         const val CONTENT_TYPE_TEXT = 1
         const val CONTENT_TYPE_IMAGE = 2
