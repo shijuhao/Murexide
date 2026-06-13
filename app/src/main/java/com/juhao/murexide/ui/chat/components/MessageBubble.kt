@@ -143,25 +143,28 @@ fun MessageBubble(
                     ) {
                         Column(modifier = Modifier.padding(if (isMediaMsg) 0.dp else 8.dp)) {
                             if (!isMine && isLastFromSender) {
-                                Surface (
-                                    shape = RoundedCornerShape(50.dp)
-                                    modifier = Modifier
-                                        .padding(bottom = 4.dp, start = if (isMediaMsg) 8.dp else 0.dp)
-                                        .background(
-                                            if (isMine)
-                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                                            else
-                                                MaterialTheme.colorScheme.surfaceContainer
-                                        )
-                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                Box(
+                                    modifier = Modifier.padding(bottom = 4.dp, start = if (isMediaMsg) 8.dp else 0.dp)
                                 ) {
-                                    Text(
-                                        text = message.senderName,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold,
-                                        
-                                    )
+                                    Surface(
+                                        shape = RoundedCornerShape(50.dp),
+                                        color = if (isMine)
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                        else
+                                            MaterialTheme.colorScheme.surfaceContainer
+                                    ) {
+                                        Text(
+                                            text = message.senderName,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = FontWeight.Bold,
+                                            modifier = if (isMediaMsg) {
+                                                Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                            } else {
+                                                Modifier
+                                            }
+                                        )
+                                    }
                                 }
                             }
                             
