@@ -260,7 +260,7 @@ class ChatViewModel(
             isOpen = true,
             message = message,
             newContent = message.content,
-            isMarkdown = message.isMarkdownMessage
+            isMarkdown = message.contentType == MessageItem.CONTENT_TYPE_MARKDOWN
         )
     }
 
