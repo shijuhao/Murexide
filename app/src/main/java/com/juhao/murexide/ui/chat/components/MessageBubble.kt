@@ -144,7 +144,7 @@ fun MessageBubble(
                         Column(modifier = Modifier.padding(if (isMediaMsg) 0.dp else 8.dp)) {
                             if (!isMine && isLastFromSender) {
                                 Box(
-                                    modifier = Modifier.padding(bottom = 4.dp, start = if (isMediaMsg) 8.dp else 0.dp)
+                                    modifier = Modifier.padding(bottom = 4.dp)
                                 ) {
                                     Surface(
                                         shape = RoundedCornerShape(50.dp),
@@ -159,7 +159,7 @@ fun MessageBubble(
                                             color = MaterialTheme.colorScheme.primary,
                                             fontWeight = FontWeight.Bold,
                                             modifier = if (isMediaMsg) {
-                                                Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                                Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                             } else {
                                                 Modifier
                                             }
@@ -250,7 +250,18 @@ fun MessageBubble(
                                                 model = builder.build(),
                                                 contentDescription = null,
                                                 contentScale = ContentScale.FillWidth,
-                                                modifier = Modifier.clickable { }
+                                                modifier = Modifier
+                                                    .clickable { }
+                                                    .then(
+                                                        if (isLastFromSender)
+                                                            Modifier.clip(
+                                                                RoundedCornerShape(
+                                                                    topStart = 16.dp,
+                                                                    topEnd = 16.dp
+                                                                )
+                                                            )
+                                                         else Modifier
+                                                    )
                                             )
 
                                             Row(
@@ -258,10 +269,10 @@ fun MessageBubble(
                                                 horizontalArrangement = Arrangement.spacedBy(3.dp),
                                                 modifier = Modifier
                                                     .align(Alignment.BottomEnd)
-                                                    .padding(end = 8.dp, bottom = 8.dp)
+                                                    .padding(end = 6.dp, bottom = 6.dp)
                                                     .background(
                                                         color = Color.Black.copy(alpha = 0.6f),
-                                                        shape = RoundedCornerShape(8.dp)
+                                                        shape = RoundedCornerShape(50.dp)
                                                     )
                                                     .padding(horizontal = 6.dp, vertical = 2.dp)
                                             ) {
