@@ -211,6 +211,11 @@ private fun MineContent(
                 title = "手机号",
                 subtitle = userInfo.phone.ifEmpty { "未绑定" }
             )
+            SettingsItem(
+                icon = Icons.Rounded.Person,
+                title = "邀请码",
+                subtitle = userInfo.invitationCode.ifEmpty { "未设置" }
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))

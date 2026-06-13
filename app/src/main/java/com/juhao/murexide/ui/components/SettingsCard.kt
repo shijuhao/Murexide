@@ -3,6 +3,7 @@ package com.juhao.murexide.ui.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.automirrored.rounded.NavigateNext
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.ChevronRight
@@ -49,7 +50,7 @@ fun SettingsGroup(
 }
 
 /**
- * 标准设置项 (带右箭头)
+ * 标准设置项 (带箭头)
  */
 @Composable
 fun SettingsItem(
@@ -97,7 +98,7 @@ fun SettingsItem(
             }
 
             Icon(
-                Icons.Rounded.ChevronRight,
+                Icons.AutoMirrored.Rounded.NavigateNext,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                 modifier = Modifier.size(20.dp)
