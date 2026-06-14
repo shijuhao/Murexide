@@ -7,12 +7,20 @@ import com.juhao.murexide.proto.chat_ws_go.push_message
 import com.juhao.murexide.proto.chat_ws_go.edit_message
 import com.juhao.murexide.proto.chat_ws_go.stream_message
 import com.juhao.murexide.proto.chat_ws_go.draft_input
+import com.juhao.murexide.proto.chat_ws_go.heartbeat_ack
+import com.juhao.murexide.proto.chat_ws_go.file_send_message
+import com.juhao.murexide.proto.chat_ws_go.bot_board_message
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.Request
 import okhttp3.Response
@@ -20,19 +28,39 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
 import java.util.UUID
-import java.util.concurrent.TimeUnit
 
-class WebSocketManager {
+class WebSocketManager private constructor() {
     companion object {
         private const val TAG = "WebSocketManager"
         private const val WS_URL = "wss://chat-ws-go.jwzhd.com/ws"
-        private const val HEARTBEAT_INTERVAL = 30000L
+        private const val HEARTBEAT_INTERVAL = 15000L // 降低心跳间隔到 15 秒
+
+        @Volatile
+        private var instance: WebSocketManager? = null
+
+        fun getInstance(): WebSocketManager {
+            return instance ?: synchronized(this) {
+                instance ?: WebSocketManager().also { instance = it }
+            }
+        }
     }
 
     private var webSocket: WebSocket? = null
     private var isConnected = false
-    private var heartbeatRunnable: Runnable? = null
+    private var currentUserId: String? = null
+    private var currentToken: String? = null
+    private var currentDeviceId: String? = null
+    private var currentPlatform: String? = null
+    private var lastHeartbeatAckTime = 0L
+    private var heartbeatJob: Job? = null
     
+    private var reconnectAttempt = 0
+    private val maxReconnectDelay = 5000L // 降低最大重连延迟到 5 秒
+    private var reconnectJob: Job? = null
+
+    private val _connectionState = MutableStateFlow(false)
+    val connectionState: StateFlow<Boolean> = _connectionState.asStateFlow()
+
     private val _messageFlow = MutableSharedFlow<WsEvent>()
     val messageFlow: SharedFlow<WsEvent> = _messageFlow.asSharedFlow()
     
@@ -47,7 +75,6 @@ class WebSocketManager {
         data class MessageDeleted(val msgId: String) : WsEvent()
         object Connected : WsEvent()
         object Disconnected : WsEvent()
-        data class Error(val message: String) : WsEvent()
     }
 
     fun connect(userId: String, token: String, deviceId: String, platform: String = "android") {
@@ -56,6 +83,13 @@ class WebSocketManager {
             return
         }
 
+        this.currentUserId = userId
+        this.currentToken = token
+        this.currentDeviceId = deviceId
+        this.currentPlatform = platform
+
+        reconnectJob?.cancel()
+        
         val request = Request.Builder()
             .url(WS_URL)
             .build()
@@ -64,6 +98,9 @@ class WebSocketManager {
             override fun onOpen(webSocket: WebSocket, response: Response) {
                 Log.d(TAG, "WebSocket connected")
                 isConnected = true
+                _connectionState.value = true
+                reconnectAttempt = 0
+                lastHeartbeatAckTime = System.currentTimeMillis()
                 sendLogin(userId, token, deviceId, platform)
                 startHeartbeat()
                 scope.launch {
@@ -82,22 +119,63 @@ class WebSocketManager {
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
                 Log.d(TAG, "WebSocket closing: $code / $reason")
-                stopHeartbeat()
-                isConnected = false
-                scope.launch {
-                    _messageFlow.emit(WsEvent.Disconnected)
+                handleDisconnect()
+                if (code != 1000) {
+                    triggerReconnect()
                 }
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
                 Log.e(TAG, "WebSocket error: ${t.message}", t)
-                stopHeartbeat()
-                isConnected = false
-                scope.launch {
-                    _messageFlow.emit(WsEvent.Error(t.message ?: "连接失败"))
-                }
+                handleDisconnect()
+                triggerReconnect()
             }
         })
+    }
+
+    private fun handleDisconnect() {
+        stopHeartbeat()
+        isConnected = false
+        _connectionState.value = false
+        webSocket = null
+        scope.launch {
+            _messageFlow.emit(WsEvent.Disconnected)
+        }
+    }
+
+    private fun triggerReconnect() {
+        if (isConnected || currentUserId == null || currentToken == null) {
+            Log.d(TAG, "triggerReconnect skipped: isConnected=$isConnected, userId=${currentUserId != null}")
+            return
+        }
+        
+        reconnectJob?.cancel()
+        reconnectJob = scope.launch {
+            reconnectAttempt++
+            val delayMs = if (reconnectAttempt <= 1) 0L else minOf(1000L * (1 shl (reconnectAttempt - 2)), maxReconnectDelay)
+            
+            Log.d(TAG, "Attempting reconnect in $delayMs ms (attempt $reconnectAttempt)")
+            if (delayMs > 0) delay(delayMs)
+            
+            if (!isConnected) {
+                connect(currentUserId!!, currentToken!!, currentDeviceId!!, currentPlatform ?: "android")
+            }
+        }
+    }
+
+    fun manualReconnect() {
+        Log.d(TAG, "Manual reconnect triggered, isConnected=$isConnected")
+        if (isConnected) return
+        reconnectAttempt = 0
+        disconnect()
+        triggerReconnect()
+    }
+
+    fun notifyNetworkLost() {
+        Log.d(TAG, "Network lost notified")
+        if (isConnected) {
+            _connectionState.value = false
+        }
     }
 
     private fun sendLogin(userId: String, token: String, deviceId: String, platform: String) {
@@ -120,29 +198,20 @@ class WebSocketManager {
     }
 
     private fun startHeartbeat() {
-        heartbeatRunnable = object : Runnable {
-            override fun run() {
-                if (isConnected) {
-                    sendHeartbeat()
-                    webSocket?.let { _ ->
-                        (client.dispatcher.executorService as? java.util.concurrent.ScheduledExecutorService)?.schedule(
-                            this, HEARTBEAT_INTERVAL, TimeUnit.MILLISECONDS
-                        )
-                    }
-                }
-            }
-        }
-
-        scheduleNextHeartbeat()
-    }
-
-    private fun scheduleNextHeartbeat() {
-        scope.launch {
+        heartbeatJob?.cancel()
+        heartbeatJob = scope.launch {
             while (isConnected) {
-                kotlinx.coroutines.delay(HEARTBEAT_INTERVAL)
-                if (isConnected) {
-                    sendHeartbeat()
+                delay(HEARTBEAT_INTERVAL)
+                if (!isConnected) break
+                val now = System.currentTimeMillis()
+                if (now - lastHeartbeatAckTime > HEARTBEAT_INTERVAL * 2) {
+                    Log.w(TAG, "Heartbeat timeout, triggering reconnect")
+                    handleDisconnect()
+                    triggerReconnect()
+                    break
                 }
+                
+                sendHeartbeat()
             }
         }
     }
@@ -161,7 +230,8 @@ class WebSocketManager {
     }
 
     private fun stopHeartbeat() {
-        heartbeatRunnable = null
+        heartbeatJob?.cancel()
+        heartbeatJob = null
     }
 
     fun sendDraftSync(chatId: String, draft: String, deviceId: String) {
@@ -188,11 +258,11 @@ class WebSocketManager {
 
     private fun handleTextMessage(text: String) {
         try {
-            // 尝试解析JSON格式的消息
             val json = org.json.JSONObject(text)
             when (val cmd = json.optString("cmd", "")) {
                 "heartbeat_ack" -> {
                     Log.d(TAG, "Heartbeat ACK received")
+                    lastHeartbeatAckTime = System.currentTimeMillis()
                 }
                 "push_message", "edit_message", "stream_message", "draft_input" -> {
                     // JSON格式的消息,需要转换为ProtoBuf或直接解析
@@ -211,62 +281,65 @@ class WebSocketManager {
     private fun handleBinaryMessage(data: ByteArray) {
         Log.d(TAG, "Received binary message, size: ${data.size} bytes")
         try {
-            val pushMessage = push_message.ADAPTER.decode(data)
-            Log.d(TAG, "Decoded push_message, cmd: ${pushMessage.info?.cmd}")
-            if (pushMessage.info?.cmd == "push_message") {
-                val msg = pushMessage.data_?.msg
-                Log.d(TAG, "New message: msgId=${msg?.msg_id}, chatId=${msg?.chat_id}, content=${msg?.content?.text}")
-                if (msg != null) {
-                    val messageItem = parseWsMessage(msg)
-                    scope.launch {
-                        _messageFlow.emit(WsEvent.NewMessage(messageItem))
+            val base = heartbeat_ack.ADAPTER.decode(data)
+            val cmd = base.info?.cmd
+            Log.d(TAG, "Binary message cmd: $cmd")
+
+            when (cmd) {
+                "heartbeat_ack" -> {
+                    Log.d(TAG, "Heartbeat ACK received (Binary)")
+                    lastHeartbeatAckTime = System.currentTimeMillis()
+                }
+                "push_message" -> {
+                    val pushMessage = push_message.ADAPTER.decode(data)
+                    pushMessage.data_?.msg?.let { msg ->
+                        Log.d(TAG, "New message: msgId=${msg.msg_id}, chatId=${msg.chat_id}")
+                        val messageItem = parseWsMessage(msg)
+                        scope.launch {
+                            _messageFlow.emit(WsEvent.NewMessage(messageItem))
+                        }
                     }
                 }
-                return
-            }
-
-            // 尝试解析为编辑消息
-            val editMessage = edit_message.ADAPTER.decode(data)
-            Log.d(TAG, "Decoded edit_message, cmd: ${editMessage.info?.cmd}")
-            if (editMessage.info?.cmd == "edit_message") {
-                val msg = editMessage.data_?.msg
-                Log.d(TAG, "Edit message: msgId=${msg?.msg_id}, chatId=${msg?.chat_id}")
-                if (msg != null) {
-                    val messageItem = parseEditMessage(msg)
-                    scope.launch {
-                        _messageFlow.emit(WsEvent.EditMessage(messageItem))
+                "edit_message" -> {
+                    val editMessage = edit_message.ADAPTER.decode(data)
+                    editMessage.data_?.msg?.let { msg ->
+                        Log.d(TAG, "Edit message: msgId=${msg.msg_id}, chatId=${msg.chat_id}")
+                        val messageItem = parseEditMessage(msg)
+                        scope.launch {
+                            _messageFlow.emit(WsEvent.EditMessage(messageItem))
+                        }
                     }
                 }
-                return
-            }
-
-            // 尝试解析为流式消息
-            val streamMessage = stream_message.ADAPTER.decode(data)
-            if (streamMessage.info?.cmd == "stream_message") {
-                val msg = streamMessage.data_?.msg
-                if (msg != null) {
-                    scope.launch {
-                        _messageFlow.emit(WsEvent.StreamContent(msg.msg_id, msg.content))
+                "stream_message" -> {
+                    val streamMessage = stream_message.ADAPTER.decode(data)
+                    streamMessage.data_?.msg?.let { msg ->
+                        scope.launch {
+                            _messageFlow.emit(WsEvent.StreamContent(msg.msg_id, msg.content))
+                        }
                     }
                 }
-                return
-            }
-
-            // 尝试解析为草稿同步
-            val draftInput = draft_input.ADAPTER.decode(data)
-            if (draftInput.info?.cmd == "draft_input") {
-                val draft = draftInput.data_?.draft
-                if (draft != null) {
-                    scope.launch {
-                        _messageFlow.emit(WsEvent.DraftUpdate(draft.chat_id, draft.input))
+                "draft_input" -> {
+                    val draftInput = draft_input.ADAPTER.decode(data)
+                    draftInput.data_?.draft?.let { draft ->
+                        scope.launch {
+                            _messageFlow.emit(WsEvent.DraftUpdate(draft.chat_id, draft.input))
+                        }
                     }
                 }
-                return
+                "file_send_message" -> {
+                    val fileMsg = file_send_message.ADAPTER.decode(data)
+                    Log.d(TAG, "File send message: ${fileMsg.data_?.sender?.send_type}")
+                }
+                "bot_board_message" -> {
+                    val boardMsg = bot_board_message.ADAPTER.decode(data)
+                    Log.d(TAG, "Bot board message from: ${boardMsg.data_?.board?.bot_name}")
+                }
+                else -> {
+                    Log.w(TAG, "Unknown binary command: $cmd")
+                }
             }
-
-            Log.d(TAG, "Unknown message type: ${pushMessage.info?.cmd}")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse message", e)
+            Log.e(TAG, "Failed to parse binary message", e)
         }
     }
 
@@ -282,7 +355,7 @@ class WebSocketManager {
             contentType = msg.content_type,
             timestamp = msg.timestamp,
             msgSeq = msg.msg_seq,
-            direction = if (msg.sender?.chat_id == msg.recv_id) "right" else "left",
+            direction = if (msg.sender?.chat_id == currentUserId) "right" else "left",
             isRecalled = msg.delete_time > 0,
             isEdited = msg.edit_time > 0,
             quoteMsgId = msg.quote_msg_id.takeIf { it.isNotEmpty() },
@@ -330,6 +403,7 @@ class WebSocketManager {
         webSocket?.close(1000, "Client disconnecting")
         webSocket = null
         isConnected = false
+        _connectionState.value = false
         stopHeartbeat()
     }
 }

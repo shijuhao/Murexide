@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
+import androidx.compose.material.icons.automirrored.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.DropdownMenu
@@ -121,7 +122,7 @@ fun WebViewScreen(
         AlertDialog(
             onDismissRequest = { showSchemeDialog = false },
             icon = {
-                Icon(Icons.Rounded.OpenInNew, contentDescription = null)
+                Icon(Icons.AutoMirrored.Rounded.OpenInNew, contentDescription = null)
             },
             title = { Text("跳转应用") },
             text = {
@@ -139,7 +140,7 @@ fun WebViewScreen(
                         val intent = Intent(Intent.ACTION_VIEW, pendingSchemeUrl.toUri())
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         context.startActivity(intent)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         Toast.makeText(context, "无法打开链接", Toast.LENGTH_SHORT).show()
                     }
                 }) {

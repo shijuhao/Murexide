@@ -15,14 +15,21 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+import com.juhao.murexide.network.NetworkClient
+import com.juhao.murexide.proto.group.info
+import com.juhao.murexide.proto.group.info_send
+import kotlinx.coroutines.Dispatchers
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+
 class ChatViewModel(
     private val token: String,
     private val chatId: String,
     private val chatType: Int,
-    private val userId: String,
     private val deviceId: String,
     private val repository: MessageRepository = MessageRepository(),
-    private val wsManager: WebSocketManager = WebSocketManager()
+    private val wsManager: WebSocketManager = WebSocketManager.getInstance()
 ) : ViewModel() {
 
     companion object {
@@ -47,6 +54,37 @@ class ChatViewModel(
     init {
         loadMessages()
         setupWebSocket()
+        if (chatType == 2) { // 群聊
+            loadGroupInfo()
+        }
+    }
+
+    private fun loadGroupInfo() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val requestProto = info_send(group_id = chatId)
+                val requestBody = requestProto.encode().toRequestBody("application/octet-stream".toMediaType())
+                
+                val request = Request.Builder()
+                    .url("${NetworkClient.BASE_URL}/v1/group/info")
+                    .post(requestBody)
+                    .header("token", token)
+                    .build()
+
+                NetworkClient.okHttpClient.newCall(request).execute().use { response ->
+                    if (response.isSuccessful) {
+                        val body = response.body.bytes()
+                        val groupInfo = info.ADAPTER.decode(body)
+                        if (groupInfo.status?.code == 1) {
+                            val memberCount = groupInfo.data_?.member
+                            _uiState.update { it.copy(memberCount = memberCount) }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load group info", e)
+            }
+        }
     }
 
     private fun setupWebSocket() {
@@ -73,9 +111,9 @@ class ChatViewModel(
                         // TODO: 根据msgId找到对应消息并追加内容
                     }
                     is WebSocketManager.WsEvent.DraftUpdate -> {
-                        Log.d(TAG, "Draft update: chatId=${event.chatId}, expected=$chatId")
+                        Log.d(TAG, "Draft update from WS: chatId=${event.chatId}, expected=$chatId")
                         if (event.chatId == chatId) {
-                            updateInputText(event.draft)
+                            updateInputTextFromWs(event.draft)
                         }
                     }
                     is WebSocketManager.WsEvent.MessageDeleted -> {
@@ -86,8 +124,6 @@ class ChatViewModel(
                 }
             }
         }
-        
-        wsManager.connect(userId, token, deviceId)
     }
 
     fun loadMessages() {
@@ -162,9 +198,16 @@ class ChatViewModel(
     }
 
     fun updateInputText(text: String) {
+        if (_uiState.value.inputText == text) return
         _uiState.update { it.copy(inputText = text) }
-        // 同步草稿到服务器
+        // 只有用户主动输入才同步到服务器
         wsManager.sendDraftSync(chatId, text, deviceId)
+    }
+
+    private fun updateInputTextFromWs(text: String) {
+        if (_uiState.value.inputText == text) return
+        // 收到服务器同步的消息，只更新UI，不再发回服务器，避免死循环
+        _uiState.update { it.copy(inputText = text) }
     }
 
     fun toggleMarkdown() {
@@ -181,8 +224,10 @@ class ChatViewModel(
 
     fun sendMessage() {
         val state = _uiState.value
+        if (state.inputText.isBlank() || state.isSending) return
 
         viewModelScope.launch {
+            _uiState.update { it.copy(isSending = true) }
             val contentType = if (state.isMarkdown) MessageItem.CONTENT_TYPE_MARKDOWN else MessageItem.CONTENT_TYPE_TEXT
             val content = MessageContent(
                 text = state.inputText
@@ -199,11 +244,13 @@ class ChatViewModel(
                 _uiState.update {
                     it.copy(
                         inputText = "",
-                        replyTo = null
+                        replyTo = null,
+                        isSending = false
                     )
                 }
                 refresh()
             }.onFailure { error ->
+                _uiState.update { it.copy(isSending = false) }
                 _toastMessage.emit(error.message ?: "发送失败")
             }
         }
@@ -316,11 +363,6 @@ class ChatViewModel(
                 }
             )
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        wsManager.disconnect()
     }
 }
 

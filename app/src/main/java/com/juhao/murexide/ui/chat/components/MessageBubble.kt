@@ -7,6 +7,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.InsertDriveFile
 import androidx.compose.material.icons.automirrored.rounded.Undo
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -523,7 +524,7 @@ private fun getFileIcon(fileName: String): androidx.compose.ui.graphics.vector.I
         "mp4", "avi", "mkv", "mov", "flv" -> Icons.Rounded.VideoFile
         "jpg", "jpeg", "png", "gif", "webp", "bmp", "svg" -> Icons.Rounded.Image
         "txt", "md", "json", "xml", "html", "css", "js", "kt", "java" -> Icons.Rounded.Code
-        else -> Icons.Rounded.InsertDriveFile
+        else -> Icons.AutoMirrored.Rounded.InsertDriveFile
     }
 }
 

@@ -39,7 +39,7 @@ class ConversationRepository {
                                     chatType = conversationData.chat_type.toInt(),
                                     name = conversationData.name,
                                     remark = conversationData.remark.takeIf { it.isNotEmpty() },
-                                    chatContent = conversationData.chat_content,
+                                    chatContent = conversationData.chat_content.takeIf { it.isNotEmpty() } ?: "[消息]",
                                     timestampMs = conversationData.timestamp_ms,
                                     unreadMessage = conversationData.unread_message.toInt(),
                                     at = conversationData.at.toInt(),

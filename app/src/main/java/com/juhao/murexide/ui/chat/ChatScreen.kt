@@ -41,6 +41,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.MoreVert
 
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
@@ -59,7 +60,6 @@ fun ChatScreen(
                     token = token,
                     chatId = chatId,
                     chatType = chatType,
-                    userId = getUserIdFromToken(token),
                     deviceId = getDeviceId()
                 ) as T
             }
@@ -218,6 +218,7 @@ fun ChatScreen(
     }
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = {
@@ -230,14 +231,32 @@ fun ChatScreen(
                         Column {
                             Text(
                                 text = chatName,
-                                fontSize = 18.sp
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
+                            if (chatType == 2 && uiState.memberCount != null) {
+                                Text(
+                                    text = "${uiState.memberCount} 人",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1
+                                )
+                            }
                         }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
                 ),
+                actions = {
+                    Box{
+                        IconButton(onClick = {  }) {
+                            Icon(Icons.Rounded.MoreVert, contentDescription = "更多")
+                        }
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "返回")
@@ -246,7 +265,7 @@ fun ChatScreen(
             )
         },
         bottomBar = {
-            Column {
+            Column(modifier = Modifier.imePadding()) {
                 AnimatedVisibility(
                     visible = uiState.replyTo != null,
                     enter = expandVertically() + fadeIn(),
@@ -282,7 +301,7 @@ fun ChatScreen(
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                     Text(
-                                        text = repliedMessage.content.ifEmpty { "消息" },
+                                        text = repliedMessage.getDisplayContent(),
                                         fontSize = 12.sp,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
@@ -301,10 +320,11 @@ fun ChatScreen(
                 }
     
                 MessageInput(
-                    inputText = uiState.inputText,
-                    isMarkdown = uiState.isMarkdown,
-                    onTextChange = { viewModel.updateInputText(it) },
-                    onSendClick = { viewModel.sendMessage() },
+                inputText = uiState.inputText,
+                isMarkdown = uiState.isMarkdown,
+                isSending = uiState.isSending,
+                onTextChange = { viewModel.updateInputText(it) },
+                onSendClick = { viewModel.sendMessage() },
                     onAddImageClick = { },
                     onToggleMarkdown = { viewModel.toggleMarkdown() }
                 )
@@ -378,7 +398,9 @@ fun ChatScreen(
                         if (uiState.isLoadingMore) {
                             item {
                                 Box(
-                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     CircularProgressIndicator()
@@ -440,10 +462,6 @@ fun ChatScreen(
             onToggleMarkdown = { viewModel.toggleEditMarkdown() }
         )
     }
-}
-
-private fun getUserIdFromToken(token: String): String {
-    return token.split("-").firstOrNull()?.removePrefix("nj") ?: ""
 }
 
 private fun getDeviceId(): String {

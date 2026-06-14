@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 fun MessageInput(
     inputText: String,
     isMarkdown: Boolean,
+    isSending: Boolean = false,
     onTextChange: (String) -> Unit,
     onSendClick: () -> Unit,
     onAddImageClick: () -> Unit,
@@ -116,6 +117,7 @@ fun MessageInput(
                     value = inputText,
                     onValueChange = onTextChange,
                     modifier = Modifier.weight(1f),
+                    enabled = !isSending,
                     placeholder = { Text("输入消息...") },
                     shape = RoundedCornerShape(20.dp),
                     maxLines = 5
@@ -146,12 +148,21 @@ fun MessageInput(
                         Spacer(modifier = Modifier.width(5.dp))
                         IconButton(
                             onClick = onSendClick,
+                            enabled = !isSending,
                             modifier = Modifier.size(36.dp)
                         ) {
-                            Icon(
-                                Icons.AutoMirrored.Rounded.Send,
-                                contentDescription = "发送"
-                            )
+                            if (isSending) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            } else {
+                                Icon(
+                                    Icons.AutoMirrored.Rounded.Send,
+                                    contentDescription = "发送"
+                                )
+                            }
                         }
                     }
                 }
