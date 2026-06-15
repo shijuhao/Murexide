@@ -13,21 +13,23 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.LayoutDirection
 import com.juhao.murexide.R
 import com.juhao.murexide.data.ConversationItem
+import com.juhao.murexide.datastore.SettingsStorage
 import com.juhao.murexide.ui.components.Avatar
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextAlign
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,9 +39,17 @@ fun ConversationListScreen(
     modifier: Modifier = Modifier,
     viewModel: ConversationViewModel = remember { ConversationViewModel(token) }
 ) {
+    val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val uiState by viewModel.uiState.collectAsState()
     val isWsConnected by viewModel.isWsConnected.collectAsState()
+    
+    val settingsStorage = remember { SettingsStorage(context) }
+    var showSticky by remember { mutableStateOf(false) }
+    
+    LaunchedEffect(Unit) {
+        showSticky = settingsStorage.getShowSticky()
+    }
 
     Scaffold (
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -86,7 +96,7 @@ fun ConversationListScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    if (state.stickyConversations.isNotEmpty()) {
+                    if (showSticky && state.stickyConversations.isNotEmpty()) {
                         item {
                             StickyConversationSection(
                                 stickyItems = state.stickyConversations,
