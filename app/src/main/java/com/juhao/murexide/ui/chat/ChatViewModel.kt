@@ -113,7 +113,7 @@ class ChatViewModel(
                     is WebSocketManager.WsEvent.DraftUpdate -> {
                         Log.d(TAG, "Draft update from WS: chatId=${event.chatId}, expected=$chatId")
                         if (event.chatId == chatId) {
-                            updateInputTextFromWs(event.draft)
+                            //updateInputTextFromWs(event.draft)
                         }
                     }
                     is WebSocketManager.WsEvent.MessageDeleted -> {
@@ -204,11 +204,11 @@ class ChatViewModel(
         wsManager.sendDraftSync(chatId, text, deviceId)
     }
 
-    private fun updateInputTextFromWs(text: String) {
+    /*private fun updateInputTextFromWs(text: String) {
         if (_uiState.value.inputText == text) return
         // 收到服务器同步的消息，只更新UI，不再发回服务器，避免死循环
         _uiState.update { it.copy(inputText = text) }
-    }
+    }*/
 
     fun toggleMarkdown() {
         _uiState.update { it.copy(isMarkdown = !it.isMarkdown) }
