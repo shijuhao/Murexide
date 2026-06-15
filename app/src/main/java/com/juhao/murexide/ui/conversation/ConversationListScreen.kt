@@ -183,14 +183,12 @@ fun StickyItemView(
     onClick: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .width(64.dp)
-            .clickable(onClick = onClick),
+        modifier = Modifier.clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Avatar(
             url = item.avatarUrl,
-            size = 48.dp
+            size = 42.dp
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
