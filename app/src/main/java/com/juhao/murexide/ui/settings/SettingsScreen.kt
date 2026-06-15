@@ -34,10 +34,12 @@ fun SettingsScreen(
     val themeMode by ThemeState.themeMode
     var squareAvatar by remember { mutableStateOf(false) }
     var avatarFollow by remember { mutableStateOf(false) }
+    var showSticky by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
         squareAvatar = settingsStorage.getSquareAvatar()
         avatarFollow = settingsStorage.getAvatarFollow()
+        showSticky = settingsStorage.getShowSticky()
     }
 
     Scaffold(
@@ -87,6 +89,18 @@ fun SettingsScreen(
             }
 
             SettingsGroup(title = "外观") {
+                SettingsSwitchItem(
+                    icon = Icons.Rounded.ChatBubbleOutline,
+                    title = "显示置顶会话",
+                    subtitle = "在主页显示置顶会话",
+                    checked = showSticky,
+                    onCheckedChange = { checked ->
+                        showSticky = checked
+                        scope.launch {
+                            settingsStorage.setShowSticky(checked)
+                        }
+                    }
+                )
                 SettingsSwitchItem(
                     icon = Icons.Rounded.People,
                     title = "圆角正方形头像",
