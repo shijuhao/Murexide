@@ -23,7 +23,7 @@ class FriendRepository {
                 val requestBody = requestProto.encode().toRequestBody("application/octet-stream".toMediaType())
                 
                 val httpRequest = Request.Builder()
-                    .url("$baseUrl/v1/friend/address_book_list")
+                    .url("$baseUrl/v1/friend/address-book-list")
                     .post(requestBody)
                     .header("token", token)
                     .build()
