@@ -4,15 +4,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.LayoutDirection
 import com.juhao.murexide.data.ContactItem
 import com.juhao.murexide.ui.components.Avatar
 
@@ -23,19 +25,25 @@ fun ContactListScreen(
     onContactClick: (ContactItem) -> Unit,
     viewModel: ContactViewModel = remember { ContactViewModel(token) }
 ) {
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                title = { Text("通讯录") }
+                title = { Text("通讯录") },
+                scrollBehavior = scrollBehavior
             )
         }
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
+                .padding(
+                    top = paddingValues.calculateTopPadding(),
+                    end = paddingValues.calculateRightPadding(LayoutDirection.Ltr)
+                ),
         ) {
             if (uiState.isLoading && uiState.contactGroups.isEmpty()) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -50,18 +58,35 @@ fun ContactListScreen(
                     }
                 }
             } else {
+                val groupStates = remember(uiState.contactGroups) {
+                    uiState.contactGroups.associate { group ->
+                        group.groupName to false
+                    }.toMutableStateMap()
+                }
+
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     uiState.contactGroups.forEach { group ->
+                        val isExpanded = groupStates[group.groupName] ?: false
+                        
                         item {
-                            ContactGroupHeader(group.groupName)
-                        }
-                        items(group.contacts) { contact ->
-                            ContactItemRow(contact = contact, onClick = { onContactClick(contact) })
-                            HorizontalDivider(
-                                modifier = Modifier.padding(start = 72.dp),
-                                thickness = 0.5.dp,
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            ContactGroupHeader(
+                                name = group.groupName,
+                                isExpanded = isExpanded,
+                                onToggle = {
+                                    groupStates[group.groupName] = !isExpanded
+                                }
                             )
+                        }
+                        
+                        if (isExpanded) {
+                            items(group.contacts) { contact ->
+                                ContactItemRow(contact = contact, onClick = { onContactClick(contact) })
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(start = 72.dp),
+                                    thickness = 0.5.dp,
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                )
+                            }
                         }
                     }
                 }
@@ -71,18 +96,35 @@ fun ContactListScreen(
 }
 
 @Composable
-fun ContactGroupHeader(name: String) {
+fun ContactGroupHeader(
+    name: String,
+    isExpanded: Boolean,
+    onToggle: () -> Unit
+) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text(
-            text = name,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onToggle() }
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = name,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Bold
+            )
+            Icon(
+                imageVector = if (isExpanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
+                contentDescription = if (isExpanded) "折叠" else "展开",
+                tint = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }
 
