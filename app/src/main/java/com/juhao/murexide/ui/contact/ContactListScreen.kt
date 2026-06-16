@@ -5,7 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.juhao.murexide.data.ContactItem
 import com.juhao.murexide.ui.components.Avatar
 
@@ -27,6 +29,16 @@ fun ContactListScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val uiState by viewModel.uiState.collectAsState()
+
+    val groupStates = remember { mutableStateMapOf<String, Boolean>() }
+
+    LaunchedEffect(uiState.contactGroups) {
+        uiState.contactGroups.forEach { group ->
+            if (!groupStates.containsKey(group.groupName)) {
+                groupStates[group.groupName] = false
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -58,12 +70,6 @@ fun ContactListScreen(
                     }
                 }
             } else {
-                val groupStates = remember(uiState.contactGroups) {
-                    uiState.contactGroups.associate { group ->
-                        group.groupName to false
-                    }.toMutableStateMap()
-                }
-
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     uiState.contactGroups.forEach { group ->
                         val isExpanded = groupStates[group.groupName] ?: false
@@ -116,13 +122,13 @@ fun ContactGroupHeader(
             Text(
                 text = name,
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold
             )
             Icon(
                 imageVector = if (isExpanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
                 contentDescription = if (isExpanded) "折叠" else "展开",
-                tint = MaterialTheme.colorScheme.onSurface
+                tint = MaterialTheme.colorScheme.primary
             )
         }
     }
