@@ -85,14 +85,15 @@ fun MessageBubble(
             contentAlignment = Alignment.Center
         ) {
             Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                shape = RoundedCornerShape(500.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.widthIn(max = 250.dp)
             ) {
                 Text(
                     text = "${message.senderName} 撤回了一条消息",
                     fontSize = 12.sp,
+                    lineHeight = 20.sp,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                 )
             }
@@ -139,7 +140,7 @@ fun MessageBubble(
                             containerColor = if (isMediaMsg)
                                 MaterialTheme.colorScheme.surface
                             else if (isMine)
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                MaterialTheme.colorScheme.tertiaryContainer
                             else
                                 MaterialTheme.colorScheme.surfaceContainer
                         )
@@ -214,7 +215,7 @@ fun MessageBubble(
                                             fontSize = 12.sp,
                                             maxLines = 2,
                                             overflow = TextOverflow.Ellipsis,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            color = MaterialTheme.colorScheme.onTertiaryContainer
                                         )
                                     }
                                 }
@@ -232,7 +233,7 @@ fun MessageBubble(
                                             text = message.content,
                                             fontSize = 14.sp,
                                             lineHeight = 22.sp,
-                                            color = MaterialTheme.colorScheme.onSurface
+                                            color = MaterialTheme.colorScheme.onTertiaryContainer
                                         )
                                     }
                                 }
@@ -371,7 +372,7 @@ fun MessageBubble(
                                         fontSize = 10.sp,
                                         lineHeight = 16.sp,
                                         maxLines = 1,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
                                     )
                                     if (message.isEdited) {
                                         Text(
@@ -379,7 +380,7 @@ fun MessageBubble(
                                             fontSize = 10.sp,
                                             lineHeight = 16.sp,
                                             maxLines = 1,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
                                             modifier = Modifier.padding(start = 4.dp)
                                         )
                                     }

@@ -232,6 +232,7 @@ fun ChatScreen(
                             Text(
                                 text = chatName,
                                 fontSize = 18.sp,
+                                lineHeight = 26.sp,
                                 fontWeight = FontWeight.Bold,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
@@ -240,6 +241,7 @@ fun ChatScreen(
                                 Text(
                                     text = "${uiState.memberCount} 人",
                                     fontSize = 12.sp,
+                                    lineHeight = 18.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1
                                 )
@@ -248,7 +250,7 @@ fun ChatScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
                 ),
                 actions = {
                     Box{
@@ -274,7 +276,7 @@ fun ChatScreen(
                     uiState.replyTo?.let { repliedMessage ->
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
                             shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
                         ) {
                             Row(
@@ -520,8 +522,8 @@ fun AnimatedScrollToBottomButton(
             SmallFloatingActionButton (
                 onClick = onClick,
                 shape = CircleShape,
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                contentColor = MaterialTheme.colorScheme.onSurface
             ) {
                 Icon(
                     imageVector = Icons.Rounded.KeyboardArrowDown,
