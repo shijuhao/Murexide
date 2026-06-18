@@ -522,7 +522,7 @@ fun AnimatedScrollToBottomButton(
             SmallFloatingActionButton (
                 onClick = onClick,
                 shape = CircleShape,
-                containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 contentColor = MaterialTheme.colorScheme.onSurface
             ) {
                 Icon(
