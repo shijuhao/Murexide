@@ -81,7 +81,7 @@ fun MessageBubble(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 8.dp, vertical = 4.dp),
             contentAlignment = Alignment.Center
         ) {
             Surface(
@@ -140,7 +140,7 @@ fun MessageBubble(
                             containerColor = if (isMediaMsg)
                                 MaterialTheme.colorScheme.surface
                             else if (isMine)
-                                MaterialTheme.colorScheme.tertiaryContainer
+                                MaterialTheme.colorScheme.primaryContainer
                             else
                                 MaterialTheme.colorScheme.surfaceContainer
                         )
@@ -215,7 +215,7 @@ fun MessageBubble(
                                             fontSize = 12.sp,
                                             maxLines = 2,
                                             overflow = TextOverflow.Ellipsis,
-                                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
                                     }
                                 }
@@ -233,7 +233,7 @@ fun MessageBubble(
                                             text = message.content,
                                             fontSize = 14.sp,
                                             lineHeight = 22.sp,
-                                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
                                     }
                                 }
@@ -372,7 +372,7 @@ fun MessageBubble(
                                         fontSize = 10.sp,
                                         lineHeight = 16.sp,
                                         maxLines = 1,
-                                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f)
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                     )
                                     if (message.isEdited) {
                                         Text(
@@ -380,7 +380,7 @@ fun MessageBubble(
                                             fontSize = 10.sp,
                                             lineHeight = 16.sp,
                                             maxLines = 1,
-                                            color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.7f),
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                                             modifier = Modifier.padding(start = 4.dp)
                                         )
                                     }
