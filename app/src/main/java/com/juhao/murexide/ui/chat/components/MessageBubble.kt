@@ -169,6 +169,15 @@ fun MessageBubble(
                                 }
                             }
                             
+                            message.cmdName?.let {
+                                Text(
+                                    text = it,
+                                    fontSize = 14.sp,
+                                    lineHeight = 24.sp,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                )
+                            }
+                            
                             if (message.quoteMsgText != null) {
                                 val quoteText = message.quoteMsgText
                                 Surface(
