@@ -47,9 +47,9 @@ class SettingsStorage(private val context: Context) {
         return squareAvatarFlow.first()
     }
     
-    // 头像跟随 - 实验性
+    // 头像跟随
     val avatarFollowFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
-        preferences[AVATAR_FOLLOW_KEY] ?: false
+        preferences[AVATAR_FOLLOW_KEY] ?: true
     }
 
     suspend fun setAvatarFollow(enabled: Boolean) {

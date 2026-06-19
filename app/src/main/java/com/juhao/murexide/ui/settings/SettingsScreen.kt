@@ -115,7 +115,7 @@ fun SettingsScreen(
                 )
             }
             
-            SettingsGroup(title = "实验性") {
+            SettingsGroup(title = "行为") {
                 SettingsSwitchItem(
                     icon = Icons.Rounded.Animation,
                     title = "聊天页头像跟随",
