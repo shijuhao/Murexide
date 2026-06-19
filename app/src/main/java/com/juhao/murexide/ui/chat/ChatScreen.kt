@@ -80,10 +80,50 @@ fun ChatScreen(
     var firstMessageId by remember { mutableStateOf<String?>(null) }
     
     val settingsStorage = remember { SettingsStorage(context) }
-    var avatarFollowEnabled by remember { mutableStateOf(false) }
-    var showFloatingAvatar by remember { mutableStateOf(false) }
-    var floatingAvatarUrl by remember { mutableStateOf("") }
-    var floatingAvatarIsMine by remember { mutableStateOf(false) }
+    val avatarFollowEnabled by settingsStorage.avatarFollowFlow.collectAsState(initial = false)
+
+    val floatingAvatarState by remember {
+        derivedStateOf {
+            val visibleItems = listState.layoutInfo.visibleItemsInfo
+            if (visibleItems.isEmpty() || uiState.messages.isEmpty() || !avatarFollowEnabled) {
+                Triple(false, "", false)
+            } else {
+                val topVisibleItem = visibleItems.minByOrNull { it.index }
+                if (topVisibleItem == null) {
+                    Triple(false, "", false)
+                } else {
+                    val firstVisibleIndex = topVisibleItem.index
+                    val message = uiState.messages.getOrNull(firstVisibleIndex)
+                    
+                    if (message == null || message.isRecalled) {
+                        Triple(false, "", false)
+                    } else {
+                        val visibleHeightDp = with(density) { 
+                            (topVisibleItem.size + topVisibleItem.offset.coerceAtMost(0)).toDp() 
+                        }.value
+
+                        val isVisibleEnough = visibleHeightDp >= 40
+                        
+                        val newerMessage = if (firstVisibleIndex > 0) uiState.messages.getOrNull(firstVisibleIndex - 1) else null
+                        val olderMessage = if (firstVisibleIndex < uiState.messages.size - 1) uiState.messages.getOrNull(firstVisibleIndex + 1) else null
+                        val isLastFromSender = olderMessage == null || olderMessage.isRecalled || olderMessage.senderId != message.senderId
+                        val hasOtherSameSender = (newerMessage != null && !newerMessage.isRecalled && newerMessage.senderId == message.senderId && !isLastFromSender) ||
+                                                 (olderMessage != null && !olderMessage.isRecalled && olderMessage.senderId == message.senderId)
+
+                        if (hasOtherSameSender && message.senderAvatar.isNotEmpty() && isVisibleEnough) {
+                            Triple(true, message.senderAvatar, message.isMine)
+                        } else {
+                            Triple(false, "", false)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    val showFloatingAvatar = floatingAvatarState.first
+    val floatingAvatarUrl = floatingAvatarState.second
+    val floatingAvatarIsMine = floatingAvatarState.third
     
     val topVisibleMessageIndex by remember {
         derivedStateOf {
@@ -98,7 +138,6 @@ fun ChatScreen(
     }
     
     LaunchedEffect(Unit) {
-        avatarFollowEnabled = settingsStorage.getAvatarFollow()
         viewModel.toastMessage.collect { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
@@ -123,47 +162,10 @@ fun ChatScreen(
             } else {
                 true
             }
-    
-            val floatingAvatarState = if (visibleItems.isEmpty() || uiState.messages.isEmpty()) {
-                Triple(false, "", false)
-            } else {
-                val topVisibleItem = visibleItems.minByOrNull { it.index }
-                if (topVisibleItem == null) {
-                    Triple(false, "", false)
-                } else {
-                    val firstVisibleIndex = topVisibleItem.index
-                    val message = uiState.messages.getOrNull(firstVisibleIndex)
-                    
-                    if (message == null || message.isRecalled) {
-                        Triple(false, "", false)
-                    } else {
-                        val itemHeightDp = with(density) { topVisibleItem.size.toDp() }.value
-                        val visibleHeightDp = with(density) { 
-                            (topVisibleItem.size + topVisibleItem.offset.coerceAtMost(0)).toDp() 
-                        }.value
-                        
-                        val hasEnoughSpace = visibleHeightDp >= 44 && itemHeightDp >= 44
-                        
-                        val newerMessage = if (firstVisibleIndex > 0) uiState.messages.getOrNull(firstVisibleIndex - 1) else null
-                        val olderMessage = if (firstVisibleIndex < uiState.messages.size - 1) uiState.messages.getOrNull(firstVisibleIndex + 1) else null
-                        val isLastFromSender = olderMessage == null || olderMessage.isRecalled || olderMessage.senderId != message.senderId
-                        val hasOtherSameSender = (newerMessage != null && !newerMessage.isRecalled && newerMessage.senderId == message.senderId && !isLastFromSender) ||
-                                                 (olderMessage != null && !olderMessage.isRecalled && olderMessage.senderId == message.senderId)
-                        
-                        if (hasEnoughSpace) {
-                            Triple(true, message.senderAvatar, message.isMine)
-                        } else if (hasOtherSameSender && message.senderAvatar.isNotEmpty()) {
-                            Triple(true, message.senderAvatar, message.isMine)
-                        } else {
-                            Triple(false, "", false)
-                        }
-                    }
-                }
-            }
             
-            Triple(shouldLoadMore, atBottom, floatingAvatarState)
+            Pair(shouldLoadMore, atBottom)
         }
-        .collect { (shouldLoadMore, atBottom, floatingAvatarState) ->
+        .collect { (shouldLoadMore, atBottom) ->
             if (shouldLoadMore) {
                 viewModel.loadMore()
             }
@@ -174,18 +176,6 @@ fun ChatScreen(
                 if (uiState.messages.isNotEmpty()) {
                     firstMessageId = uiState.messages.first().msgId
                 }
-            }
-    
-            val (show, url, isMine) = floatingAvatarState
-    
-            if (show && avatarFollowEnabled) {
-                showFloatingAvatar = true
-                floatingAvatarUrl = url
-                floatingAvatarIsMine = isMine
-            } else {
-                showFloatingAvatar = false
-                floatingAvatarUrl = ""
-                floatingAvatarIsMine = false
             }
         }
     }
