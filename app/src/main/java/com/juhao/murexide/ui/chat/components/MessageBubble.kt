@@ -171,9 +171,9 @@ fun MessageBubble(
                             
                             message.cmdName?.let {
                                 Text(
-                                    text = it,
-                                    fontSize = 14.sp,
-                                    lineHeight = 24.sp,
+                                    text = "/$it",
+                                    fontSize = 12.sp,
+                                    lineHeight = 20.sp,
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                 )
                             }
