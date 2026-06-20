@@ -1,3 +1,5 @@
+@file:Suppress("AssignedValueIsNeverRead")
+
 package com.juhao.murexide.ui.webview
 
 import android.annotation.SuppressLint

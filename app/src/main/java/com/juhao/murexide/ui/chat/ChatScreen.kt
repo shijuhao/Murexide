@@ -15,13 +15,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.juhao.murexide.ui.components.Avatar
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.juhao.murexide.ui.chat.components.EditMessageDialog
 import com.juhao.murexide.ui.chat.components.MessageBubble
 import com.juhao.murexide.ui.chat.components.MessageInput
@@ -42,6 +44,7 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.ui.draw.alpha
 
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
 @Composable
@@ -68,7 +71,6 @@ fun ChatScreen(
 ) {
     val density = LocalDensity.current
     val context = LocalContext.current
-    val clipboardManager = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
     val uiState by viewModel.uiState.collectAsState()
     val recallDialog by viewModel.recallDialog.collectAsState()
@@ -271,7 +273,6 @@ fun ChatScreen(
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
                             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
                         ) {
                             Row(
                                 modifier = Modifier
@@ -332,6 +333,25 @@ fun ChatScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
+            uiState.backgroundUrl?.takeIf { it.isNotEmpty() }?.let { bgUrl ->
+                val bgRequest = remember(bgUrl) {
+                    ImageRequest.Builder(context)
+                        .data(bgUrl)
+                        .apply {
+                            if (bgUrl.contains("jwznb.com")) {
+                                setHeader("Referer", "https://myapp.jwznb.com")
+                            }
+                        }
+                        .build()
+                }
+                AsyncImage(
+                    model = bgRequest,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize().alpha(0.6f),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
             if (uiState.isLoading && uiState.messages.isEmpty()) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             } else if (uiState.error != null && uiState.messages.isEmpty()) {
@@ -355,7 +375,7 @@ fun ChatScreen(
                         itemsIndexed(items = uiState.messages) { index, message ->
                             val newerMessage = if (index > 0) uiState.messages[index - 1] else null
                             val olderMessage = if (index < uiState.messages.size - 1) uiState.messages[index + 1] else null
-    
+
                             val isFirstFromSender = newerMessage == null || newerMessage.isRecalled || newerMessage.senderId != message.senderId
                             val isLastFromSender = olderMessage == null || olderMessage.isRecalled || olderMessage.senderId != message.senderId
                             val isOlderSameSender = olderMessage != null && !olderMessage.isRecalled && olderMessage.senderId == message.senderId
@@ -368,18 +388,17 @@ fun ChatScreen(
                             } else {
                                 isFirstFromSender
                             }
-                            
+
                             val avatarAlignment = if (isTopVisibleItem && shouldShowItemAvatar && avatarFollowEnabled) {
                                 if (isLastFromSender) Alignment.Top else Alignment.Bottom
                             } else {
                                 Alignment.Bottom
                             }
-    
+
                             MessageBubble(
                                 message = message,
                                 onRecall = { viewModel.showRecallDialog(message.msgId) },
                                 onEdit = { viewModel.showEditDialog(message) },
-                                clipboardManager = clipboardManager,
                                 onReply = { viewModel.setReplyTo(message) },
                                 isAdmin = uiState.isAdmin,
                                 isLastFromSender = isLastFromSender,
@@ -390,7 +409,7 @@ fun ChatScreen(
                                 avatarAlignment = avatarAlignment
                             )
                         }
-                        
+
                         if (uiState.isLoadingMore) {
                             item {
                                 Box(

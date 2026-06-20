@@ -14,13 +14,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 import com.juhao.murexide.network.NetworkClient
 import com.juhao.murexide.proto.group.info
 import com.juhao.murexide.proto.group.info_send
+import com.juhao.murexide.repository.ChatBackgroundRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -31,6 +32,7 @@ class ChatViewModel(
     private val chatType: Int,
     private val deviceId: String,
     private val repository: MessageRepository = MessageRepository(),
+    private val backgroundRepository: ChatBackgroundRepository = ChatBackgroundRepository(),
     private val wsManager: WebSocketManager = WebSocketManager.getInstance()
 ) : ViewModel() {
 
@@ -62,8 +64,20 @@ class ChatViewModel(
     init {
         loadMessages()
         setupWebSocket()
+        loadBackground()
         if (chatType == 2) { // 群聊
             loadGroupInfo()
+        }
+    }
+
+    private fun loadBackground() {
+        viewModelScope.launch(Dispatchers.IO) {
+            backgroundRepository.getBackgroundList(token).onSuccess { list ->
+                val url = backgroundRepository.resolveBackground(list, chatId)
+                _uiState.update { it.copy(backgroundUrl = url) }
+            }.onFailure { e ->
+                Log.e(TAG, "Failed to load background", e)
+            }
         }
     }
 
@@ -141,8 +155,7 @@ class ChatViewModel(
             repository.getMessageList(
                 token = token,
                 chatId = chatId,
-                chatType = chatType,
-                msgCount = 20
+                chatType = chatType
             ).onSuccess { messages ->
                 _uiState.update {
                     it.copy(
@@ -177,8 +190,7 @@ class ChatViewModel(
                 token = token,
                 chatId = chatId,
                 chatType = chatType,
-                msgId = currentMsgId,
-                msgCount = 20
+                msgId = currentMsgId
             ).onSuccess { messages ->
                 if (messages.isNotEmpty()) {
                     _uiState.update {
@@ -242,7 +254,7 @@ class ChatViewModel(
         
         draftClearJob?.cancel()
         draftClearJob = viewModelScope.launch {
-            kotlinx.coroutines.delay(DRAFT_CLEAR_DELAY_MS)
+            delay(DRAFT_CLEAR_DELAY_MS)
             Log.d(TAG, "Clearing draft state after ${DRAFT_CLEAR_DELAY_MS}ms delay")
             _uiState.update { it.copy(isRemoteDraft = false) }
         }

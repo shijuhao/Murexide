@@ -127,12 +127,15 @@ fun ConversationListScreen(
                             }
                         }
                     } else {
-                        items(state.conversations, key = { it.chatId }) { conversation ->
+                        items(
+                            items = state.conversations,
+                            key = { item -> item.chatId }
+                        ) { conversation ->
                             ConversationItem(
                                 conversation = conversation,
-                                onClick = { 
+                                onClick = {
                                     viewModel.clearUnread(conversation.chatId)
-                                    onConversationClick(conversation) 
+                                    onConversationClick(conversation)
                                 }
                             )
                         }

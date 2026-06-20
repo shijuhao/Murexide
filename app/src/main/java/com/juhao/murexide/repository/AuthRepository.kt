@@ -1,6 +1,5 @@
 package com.juhao.murexide.repository
 
-import com.juhao.murexide.data.CaptchaResponse
 import com.juhao.murexide.data.LoginRequest
 import com.juhao.murexide.data.LoginResponse
 import com.juhao.murexide.network.NetworkClient

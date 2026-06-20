@@ -1,9 +1,11 @@
 package com.juhao.murexide.ui.chat.components
 
+import android.content.ClipData
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -17,9 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -30,6 +32,7 @@ import com.juhao.murexide.data.MessageItem
 import com.juhao.murexide.ui.chat.EditDialogState
 import com.juhao.murexide.ui.components.Avatar
 import com.juhao.murexide.ui.components.MarkdownRenderer
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -40,7 +43,6 @@ fun MessageBubble(
     message: MessageItem,
     onRecall: () -> Unit,
     onEdit: () -> Unit,
-    clipboardManager: ClipboardManager,
     onReply: () -> Unit,
     isAdmin: Boolean = false,
     isLastFromSender: Boolean = true,
@@ -50,6 +52,9 @@ fun MessageBubble(
     showAvatar: Boolean = true,
     avatarAlignment: Alignment.Vertical = Alignment.Bottom
 ) {
+    val clipboardManager = LocalClipboard.current
+    val scope = rememberCoroutineScope()
+
     var showMenu by remember { mutableStateOf(false) }
     val isMine = message.isMine
     val context = LocalContext.current
@@ -86,7 +91,7 @@ fun MessageBubble(
         ) {
             Surface(
                 shape = RoundedCornerShape(500.dp),
-                color = MaterialTheme.colorScheme.surfaceContainer,
+                color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.95f),
                 contentColor = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.widthIn(max = 250.dp)
             ) {
@@ -103,7 +108,11 @@ fun MessageBubble(
             modifier = Modifier
                 .fillMaxWidth()
                 .combinedClickable(
-                    onClick = { },
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {
+                        showMenu = true
+                    },
                     onLongClick = { showMenu = true }
                 )
                 .padding(
@@ -140,11 +149,11 @@ fun MessageBubble(
                         ),
                         colors = CardDefaults.cardColors(
                             containerColor = if (hideMsgCard)
-                                MaterialTheme.colorScheme.surface
+                                Color.Transparent
                             else if (isMine)
-                                MaterialTheme.colorScheme.primaryContainer
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f)
                             else
-                                MaterialTheme.colorScheme.surfaceContainer
+                                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f)
                         )
                     ) {
                         Column(modifier = Modifier.padding(if (hideMsgCard) 0.dp else 8.dp)) {
@@ -153,8 +162,8 @@ fun MessageBubble(
                                     modifier = Modifier.padding(bottom = 4.dp)
                                 ) {
                                     Surface(
-                                        shape = RoundedCornerShape(50.dp),
-                                        color = MaterialTheme.colorScheme.surfaceContainer
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = if (hideMsgCard) MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.95f) else Color.Transparent
                                     ) {
                                         Text(
                                             text = message.senderName,
@@ -164,7 +173,7 @@ fun MessageBubble(
                                             modifier = if (hideMsgCard) {
                                                 Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                             } else {
-                                                Modifier
+                                                Modifier.padding(horizontal = 2.dp)
                                             }
                                         )
                                     }
@@ -277,7 +286,10 @@ fun MessageBubble(
                                                             )
                                                          else Modifier
                                                     )
-                                                    .clickable { }
+                                                    .combinedClickable(
+                                                        onClick = {},
+                                                        onLongClick = { showMenu = true }
+                                                    )
                                             )
 
                                             Row(
@@ -329,9 +341,9 @@ fun MessageBubble(
                                                 )
                                                 .background(
                                                     if (isMine)
-                                                        MaterialTheme.colorScheme.primaryContainer
+                                                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f)
                                                     else
-                                                        MaterialTheme.colorScheme.surfaceContainer
+                                                        MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.95f)
                                                 )
                                                 .clickable { /* TODO: 打开/下载文件 */ }
                                                 .padding(12.dp),
@@ -440,7 +452,9 @@ fun MessageBubble(
                         DropdownMenuItem(
                             text = { Text("复制") },
                             onClick = {
-                                clipboardManager.setText(AnnotatedString(message.content))
+                                scope.launch {
+                                    clipboardManager.setClipEntry(ClipEntry(ClipData.newPlainText("msg", message.content)))
+                                }
                                 Toast.makeText(context, "复制成功", Toast.LENGTH_SHORT).show()
                                 showMenu = false
                             },

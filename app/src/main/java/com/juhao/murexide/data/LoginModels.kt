@@ -21,16 +21,3 @@ data class LoginResponse(
 data class LoginData(
     val token: String
 )
-
-@Serializable
-data class CaptchaResponse(
-    val code: Int,
-    val data: CaptchaData? = null,
-    val msg: String
-)
-
-@Serializable
-data class CaptchaData(
-    val b64s: String,
-    val id: String
-)

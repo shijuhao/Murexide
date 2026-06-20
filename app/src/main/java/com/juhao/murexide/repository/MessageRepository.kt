@@ -26,12 +26,11 @@ class MessageRepository {
         chatId: String,
         chatType: Int,
         msgId: String? = null,
-        msgCount: Int = 20
     ): Result<List<MessageItem>> {
         return withContext(Dispatchers.IO) {
             try {
                 val requestBody = list_message_send(
-                    msg_count = msgCount.toLong(),
+                    msg_count = 20.toLong(),
                     msg_id = msgId ?: "",
                     chat_type = chatType.toLong(),
                     chat_id = chatId

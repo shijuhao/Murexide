@@ -103,5 +103,6 @@ data class ChatUiState(
     val memberCount: Long? = null,
     val isSending: Boolean = false,
     val isRemoteDraft: Boolean = false,
-    val draftSource: String? = null
+    val draftSource: String? = null,
+    val backgroundUrl: String? = null
 )
