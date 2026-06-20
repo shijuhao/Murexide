@@ -370,6 +370,7 @@ class WebSocketManager private constructor() {
             senderName = msg.sender?.name ?: "",
             senderAvatar = msg.sender?.avatar_url ?: "",
             chatId = msg.chat_id,
+            recvId = msg.recv_id ?: "",
             chatType = msg.chat_type,
             content = msg.content?.text ?: "",
             contentType = msg.content_type,

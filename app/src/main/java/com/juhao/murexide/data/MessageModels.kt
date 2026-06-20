@@ -9,6 +9,7 @@ data class MessageItem(
     val senderName: String,
     val senderAvatar: String,
     val chatId: String,
+    val recvId: String = "",
     val chatType: Int,
     val content: String = "",
     val contentType: Int,
