@@ -110,7 +110,7 @@ class ChatViewModel(
                     is WebSocketManager.WsEvent.EditMessage -> {
                         Log.d(TAG, "Edit message: chatId=${event.message.chatId}, expected=$chatId")
                         if (event.message.chatId == chatId) {
-                            updateMessage(event.message)
+                            updateEditedMessage(event.message)
                         }
                     }
                     is WebSocketManager.WsEvent.StreamContent -> {
@@ -369,7 +369,7 @@ class ChatViewModel(
                     content = state.newContent,
                     isEdited = true
                 )
-                updateMessage(updatedMessage)
+                updateEditedMessage(updatedMessage)
                 _toastMessage.emit("编辑成功")
             }.onFailure { error ->
                 hideEditDialog()
@@ -387,11 +387,18 @@ class ChatViewModel(
         }
     }
 
-    fun updateMessage(message: MessageItem) {
+    fun updateEditedMessage(message: MessageItem) {
         _uiState.update {
             it.copy(
                 messages = it.messages.map { msg ->
-                    if (msg.msgId == message.msgId) message else msg
+                    if (msg.msgId == message.msgId) 
+                        msg.copy(
+                            content = message.content,
+                            contentType = message.contentType,
+                            isEdited = true
+                        )
+                    else 
+                        msg
                 }
             )
         }
