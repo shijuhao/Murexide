@@ -271,7 +271,8 @@ class ChatViewModel(
                 quoteMsgText = state.replyTo?.let {
                     "${it.senderName}: ${it.content}"
                 },
-                quoteImageUrl = state.replyTo?.imageUrl
+                quoteImageUrl = state.replyTo?.imageUrl,
+                quoteImageName = state.replyTo?.imageUrl
             )
 
             repository.sendMessage(
