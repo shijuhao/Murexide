@@ -107,6 +107,8 @@ class ConversationViewModel(
                         )
                         conversations.add(0, updatedConv)
                         state.copy(conversations = conversations)
+                    } else {
+                        state
                     }
                 } else {
                     refresh()
