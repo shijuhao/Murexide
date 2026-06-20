@@ -79,6 +79,7 @@ fun ChatScreen(
     val listState = rememberLazyListState()
     var showScrollToBottom by remember { mutableStateOf(false) }
     var unreadCount by remember { mutableIntStateOf(0) }
+    var isScrollingToBottom by remember { mutableStateOf(false) }
     var firstMessageId by remember { mutableStateOf<String?>(null) }
     
     val settingsStorage = remember { SettingsStorage(context) }
@@ -179,36 +180,49 @@ fun ChatScreen(
             showScrollToBottom = !atBottom
             if (atBottom) {
                 unreadCount = 0
-                if (uiState.messages.isNotEmpty()) {
-                    firstMessageId = uiState.messages.first().msgId
-                }
             }
         }
     }
     
-    LaunchedEffect(uiState.messages) {
-        if (uiState.messages.isEmpty()) return@LaunchedEffect
-
-        val currentFirstId = uiState.messages.first().msgId
-
-        if (firstMessageId != null && currentFirstId != firstMessageId) {
-            if (showScrollToBottom) {
-                unreadCount += 1
-            } else {
+    LaunchedEffect(uiState.messages.firstOrNull()?.msgId) {
+        val currentFirstId = uiState.messages.firstOrNull()?.msgId ?: return@LaunchedEffect
+        
+        if (firstMessageId == null) {
+            firstMessageId = currentFirstId
+            return@LaunchedEffect
+        }
+        
+        if (currentFirstId != firstMessageId && !isScrollingToBottom) {
+            val layoutInfo = listState.layoutInfo
+            val isAtBottom = layoutInfo.visibleItemsInfo.firstOrNull()?.index == 0
+            
+            if (isAtBottom) {
+                isScrollingToBottom = true
                 listState.scrollToItem(0)
                 unreadCount = 0
+                scope.launch {
+                    delay(300)
+                    isScrollingToBottom = false
+                }
+            } else {
+                unreadCount += 1
             }
+            
+            firstMessageId = currentFirstId
         }
-
-        firstMessageId = currentFirstId
     }
 
     val scrollToBottom: () -> Unit = {
-        scope.launch {
-            listState.animateScrollToItem(0)
-            unreadCount = 0
-            if (uiState.messages.isNotEmpty()) {
-                firstMessageId = uiState.messages.first().msgId
+        if (!isScrollingToBottom) {
+            scope.launch {
+                isScrollingToBottom = true
+                listState.animateScrollToItem(0)
+                unreadCount = 0
+                if (uiState.messages.isNotEmpty()) {
+                    firstMessageId = uiState.messages.first().msgId
+                }
+                delay(300)
+                isScrollingToBottom = false
             }
         }
     }
