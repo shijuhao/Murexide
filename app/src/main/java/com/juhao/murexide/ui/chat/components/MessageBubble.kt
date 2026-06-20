@@ -2,6 +2,7 @@ package com.juhao.murexide.ui.chat.components
 
 import android.content.ClipData
 import android.widget.Toast
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -133,7 +134,7 @@ fun MessageBubble(
             } else if (!isMine) {
                 Spacer(modifier = Modifier.width(44.dp))
             }
-            
+
             val hideMsgCard = message.contentType == MessageItem.CONTENT_TYPE_IMAGE
                 || message.contentType == MessageItem.CONTENT_TYPE_STICKER
                 || message.contentType == MessageItem.CONTENT_TYPE_FILE
@@ -179,7 +180,7 @@ fun MessageBubble(
                                     }
                                 }
                             }
-                            
+
                             message.cmdName?.let {
                                 Text(
                                     text = "/$it",
@@ -188,7 +189,7 @@ fun MessageBubble(
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                 )
                             }
-                            
+
                             if (message.quoteMsgText != null) {
                                 val quoteText = message.quoteMsgText
                                 Surface(
@@ -213,13 +214,13 @@ fun MessageBubble(
                                         if (message.quoteImageUrl != null) {
                                             val builder = ImageRequest.Builder(context)
                                                 .data(message.quoteImageUrl)
-                                            
-                                            if (message.quoteImageUrl.contains("chat-img.jwznb.com") || 
-                                                message.quoteImageUrl.contains("jwznb.com") || 
+
+                                            if (message.quoteImageUrl.contains("chat-img.jwznb.com") ||
+                                                message.quoteImageUrl.contains("jwznb.com") ||
                                                 message.quoteImageUrl.contains("myapp.jwznb.com")) {
                                                 builder.setHeader("Referer", "https://myapp.jwznb.com")
                                             }
-                                            
+
                                             AsyncImage(
                                                 model = builder.build(),
                                                 contentDescription = null,
@@ -257,20 +258,22 @@ fun MessageBubble(
                                         )
                                     }
                                 }
-                                
+
                                 MessageItem.CONTENT_TYPE_IMAGE,
                                 MessageItem.CONTENT_TYPE_STICKER -> {
                                     message.imageUrl?.let { url ->
                                         val builder = ImageRequest.Builder(context)
                                             .data(url)
-                                        
-                                        if (url.contains("chat-img.jwznb.com") || 
-                                            url.contains("jwznb.com") || 
+
+                                        if (url.contains("chat-img.jwznb.com") ||
+                                            url.contains("jwznb.com") ||
                                             url.contains("myapp.jwznb.com")) {
                                             builder.setHeader("Referer", "https://myapp.jwznb.com")
                                         }
-                                    
-                                        Box {
+
+                                        Box(
+                                            modifier = Modifier.animateContentSize()
+                                        ) {
                                             AsyncImage(
                                                 model = builder.build(),
                                                 contentDescription = null,
@@ -323,7 +326,7 @@ fun MessageBubble(
                                         }
                                     }
                                 }
-                                
+
                                 MessageItem.CONTENT_TYPE_FILE -> {
                                     message.fileName?.let { fileName ->
                                         Row(
@@ -363,9 +366,9 @@ fun MessageBubble(
                                                     )
                                                 }
                                             }
-                                            
+
                                             Spacer(modifier = Modifier.width(12.dp))
-                                            
+
                                             Column(modifier = Modifier.weight(1f)) {
                                                 Text(
                                                     text = fileName,
@@ -376,7 +379,7 @@ fun MessageBubble(
                                                     overflow = TextOverflow.Ellipsis,
                                                     color = MaterialTheme.colorScheme.onSurface
                                                 )
-                                                
+
                                                 Row(modifier = Modifier.padding(top = 2.dp)) {
                                                     message.fileSize?.let { size ->
                                                         Text(
@@ -396,7 +399,7 @@ fun MessageBubble(
                                                     )
                                                 }
                                             }
-                                            
+
                                             Icon(
                                                 imageVector = Icons.Rounded.Download,
                                                 contentDescription = null,
@@ -406,11 +409,11 @@ fun MessageBubble(
                                         }
                                     }
                                 }
-                                
+
                                 MessageItem.CONTENT_TYPE_VIDEO -> {
                                     // TODO: 视频消息 UI
                                 }
-                                
+
                                 MessageItem.CONTENT_TYPE_AUDIO -> {
                                     // TODO: 音频消息 UI
                                 }

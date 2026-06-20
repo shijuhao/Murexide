@@ -76,42 +76,44 @@ object MarkdownRenderer {
             }
         }
 
-        val components = markdownComponents(
-            image = { componentData ->
-                val url = componentData.content
-                val altText = componentData.node.getAltTextFromNode(url)
-                
-                val imageRequest = remember(url) {
-                    ImageRequest.Builder(context)
-                        .data(url)
-                        .apply {
-                            if (url.contains("chat-img.jwznb.com") ||
-                                url.contains("jwznb.com") ||
-                                url.contains("myapp.jwznb.com")
-                            ) {
-                                setHeader("Referer", "https://myapp.jwznb.com")
-                            }
-                        }
-                        .build()
-                }
+        val components = remember(onImageClick) {
+            markdownComponents(
+                image = { componentData ->
+                    val url = componentData.content
+                    val altText = componentData.node.getAltTextFromNode(url)
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp)
-                        .clickable {
-                            onImageClick?.invoke(url, altText)
-                        }
-                ) {
-                    AsyncImage(
-                        model = imageRequest,
-                        contentDescription = altText.ifEmpty { null },
-                        modifier = Modifier.fillMaxWidth(),
-                        contentScale = ContentScale.FillWidth
-                    )
+                    val imageRequest = remember(url) {
+                        ImageRequest.Builder(context)
+                            .data(url)
+                            .apply {
+                                if (url.contains("chat-img.jwznb.com") ||
+                                    url.contains("jwznb.com") ||
+                                    url.contains("myapp.jwznb.com")
+                                ) {
+                                    setHeader("Referer", "https://myapp.jwznb.com")
+                                }
+                            }
+                            .build()
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .clickable {
+                                onImageClick?.invoke(url, altText)
+                            }
+                    ) {
+                        AsyncImage(
+                            model = imageRequest,
+                            contentDescription = altText.ifEmpty { null },
+                            modifier = Modifier.fillMaxWidth(),
+                            contentScale = ContentScale.FillWidth
+                        )
+                    }
                 }
-            }
-        )
+            )
+        }
 
         CompositionLocalProvider(LocalUriHandler provides customUriHandler) {
             Markdown(

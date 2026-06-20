@@ -46,6 +46,8 @@ class ChatViewModel(
     private var lastAppliedDraft = ""
     private var draftClearJob: kotlinx.coroutines.Job? = null
 
+    private val msgIdCache = mutableSetOf<String>()
+
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
 
@@ -115,8 +117,9 @@ class ChatViewModel(
                 Log.d(TAG, "Received WS event: ${event::class.simpleName}")
                 when (event) {
                     is WebSocketManager.WsEvent.NewMessage -> {
-                        Log.d(TAG, "New message: chatId=${event.message.chatId}, expected=$chatId, match=${event.message.chatId == chatId}")
-                        if (event.message.chatId == chatId && event.message.chatType == chatType) {
+                        val match = event.message.chatId == chatId || event.message.chatType != 2
+                        Log.d(TAG, "New message: chatId=${event.message.chatId}, expected=$chatId, match=${match}")
+                        if (match) {
                             Log.d(TAG, "Adding new message to UI")
                             addReceivedMessage(event.message)
                         }
@@ -129,8 +132,7 @@ class ChatViewModel(
                     }
                     is WebSocketManager.WsEvent.StreamContent -> {
                         Log.d(TAG, "Stream content: msgId=${event.msgId}")
-                        // 处理流式消息内容追加
-                        // TODO: 根据msgId找到对应消息并追加内容
+                        updateStreamMessage(event.msgId, event.content)
                     }
                     is WebSocketManager.WsEvent.DraftUpdate -> {
                         Log.d(TAG, "Draft update from WS: chatId=${event.chatId}, expected=$chatId")
@@ -157,6 +159,9 @@ class ChatViewModel(
                 chatId = chatId,
                 chatType = chatType
             ).onSuccess { messages ->
+                msgIdCache.clear()
+                msgIdCache.addAll(messages.map { it.msgId })
+
                 _uiState.update {
                     it.copy(
                         messages = messages,
@@ -193,12 +198,18 @@ class ChatViewModel(
                 msgId = currentMsgId
             ).onSuccess { messages ->
                 if (messages.isNotEmpty()) {
-                    _uiState.update {
-                        it.copy(
-                            messages = it.messages + messages,
-                            isLoadingMore = false,
-                            hasMore = true
-                        )
+                    val newMessages = messages.filter { it.msgId !in msgIdCache }
+                    if (newMessages.isNotEmpty()) {
+                        msgIdCache.addAll(newMessages.map { it.msgId })
+                        _uiState.update {
+                            it.copy(
+                                messages = it.messages + newMessages,
+                                isLoadingMore = false,
+                                hasMore = true
+                            )
+                        }
+                    } else {
+                        _uiState.update { it.copy(isLoadingMore = false, hasMore = true) }
                     }
                     currentMsgId = messages.last().msgId
                 } else {
@@ -213,6 +224,7 @@ class ChatViewModel(
     }
 
     fun refresh() {
+        msgIdCache.clear()
         currentMsgId = null
         loadMessages()
     }
@@ -392,10 +404,27 @@ class ChatViewModel(
     }
 
     fun addReceivedMessage(message: MessageItem) {
-        if (message.chatId != chatId || message.chatType != chatType) return
+        if (message.msgId in msgIdCache) {
+            updateEditedMessage(message)
+            return
+        }
 
+        msgIdCache.add(message.msgId)
         _uiState.update {
             it.copy(messages = listOf(message) + it.messages)
+        }
+    }
+
+    fun updateStreamMessage(msgId: String, content: String) {
+        _uiState.update {
+            it.copy(
+                messages = it.messages.map { msg ->
+                    if (msg.msgId == msgId)
+                        msg.copy(content = msg.content + content)
+                    else
+                        msg
+                }
+            )
         }
     }
 
