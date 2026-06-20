@@ -2,7 +2,6 @@ package com.juhao.murexide.ui.chat.components
 
 import android.content.ClipData
 import android.widget.Toast
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -271,9 +270,7 @@ fun MessageBubble(
                                             builder.setHeader("Referer", "https://myapp.jwznb.com")
                                         }
 
-                                        Box(
-                                            modifier = Modifier.animateContentSize()
-                                        ) {
+                                        Box {
                                             AsyncImage(
                                                 model = builder.build(),
                                                 contentDescription = null,
