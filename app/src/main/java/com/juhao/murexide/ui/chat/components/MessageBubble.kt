@@ -97,8 +97,7 @@ fun MessageBubble(
             ) {
                 Text(
                     text = "${message.senderName} 撤回了一条消息",
-                    fontSize = 12.sp,
-                    lineHeight = 18.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
                 )
             }
@@ -175,7 +174,7 @@ fun MessageBubble(
                                         ) {
                                             Text(
                                                 text = "机器人",
-                                                style = MaterialTheme.typography.bodyMedium,
+                                                style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                             )
