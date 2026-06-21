@@ -486,7 +486,7 @@ fun ChatScreen(
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
                         Avatar(
-                            url = floatingAvatarUrl,i
+                            url = floatingAvatarUrl,
                             size = 36.dp
                         )
                     }
