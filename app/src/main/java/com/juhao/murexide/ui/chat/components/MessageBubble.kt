@@ -102,6 +102,26 @@ fun MessageBubble(
                 )
             }
         }
+    } else if (message.contentType == MessageItem.CONTENT_TYPE_TIP) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Surface(
+                shape = RoundedCornerShape(500.dp),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.widthIn(max = 250.dp)
+            ) {
+                Text(
+                    text = message.content,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
+                )
+            }
+        }
     } else {
         Row(
             modifier = Modifier

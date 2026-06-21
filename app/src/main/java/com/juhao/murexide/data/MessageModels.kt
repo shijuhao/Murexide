@@ -57,6 +57,7 @@ data class MessageItem(
         const val CONTENT_TYPE_FILE = 4
         const val CONTENT_TYPE_STICKER = 7
         const val CONTENT_TYPE_HTML = 8
+        const val CONTENT_TYPE_TIP = 9
         const val CONTENT_TYPE_VIDEO = 10
         const val CONTENT_TYPE_AUDIO = 11
     }
