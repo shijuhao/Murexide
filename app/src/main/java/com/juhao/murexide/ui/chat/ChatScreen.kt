@@ -477,11 +477,18 @@ fun ChatScreen(
                         .align(Alignment.BottomCenter)
                         .padding(12.dp)
                 )
+                
+                val targetAlpha = if (showMenuMsgId != null && topVisibleMessageId != showMenuMsgId) 0.4f else 1f
+                val animatedAlpha by animateFloatAsState(
+                    targetValue = targetAlpha,
+                    animationSpec = tween(durationMillis = 300),
+                    label = "floating_avatar_alpha"
+                )
 
                 if (showFloatingAvatar) {
                     Column (
                         modifier = Modifier
-                            .alpha(if (showMenuMsgId != null && topVisibleMessageId != showMenuMsgId) 0.4f else 1f)
+                            .alpha(animatedAlpha)
                             .align(if (floatingAvatarIsMine) Alignment.BottomEnd else Alignment.BottomStart)
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {

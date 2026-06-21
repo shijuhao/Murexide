@@ -2,6 +2,8 @@ package com.juhao.murexide.ui.chat.components
 
 import android.content.ClipData
 import android.widget.Toast
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -87,8 +89,15 @@ fun MessageBubble(
         }
     }
 
+    val targetAlpha = if (showMenuMsgId != null && !showMenu) 0.4f else 1f
+    val animatedAlpha by animateFloatAsState(
+        targetValue = targetAlpha,
+        animationSpec = tween(durationMillis = 300),
+        label = "message_alpha"
+    )
+    
     Box(
-        modifier = Modifier.alpha(if (showMenuMsgId != null && !showMenu) 0.4f else 1f)
+        modifier = Modifier.alpha(animatedAlpha)
     ) {
         if (message.isRecalled) {
             Box(
