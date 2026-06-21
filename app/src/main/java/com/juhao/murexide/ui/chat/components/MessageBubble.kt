@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.InsertDriveFile
@@ -146,6 +147,10 @@ fun MessageBubble(
             verticalAlignment = avatarAlignment,
             horizontalArrangement = if (isMine) Arrangement.End else Arrangement.Start
         ) {
+            if (isFirstFromSender || isLastFromSender) {
+                Spacer(modifier = Modifier.height(36.dp))
+            }
+        
             if (!isMine && showAvatar) {
                 Avatar(
                     url = message.senderAvatar,
@@ -376,8 +381,8 @@ fun MessageBubble(
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Surface(
-                                                shape = RoundedCornerShape(12.dp),
-                                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                                shape = CircleShape,
+                                                color = MaterialTheme.colorScheme.primary,
                                                 modifier = Modifier.size(40.dp)
                                             ) {
                                                 Box(contentAlignment = Alignment.Center) {
@@ -385,7 +390,7 @@ fun MessageBubble(
                                                         imageVector = getFileIcon(fileName),
                                                         contentDescription = null,
                                                         modifier = Modifier.size(24.dp),
-                                                        tint = MaterialTheme.colorScheme.primary
+                                                        tint = MaterialTheme.colorScheme.onPrimary
                                                     )
                                                 }
                                             }
@@ -433,12 +438,12 @@ fun MessageBubble(
                                     }
                                 }
 
-                                MessageItem.CONTENT_TYPE_VIDEO -> {
-                                    // TODO: 视频消息 UI
-                                }
-
-                                MessageItem.CONTENT_TYPE_AUDIO -> {
-                                    // TODO: 音频消息 UI
+                                else -> {
+                                    Text(
+                                        text = "暂不支持解析此消息：${message.contentType}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                    )
                                 }
                             }
 
