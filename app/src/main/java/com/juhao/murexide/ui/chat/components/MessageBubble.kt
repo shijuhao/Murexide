@@ -158,14 +158,14 @@ fun MessageBubble(
                         Column(modifier = Modifier.padding(if (hideMsgCard) 0.dp else 8.dp)) {
                             if (!isMine && isLastFromSender && !hideMsgCard) {
                                 Row(
+                                    modifier = Modifier.padding(bottom = 4.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
                                         text = message.senderName,
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.primary,
-                                        fontWeight = FontWeight.Bold,
-                                        modifier = Modifier.padding(bottom = 4.dp)
+                                        fontWeight = FontWeight.Bold
                                     )
                                     if (message.senderType == 3) {
                                         Surface(
@@ -174,7 +174,7 @@ fun MessageBubble(
                                         ) {
                                             Text(
                                                 text = "机器人",
-                                                style = MaterialTheme.typography.bodySmall,
+                                                style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.primary,
                                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                             )
