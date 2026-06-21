@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -90,13 +91,14 @@ fun MessageBubble(
             contentAlignment = Alignment.Center
         ) {
             Surface(
-                shape = RoundedCornerShape(500.dp),
+                shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
                 contentColor = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.widthIn(max = 250.dp)
             ) {
                 Text(
                     text = "${message.senderName} 撤回了一条消息",
+                    textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
                 )
@@ -110,13 +112,14 @@ fun MessageBubble(
             contentAlignment = Alignment.Center
         ) {
             Surface(
-                shape = RoundedCornerShape(500.dp),
+                shape = RoundedCornerShape(16.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
                 contentColor = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.widthIn(max = 250.dp)
             ) {
                 Text(
                     text = message.content,
+                    textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
                 )
