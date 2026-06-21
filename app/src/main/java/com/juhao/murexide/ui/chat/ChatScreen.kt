@@ -185,34 +185,44 @@ fun ChatScreen(
         }
     }
     
-    LaunchedEffect(uiState.messages.firstOrNull()?.msgId) {
-        val currentFirstId = uiState.messages.firstOrNull()?.msgId ?: return@LaunchedEffect
-        
-        if (firstMessageId == null) {
-            firstMessageId = currentFirstId
-            return@LaunchedEffect
-        }
-        
-        if (currentFirstId != firstMessageId && !isScrollingToBottom) {
-            val layoutInfo = listState.layoutInfo
-            val isAtBottom = layoutInfo.visibleItemsInfo.firstOrNull()?.index == 0
-            
-            if (isAtBottom) {
-                isScrollingToBottom = true
-                listState.scrollToItem(0)
-                unreadCount = 0
-                scope.launch {
-                    delay(300)
-                    isScrollingToBottom = false
+    LaunchedEffect(Unit) {
+        snapshotFlow { uiState.messages.firstOrNull()?.msgId }
+            .distinctUntilChanged()
+            .collect { msgId ->
+                msgId ?: return@collect
+                
+                if (firstMessageId == null) {
+                    firstMessageId = msgId
+                    return@collect
                 }
-            } else {
-                unreadCount += 1
+                
+                if (msgId == firstMessageId) return@collect
+                
+                if (isScrollingToBottom || listState.isScrollInProgress) {
+                    firstMessageId = msgId
+                    return@collect
+                }
+                
+                val isAtBottom = listState.layoutInfo.visibleItemsInfo
+                    .firstOrNull()?.index == 0
+                    
+                firstMessageId = msgId
+                
+                if (isAtBottom && !listState.isScrollInProgress) {
+                    isScrollingToBottom = true
+                    delay(300)
+                    if (!listState.isScrollInProgress) {
+                        listState.animateScrollToItem(0)
+                        unreadCount = 0
+                    }
+                    delay(500)
+                    isScrollingToBottom = false
+                } else {
+                    unreadCount++
+                }
             }
-            
-            firstMessageId = currentFirstId
-        }
     }
-
+    
     val scrollToBottom: () -> Unit = {
         if (!isScrollingToBottom) {
             scope.launch {
@@ -227,7 +237,7 @@ fun ChatScreen(
             }
         }
     }
-
+    
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
