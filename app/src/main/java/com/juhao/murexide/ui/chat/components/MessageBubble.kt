@@ -492,7 +492,7 @@ fun MessageBubble(
                                         clipboardManager.setClipEntry(ClipEntry(ClipData.newPlainText("msg", message.content)))
                                     }
                                     Toast.makeText(context, "复制成功", Toast.LENGTH_SHORT).show()
-                                    showMenu = false
+                                    showMenuChanged(null)
                                 },
                                 leadingIcon = {
                                     Icon(
@@ -507,7 +507,7 @@ fun MessageBubble(
                         DropdownMenuItem(
                             text = { Text("引用") },
                             onClick = {
-                                showMenu = false
+                                showMenuChanged(null)
                                 onReply()
                             },
                             leadingIcon = {
@@ -519,7 +519,7 @@ fun MessageBubble(
                             DropdownMenuItem(
                                 text = { Text("撤回") },
                                 onClick = {
-                                    showMenu = false
+                                    showMenuChanged(null)
                                     onRecall()
                                 },
                                 leadingIcon = {
@@ -532,7 +532,7 @@ fun MessageBubble(
                             DropdownMenuItem(
                                 text = { Text("编辑") },
                                 onClick = {
-                                    showMenu = false
+                                    showMenuChanged(null)
                                     onEdit()
                                 },
                                 leadingIcon = {
