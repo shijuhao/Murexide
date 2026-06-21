@@ -39,6 +39,7 @@ import com.juhao.murexide.datastore.SettingsStorage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -188,8 +189,8 @@ fun ChatScreen(
     LaunchedEffect(Unit) {
         snapshotFlow { uiState.messages.firstOrNull()?.msgId }
             .distinctUntilChanged()
-            .collect { msgId ->
-                msgId ?: return@collect
+            .collect { msgId: String? ->
+                if (msgId == null) return@collect
                 
                 if (firstMessageId == null) {
                     firstMessageId = msgId
