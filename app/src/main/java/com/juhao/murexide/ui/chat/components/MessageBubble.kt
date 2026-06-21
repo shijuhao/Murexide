@@ -91,7 +91,7 @@ fun MessageBubble(
         ) {
             Surface(
                 shape = RoundedCornerShape(500.dp),
-                color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.95f),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f),
                 contentColor = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.widthIn(max = 250.dp)
             ) {
@@ -343,7 +343,7 @@ fun MessageBubble(
                                                     if (isMine)
                                                         MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f)
                                                     else
-                                                        MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.95f)
+                                                        MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f)
                                                 )
                                                 .clickable { /* TODO: 打开/下载文件 */ }
                                                 .padding(12.dp),

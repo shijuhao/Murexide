@@ -12,7 +12,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.layout.ContentScale
@@ -110,8 +110,9 @@ fun ChatScreen(
                         
                         val hasEnoughSpace = visibleHeightDp >= 44 && itemHeightDp >= 44
                         
-                        val newerMessage = if (firstVisibleIndex > 0) uiState.messages.getOrNull(firstVisibleIndex - 1) else null
-                        val olderMessage = if (firstVisibleIndex < uiState.messages.size - 1) uiState.messages.getOrNull(firstVisibleIndex + 1) else null
+                        val currentIndex = uiState.messages.indexOfFirst { it.msgId == message.msgId }
+                        val newerMessage = if (currentIndex > 0) uiState.messages[currentIndex - 1] else null
+                        val olderMessage = if (currentIndex < uiState.messages.size - 1) uiState.messages[currentIndex + 1] else null
                         val isLastFromSender = olderMessage == null || olderMessage.isRecalled || olderMessage.senderId != message.senderId
                         val hasOtherSameSender = (newerMessage != null && !newerMessage.isRecalled && newerMessage.senderId == message.senderId && !isLastFromSender) ||
                                                  (olderMessage != null && !olderMessage.isRecalled && olderMessage.senderId == message.senderId)
@@ -133,13 +134,12 @@ fun ChatScreen(
     val floatingAvatarUrl = floatingAvatarState.second
     val floatingAvatarIsMine = floatingAvatarState.third
     
-    val topVisibleMessageIndex by remember {
+    val topVisibleMessageId by remember {
         derivedStateOf {
-            val layoutInfo = listState.layoutInfo
-            val visibleItems = layoutInfo.visibleItemsInfo
+            val visibleItems = listState.layoutInfo.visibleItemsInfo
             if (visibleItems.isNotEmpty()) {
-                // 在 reverseLayout 中，index 最小的是底部的
-                visibleItems.minByOrNull { it.index }?.index
+                val topIndex = visibleItems.minByOrNull { it.index }?.index
+                topIndex?.let { uiState.messages.getOrNull(it)?.msgId }
             } else {
                 null
             }
@@ -187,17 +187,27 @@ fun ChatScreen(
     }
     
     LaunchedEffect(Unit) {
+        var lastMsgId: String? = null
+        var pendingCount = 0
+        
         snapshotFlow { uiState.messages.firstOrNull()?.msgId }
-            .distinctUntilChanged()
             .collect { msgId: String? ->
                 if (msgId == null) return@collect
+                if (msgId == lastMsgId) return@collect
+                lastMsgId = msgId
+                
+                pendingCount++
                 
                 if (firstMessageId == null) {
                     firstMessageId = msgId
+                    pendingCount = 0
                     return@collect
                 }
                 
-                if (msgId == firstMessageId) return@collect
+                if (msgId == firstMessageId) {
+                    pendingCount = 0
+                    return@collect
+                }
                 
                 if (isScrollingToBottom || listState.isScrollInProgress) {
                     firstMessageId = msgId
@@ -206,7 +216,7 @@ fun ChatScreen(
                 
                 val isAtBottom = listState.layoutInfo.visibleItemsInfo
                     .firstOrNull()?.index == 0
-                    
+                
                 firstMessageId = msgId
                 
                 if (isAtBottom && !listState.isScrollInProgress) {
@@ -218,8 +228,10 @@ fun ChatScreen(
                     }
                     delay(500)
                     isScrollingToBottom = false
+                    pendingCount = 0
                 } else {
-                    unreadCount++
+                    unreadCount += pendingCount
+                    pendingCount = 0
                 }
             }
     }
@@ -398,32 +410,34 @@ fun ChatScreen(
                         reverseLayout = true,
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        itemsIndexed(
+                        items(
                             items = uiState.messages,
-                            key = { index, item -> item.msgId }
-                        ) { index, message ->
+                            key = { it.msgId }
+                        ) { message ->
+                            val index = uiState.messages.indexOf(message)
+                            
                             val newerMessage = if (index > 0) uiState.messages[index - 1] else null
                             val olderMessage = if (index < uiState.messages.size - 1) uiState.messages[index + 1] else null
-
+                        
                             val isFirstFromSender = newerMessage == null || newerMessage.isRecalled || newerMessage.senderId != message.senderId
                             val isLastFromSender = olderMessage == null || olderMessage.isRecalled || olderMessage.senderId != message.senderId
                             val isOlderSameSender = olderMessage != null && !olderMessage.isRecalled && olderMessage.senderId == message.senderId
                             val isNewerSameSender = newerMessage != null && !newerMessage.isRecalled && newerMessage.senderId == message.senderId
-
-                            val isTopVisibleItem = index == topVisibleMessageIndex
-
+                        
+                            val isTopVisibleItem = message.msgId == topVisibleMessageId
+                        
                             val shouldShowItemAvatar = if (isTopVisibleItem) {
                                 !showFloatingAvatar && ((isLastFromSender && avatarFollowEnabled) || isFirstFromSender)
                             } else {
                                 isFirstFromSender
                             }
-
+                        
                             val avatarAlignment = if (isTopVisibleItem && shouldShowItemAvatar && avatarFollowEnabled) {
                                 if (isLastFromSender) Alignment.Top else Alignment.Bottom
                             } else {
                                 Alignment.Bottom
                             }
-
+                        
                             MessageBubble(
                                 message = message,
                                 onRecall = { viewModel.showRecallDialog(message.msgId) },
