@@ -36,7 +36,6 @@ import com.juhao.murexide.ui.chat.components.EditMessageDialog
 import com.juhao.murexide.ui.chat.components.MessageBubble
 import com.juhao.murexide.ui.chat.components.MessageInput
 import com.juhao.murexide.datastore.SettingsStorage
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -225,7 +224,6 @@ fun ChatScreen(
                         listState.animateScrollToItem(0)
                         unreadCount = 0
                     }
-                    delay(500)
                     isScrollingToBottom = false
                     pendingCount = 0
                 } else {
@@ -244,7 +242,6 @@ fun ChatScreen(
                 if (uiState.messages.isNotEmpty()) {
                     firstMessageId = uiState.messages.first().msgId
                 }
-                delay(300)
                 isScrollingToBottom = false
             }
         }
@@ -303,8 +300,8 @@ fun ChatScreen(
             Column(modifier = Modifier.imePadding()) {
                 AnimatedVisibility(
                     visible = uiState.replyTo != null,
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut()
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
                 ) {
                     uiState.replyTo?.let { repliedMessage ->
                         Surface(
