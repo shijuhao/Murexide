@@ -91,7 +91,7 @@ fun MessageBubble(
         ) {
             Surface(
                 shape = RoundedCornerShape(500.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.9f),
+                color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.6f),
                 contentColor = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.widthIn(max = 250.dp)
             ) {
@@ -167,6 +167,7 @@ fun MessageBubble(
                                         color = MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.Bold
                                     )
+                                    Spacer(modifier = Modifier.width(2.dp))
                                     if (message.senderType == 3) {
                                         Surface(
                                             shape = RoundedCornerShape(50.dp),
@@ -176,7 +177,7 @@ fun MessageBubble(
                                                 text = "机器人",
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                             )
                                         }
                                     }
