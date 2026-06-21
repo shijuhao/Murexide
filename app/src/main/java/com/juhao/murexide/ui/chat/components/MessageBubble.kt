@@ -178,7 +178,7 @@ fun MessageBubble(
                                             Text(
                                                 text = "机器人",
                                                 fontSize = 10.sp,
-                                                color = MaterialTheme.colorScheme.primary
+                                                color = MaterialTheme.colorScheme.primary,
                                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                                             )
                                         }
