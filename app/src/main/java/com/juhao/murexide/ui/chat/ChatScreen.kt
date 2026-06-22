@@ -223,6 +223,7 @@ fun ChatScreen(
                 firstMessageId = msgId
                 
                 if (isAtBottom && !listState.isScrollInProgress) {
+                    showMenuMsgId = null
                     isScrollingToBottom = true
                     if (!listState.isScrollInProgress) {
                         listState.animateScrollToItem(0)
