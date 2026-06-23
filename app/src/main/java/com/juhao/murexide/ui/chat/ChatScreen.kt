@@ -271,9 +271,10 @@ fun ChatScreen(
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
+                            Spacer(modifier = Modifier.height(2.dp))
                             if (chatType == 2 && uiState.memberCount != null) {
                                 Text(
-                                    text = "${uiState.memberCount}个成员",
+                                    text = "${uiState.memberCount} 位成员",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1
