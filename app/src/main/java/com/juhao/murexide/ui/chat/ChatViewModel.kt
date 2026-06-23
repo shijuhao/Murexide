@@ -436,7 +436,8 @@ class ChatViewModel(
                         msg.copy(
                             content = message.content,
                             contentType = message.contentType,
-                            isEdited = true
+                            isEdited = true,
+                            isRecalled = message.isRecalled
                         )
                     else 
                         msg

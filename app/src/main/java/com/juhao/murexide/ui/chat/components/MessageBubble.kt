@@ -113,7 +113,7 @@ fun MessageBubble(
                     modifier = Modifier.widthIn(max = 250.dp)
                 ) {
                     Text(
-                        text = "${message.senderName} 撤回了一条消息",
+                        text = "${message.senderName} 在 $timestampDisplay 撤回了一条消息",
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodySmall,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
