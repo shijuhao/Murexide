@@ -273,7 +273,7 @@ fun ChatScreen(
                             )
                             if (chatType == 2 && uiState.memberCount != null) {
                                 Text(
-                                    text = "${uiState.memberCount} 人",
+                                    text = "${uiState.memberCount}个成员",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     maxLines = 1
