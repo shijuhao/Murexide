@@ -181,19 +181,13 @@ class QiniuImageUploader(
             val keyRegex = """"key"\s*:\s*"([^"]+)"""".toRegex()
             val key = keyRegex.find(responseBody)?.groupValues?.get(1)
             if (key != null) {
-                if (key.startsWith("http://") || key.startsWith("https://")) {
-                    return key
-                }
-                return "$IMAGE_BASE_URL$key"
+                return key
             }
             
             val hashRegex = """"hash"\s*:\s*"([^"]+)"""".toRegex()
             val hash = hashRegex.find(responseBody)?.groupValues?.get(1)
             if (hash != null) {
-                if (hash.startsWith("http://") || hash.startsWith("https://")) {
-                    return hash
-                }
-                return "$IMAGE_BASE_URL$hash"
+                return hash
             }
             
             if (responseBody.matches(Regex("^[a-zA-Z0-9._-]+$"))) {
