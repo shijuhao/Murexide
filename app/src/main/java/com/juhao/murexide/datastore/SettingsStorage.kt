@@ -15,6 +15,7 @@ class SettingsStorage(private val context: Context) {
         private val SQUARE_AVATAR_KEY = booleanPreferencesKey("square_avatar")
         private val AVATAR_FOLLOW_KEY = booleanPreferencesKey("avatar_follow")
         private val SHOW_STICKY_KEY = booleanPreferencesKey("show_sticky")
+        private val UPDATE_CHANNEL_KEY = stringPreferencesKey("update_channel")
     }
 
     // 主题模式
@@ -75,5 +76,20 @@ class SettingsStorage(private val context: Context) {
 
     suspend fun getShowSticky(): Boolean {
         return showStickyFlow.first()
+    }
+    
+    // 更新频道
+    val updateChannelFlow: Flow<String> = context.dataStore.data.map { preferences ->
+        preferences[UPDATE_CHANNEL_KEY] ?: "stable"
+    }
+
+    suspend fun setUpdateChannel(channel: String) {
+        context.dataStore.edit { preferences ->
+            preferences[UPDATE_CHANNEL_KEY] = channel
+        }
+    }
+
+    suspend fun getUpdateChannel(): String {
+        return themeModeFlow.first()
     }
 }

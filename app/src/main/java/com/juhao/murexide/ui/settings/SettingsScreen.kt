@@ -4,13 +4,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.*
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.juhao.murexide.utils.UpdateInfo
+import com.juhao.murexide.utils.checkForUpdateWithDetails
 import com.juhao.murexide.ui.components.*
 import com.juhao.murexide.datastore.SettingsStorage
 import com.juhao.murexide.ui.theme.ThemeState
@@ -30,16 +32,34 @@ fun SettingsScreen(
     val context = LocalContext.current
     val settingsStorage = remember { SettingsStorage(context) }
     val scope = rememberCoroutineScope()
+    
+    var showUpdateDialog by remember { mutableStateOf(false) }
+    var updateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
 
     val themeMode by ThemeState.themeMode
     var squareAvatar by remember { mutableStateOf(false) }
     var avatarFollow by remember { mutableStateOf(false) }
     var showSticky by remember { mutableStateOf(true) }
+    var updateChannel by remember { mutableStateOf("stable") }
 
     LaunchedEffect(Unit) {
         squareAvatar = settingsStorage.getSquareAvatar()
         avatarFollow = settingsStorage.getAvatarFollow()
         showSticky = settingsStorage.getShowSticky()
+        updateChannel = settingsStorage.getUpdateChannel()
+    }
+    
+    if (showUpdateDialog && updateInfo != null) {
+        UpdateDialog(
+            updateInfo = updateInfo!!,
+            currentVersion = context.getAppVersionInfo().versionName,
+            onDismiss = { showUpdateDialog = false },
+            onConfirm = {
+                val intent = Intent(Intent.ACTION_VIEW, updateInfo?.releaseUrl?.toUri())
+                context.startActivity(intent)
+                showUpdateDialog = false
+            }
+        )
     }
 
     Scaffold(
@@ -129,6 +149,53 @@ fun SettingsScreen(
                     }
                 )
             }
+            
+            SettingsGroup(title = "更新") {
+                SettingsItem(
+                    icon = Icons.Rounded.Info,
+                    title = "检查更新",
+                    subtitle = "访问仓库获取最新版本",
+                    onClick = {
+                        scope.launch {
+                            val includePreRelease = updateChannel == "preRelease"
+                            
+                            val info = checkForUpdateWithDetails(
+                                context = context,
+                                includePreRelease = includePreRelease
+                            )
+                            if (info != null) {
+                                updateInfo = info
+                                showUpdateDialog = true
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "已是最新版本",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    }
+                )
+                SettingsDropdownItem(
+                    icon = Icons.AutoMirrored.Rounded.List,
+                    title = "更新频道",
+                    subtitle = if (updateChannel == "stable")
+                        "仅检查正式版本"
+                    else
+                        "检查预发布版本",
+                    options = listOf(
+                        "stable" to "仅正式版",
+                        "preRelease" to "正式版 + 预发布版"
+                    ),
+                    selectedValue = updateChannel,
+                    onOptionSelected = { selected ->
+                        updateChannel = selected
+                        scope.launch {
+                            settingsStorage.setUpdateChannel(checked)
+                        }
+                    }
+                )
+            }
 
             SettingsGroup(title = "关于") {
                 SettingsItem(
@@ -145,4 +212,52 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
+}
+
+@Composable
+fun UpdateDialog(
+    updateInfo: UpdateInfo,
+    currentVersion: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    val isPreRelease = updateInfo.isPreRelease
+    val versionType = if (isPreRelease) "预发布版" else "正式版"
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = if (isPreRelease) {
+                    "发现新预发布版"
+                } else {
+                    "发现新正式版"
+                }
+            )
+        },
+        text = {
+            Column {
+                Text(
+                    text = "$currentVersion  →  ${updateInfo.version}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Text(
+                    text = "版本类型：$versionType",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("前往下载")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("稍后")
+            }
+        }
+    )
 }
