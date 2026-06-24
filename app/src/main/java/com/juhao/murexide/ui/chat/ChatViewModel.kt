@@ -477,11 +477,6 @@ class ChatViewModel(
         stickerItemId: Long? = null,
         stickerPackId: Long? = null
     ) {
-        val contentType = if (stickerItemId != null) {
-            MessageItem.CONTENT_TYPE_STICKER
-        } else {
-            MessageItem.CONTENT_TYPE_IMAGE
-        }
         val content = MessageContent(
             image = imageUrl,
             expressionId = expressionId,
@@ -495,7 +490,7 @@ class ChatViewModel(
                 chatId = chatId,
                 chatType = chatType,
                 content = content,
-                contentType = contentType
+                contentType = MessageItem.CONTENT_TYPE_STICKER
             ).onSuccess {
                 hideStickerPanel()
             }.onFailure { error ->
