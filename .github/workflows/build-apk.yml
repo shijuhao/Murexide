@@ -1,7 +1,9 @@
-name: Build Snapshot APK
+name: Build APK
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -11,6 +13,17 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Check commit message
+        id: commit
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          
+          if echo "$COMMIT_MSG" | grep -qE "^[^:]+: .+"; then
+            echo "release=true" >> $GITHUB_OUTPUT
+          else
+            echo "release=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -40,14 +53,20 @@ jobs:
         run: |
           BASE_VERSION=$(grep -E '^\s*versionName\s*=\s*"' app/build.gradle.kts | head -1 | sed 's/.*"\([^"]*\)".*/\1/')
           COMMIT_HASH=$(git rev-parse --short HEAD)
-          FINAL_VERSION="${BASE_VERSION}-${COMMIT_HASH}"
           echo "base_version=$BASE_VERSION" >> $GITHUB_OUTPUT
           echo "commit_hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+          
+          if [ "${{ steps.commit.outputs.release }}" = "true" ]; then
+            FINAL_VERSION="${BASE_VERSION}-${COMMIT_HASH}"
+          else
+            FINAL_VERSION="$BASE_VERSION"
+          fi
           echo "final_version=$FINAL_VERSION" >> $GITHUB_OUTPUT
 
       - name: Build and Sign APK
         run: |
-          cat > ci-version.gradle << 'EOF'
+          if [ "${{ steps.commit.outputs.release }}" = "true" ]; then
+            cat > ci-version.gradle << 'EOF'
           allprojects { project ->
             project.afterEvaluate {
               if (project.hasProperty('android')) {
@@ -57,13 +76,20 @@ jobs:
           }
           EOF
 
-          ./gradlew assembleRelease \
-            -I ci-version.gradle \
-            -PcustomVersion="${{ steps.version.outputs.final_version }}" \
-            -Pandroid.injected.signing.store.file=$(pwd)/keystore.jks \
-            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
-            -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
-            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+            ./gradlew assembleRelease \
+              -I ci-version.gradle \
+              -PcustomVersion="${{ steps.version.outputs.final_version }}" \
+              -Pandroid.injected.signing.store.file=$(pwd)/keystore.jks \
+              -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
+              -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
+              -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+          else
+            ./gradlew assembleRelease \
+              -Pandroid.injected.signing.store.file=$(pwd)/keystore.jks \
+              -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
+              -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
+              -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
+          fi
 
       - name: Upload Signed APK
         uses: actions/upload-artifact@v4
@@ -72,10 +98,12 @@ jobs:
           path: app/build/outputs/apk/release/*.apk
 
       - name: Get current date
+        if: steps.commit.outputs.release == 'true'
         id: date
         run: echo "date=$(date +'%Y-%m-%d %H:%M:%S')" >> $GITHUB_OUTPUT
 
       - name: Get commit list
+        if: steps.commit.outputs.release == 'true'
         id: commits
         run: |
           {
@@ -85,6 +113,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Create Prerelease
+        if: steps.commit.outputs.release == 'true'
         uses: softprops/action-gh-release@v2
         with:
           files: app/build/outputs/apk/release/*.apk
@@ -107,20 +136,33 @@ jobs:
 
       - name: Prepare build message
         run: |
-          RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.final_version }}"
-          cat > build-body.md <<EOF
+          if [ "${{ steps.commit.outputs.release }}" = "true" ]; then
+            RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.final_version }}"
+            cat > build-body.md <<EOF
           ### 快照版本构建完成
-
+          
           **版本**: ${{ steps.version.outputs.final_version }}
           **触发者**: ${{ github.actor }}
           **构建时间**: ${{ steps.date.outputs.date }}
-
+          
           ### 最近提交
           ${{ steps.commits.outputs.list }}
-
+          
           ### 下载
           [点击下载 APK](${RELEASE_URL})
           EOF
+          else
+          cat > build-body.md <<EOF
+          ### 测试版本构建完成
+          
+          **版本**: ${{ steps.version.outputs.final_version }}
+          **触发者**: ${{ github.actor }}
+          **构建时间**: $(date +'%Y-%m-%d %H:%M:%S')
+          
+          ### 下载
+          [工作流 artifact](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          EOF
+          fi
 
       - name: Notify bot about build
         continue-on-error: true
