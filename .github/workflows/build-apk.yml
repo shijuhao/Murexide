@@ -19,7 +19,7 @@ jobs:
         run: |
           COMMIT_MSG=$(git log -1 --pretty=%B)
           
-          if echo "$COMMIT_MSG" | grep -qE "^[^:]+: .+"; then
+          if echo "$COMMIT_MSG" | grep -qi "[preRelease]"; then
             echo "release=true" >> $GITHUB_OUTPUT
           else
             echo "release=false" >> $GITHUB_OUTPUT
