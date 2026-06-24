@@ -368,18 +368,25 @@ fun ChatScreen(
                         viewModel.toggleStickerPanel()
                     }
                 )
-
-                if (expressions.isVisible) {
+                
+                AnimatedVisibility(
+                    visible = expressions.isVisible,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
                     EmojiPanel(
                         expressions = expressions.expressions,
                         isLoading = expressions.isLoading,
-                        onExpressionClick = {
-
+                        onExpressionClick = { expression ->
+                            viewModel.sendExpression(expression)
                         },
-                        onStickerItemClick = {
-
+                        onStickerItemClick = { stickerItem ->
+                            viewModel.sendStickerItem(stickerItem)
                         },
-                        stickerPacks = expressions.stickerPacks
+                        stickerPacks = expressions.stickerPacks,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(280.dp)
                     )
                 }
             }

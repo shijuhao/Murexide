@@ -150,7 +150,7 @@ fun MainScreen(token: String, onLogout: () -> Unit) {
                     bigScreenMode = useNavigationRail,
                     onLogout = onLogout,
                     modifier = Modifier
-                        .weight(if (useNavigationRail) 4f else 1f)
+                        .weight(if (useNavigationRail) 3f else 1f)
                         .fillMaxSize(),
                     navController = navController
                 )
@@ -158,7 +158,7 @@ fun MainScreen(token: String, onLogout: () -> Unit) {
                     if (currentConversation != null) {
                         key(currentConversation!!.chatId) {
                             ChatScreen(
-                                modifier = Modifier.weight(6f).fillMaxHeight(),
+                                modifier = Modifier.weight(7f).fillMaxHeight(),
                                 chatAvatar = currentConversation!!.avatarUrl,
                                 chatName = currentConversation!!.name,
                                 chatType = currentConversation!!.chatType,
