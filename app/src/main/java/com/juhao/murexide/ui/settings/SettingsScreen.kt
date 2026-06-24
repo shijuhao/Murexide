@@ -1,5 +1,6 @@
 package com.juhao.murexide.ui.settings
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -11,8 +12,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import com.juhao.murexide.utils.UpdateInfo
 import com.juhao.murexide.utils.checkForUpdateWithDetails
+import com.juhao.murexide.utils.getAppVersionInfo
 import com.juhao.murexide.ui.components.*
 import com.juhao.murexide.datastore.SettingsStorage
 import com.juhao.murexide.ui.theme.ThemeState
@@ -191,7 +194,7 @@ fun SettingsScreen(
                     onOptionSelected = { selected ->
                         updateChannel = selected
                         scope.launch {
-                            settingsStorage.setUpdateChannel(checked)
+                            settingsStorage.setUpdateChannel(selected)
                         }
                     }
                 )
