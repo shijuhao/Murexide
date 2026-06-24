@@ -250,9 +250,7 @@ private fun MainNavHost(
     ) {
         composable("conversations") {
             Row(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             ) {
                 ConversationListScreen(
                     modifier = Modifier
