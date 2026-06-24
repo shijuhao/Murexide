@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.juhao.murexide.ui.components.Avatar
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.juhao.murexide.ui.components.MultiImageViewer
 import com.juhao.murexide.ui.chat.components.EditMessageDialog
 import com.juhao.murexide.ui.chat.components.MessageBubble
 import com.juhao.murexide.ui.chat.components.MessageInput
