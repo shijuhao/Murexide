@@ -4,6 +4,7 @@ import android.content.Intent
 import com.juhao.murexide.ui.settings.SettingsActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -156,6 +157,9 @@ fun MainScreen(token: String, onLogout: () -> Unit) {
                 )
                 if (useNavigationRail && bigScreenEnabled && currentRoute == "conversations") {
                     if (currentConversation != null) {
+                        BackHandler {
+                            currentConversation = null
+                        }
                         key(currentConversation!!.chatId) {
                             ChatScreen(
                                 modifier = Modifier.weight(7f).fillMaxHeight(),

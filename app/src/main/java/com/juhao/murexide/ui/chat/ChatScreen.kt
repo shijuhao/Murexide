@@ -1,6 +1,7 @@
 package com.juhao.murexide.ui.chat
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -368,6 +369,10 @@ fun ChatScreen(
                         viewModel.toggleStickerPanel()
                     }
                 )
+                
+                BackHandler(enabled = expressions.isVisible) {
+                    viewModel.hideStickerPanel()
+                }
                 
                 AnimatedVisibility(
                     visible = expressions.isVisible,
