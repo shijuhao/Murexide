@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -99,7 +100,7 @@ fun MultiImageViewer(
     }
 
     val loadStates = remember(images.size) {
-        MutableList(images.size) { mutableStateOf(true) }
+        MutableList(images.size) { mutableIntStateOf(1) }
     }
 
     var showMenu by remember { mutableStateOf(false) }
@@ -218,24 +219,24 @@ fun MultiImageViewer(
                             },
                         contentScale = ContentScale.Fit,
                         onLoading = {
-                            loadStates[page].value = true
+                            loadStates[page].value = 1
                         },
                         onError = {
-                            loadStates[page].value = false
+                            loadStates[page].value = 2
                         },
                         onSuccess = {
-                            loadStates[page].value = true
+                            loadStates[page].value = 3
                         }
                     )
 
-                    if (loadStates[page].value) {
+                    if (loadStates[page].value == 1) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator(modifier = Modifier.size(48.dp))
                         }
-                    } else {
+                    } else if (loadStates[page].value == 2) {
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -256,7 +257,7 @@ fun MultiImageViewer(
                             )
                             IconButton(
                                 onClick = {
-                                    loadStates[page].value = true
+                                    loadStates[page].value = 1
                                 }
                             ) {
                                 Icon(
