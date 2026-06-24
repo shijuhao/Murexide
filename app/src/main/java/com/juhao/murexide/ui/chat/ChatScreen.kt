@@ -77,6 +77,10 @@ fun ChatScreen(
     
     val settingsStorage = remember { SettingsStorage(context) }
     val avatarFollowEnabled by settingsStorage.avatarFollowFlow.collectAsState(initial = false)
+    
+    var viewerImages by remember { mutableStateOf<List<String>>(emptyList()) }
+    var viewerInitialPage by remember { mutableIntStateOf(0) }
+    var viewerVisible by remember { mutableStateOf(false) }
 
     val floatingAvatarState by remember {
         derivedStateOf {
@@ -485,6 +489,20 @@ fun ChatScreen(
                                 showMenuMsgId = showMenuMsgId,
                                 showMenuChanged = {
                                     showMenuMsgId = it
+                                },
+                                onImageClick = { imageUrl ->
+                                    val allImages = uiState.messages
+                                        .filter { !it.isRecalled }
+                                        .mapNotNull { it.imageUrl }
+                                        .filter { it.isNotEmpty() }
+                                        .reversed()
+                                    
+                                    if (allImages.isNotEmpty()) {
+                                        val index = allImages.indexOf(imageUrl)
+                                        viewerImages = allImages
+                                        viewerInitialPage = if (index >= 0) index else 0
+                                        viewerVisible = true
+                                    }
                                 }
                             )
                         }
@@ -535,6 +553,15 @@ fun ChatScreen(
                 }
             }
         }
+    }
+    
+    if (viewerVisible) {
+        MultiImageViewer(
+            images = viewerImages,
+            initialPage = viewerInitialPage,
+            isVisible = true,
+            onDismiss = { viewerVisible = false }
+        )
     }
 
     if (recallDialog.isOpen) {

@@ -58,6 +58,7 @@ fun MessageBubble(
     showMenu: Boolean = false,
     showMenuMsgId: String? = null,
     showMenuChanged: (String?) -> Unit,
+    onImageClick: (String) -> Unit = {},
     avatarAlignment: Alignment.Vertical = Alignment.Bottom
 ) {
     val clipboardManager = LocalClipboard.current
@@ -332,7 +333,7 @@ fun MessageBubble(
                                                              else Modifier
                                                         )
                                                         .combinedClickable(
-                                                            onClick = {},
+                                                            onClick = { onImageClick(url) },
                                                             onLongClick = { showMenuChanged(message.msgId) }
                                                         )
                                                 )
