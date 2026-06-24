@@ -21,13 +21,13 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.UUID
 
 class WebSocketManager private constructor() {
@@ -47,17 +47,24 @@ class WebSocketManager private constructor() {
     }
 
     private var webSocket: WebSocket? = null
-    private var isConnected = false
+    @Volatile private var isConnected = false
+    @Volatile private var connectionVersion = 0
     private var currentUserId: String? = null
     private var currentToken: String? = null
     private var currentDeviceId: String? = null
     private var currentPlatform: String? = null
-    private var lastHeartbeatAckTime = 0L
+    @Volatile private var lastHeartbeatAckTime = 0L
     private var heartbeatJob: Job? = null
-    
-    private var reconnectJob: Job? = null
-    private var connectionVersion = 0
-    private val isReconnecting = AtomicBoolean(false)
+
+    /**
+     * 连接维持协程。它是唯一负责创建 / 重建 socket 的角色，
+     * 这样就不会出现「重连协程在自身内部被 cancel」导致的死循环问题。
+     * 等待者通过 [connectionSignal] 唤醒它立即进行下一次尝试。
+     */
+    private var maintainerJob: Job? = null
+    private val connectionSignal = kotlinx.coroutines.channels.Channel<Unit>(
+        capacity = kotlinx.coroutines.channels.Channel.CONFLATED
+    )
 
     private val _connectionState = MutableStateFlow(false)
     val connectionState: StateFlow<Boolean> = _connectionState.asStateFlow()
@@ -79,74 +86,142 @@ class WebSocketManager private constructor() {
     }
 
     fun connect(userId: String, token: String, deviceId: String, platform: String = "android") {
-        if (isConnected) {
-            Log.w(TAG, "WebSocket already connected")
+        val credsChanged = currentUserId != userId ||
+            currentToken != token ||
+            currentDeviceId != deviceId ||
+            currentPlatform != platform
+
+        currentUserId = userId
+        currentToken = token
+        currentDeviceId = deviceId
+        currentPlatform = platform
+
+        if (isConnected && !credsChanged) {
+            Log.d(TAG, "WebSocket already connected with same creds")
             return
         }
-    
-        reconnectJob?.cancel()
-        isReconnecting.set(false)
+
+        if (credsChanged || !isConnected) {
+            connectionVersion++
+            closeCurrentSocket()
+            startMaintainer()
+            connectionSignal.trySend(Unit)
+        }
+    }
+
+    private fun startMaintainer() {
+        if (maintainerJob?.isActive == true) return
+
+        maintainerJob = scope.launch {
+            var backoff = 1000L
+            while (isActive && currentUserId != null && currentToken != null) {
+                if (isConnected) {
+                    connectionSignal.receive()
+                    backoff = 1000L
+                    continue
+                }
+
+                try {
+                    createConnection()
+                } catch (e: Exception) {
+                    Log.e(TAG, "createConnection threw", e)
+                }
+
+                val connected = waitForConnectionOrTimeout(2500L)
+                if (connected) {
+                    backoff = 1000L
+                } else {
+                    delay(backoff)
+                    backoff = minOf(backoff * 2, 30000L)
+                }
+            }
+        }
+    }
+
+    private fun createConnection() {
+        if (isConnected) return
+        val userId = currentUserId ?: return
+        val token = currentToken ?: return
+        val deviceId = currentDeviceId ?: return
+        val platform = currentPlatform ?: "android"
+
         connectionVersion++
-        val thisConnectionVersion = connectionVersion
-    
-        this.currentUserId = userId
-        this.currentToken = token
-        this.currentDeviceId = deviceId
-        this.currentPlatform = platform
-    
-        val request = Request.Builder()
-            .url(WS_URL)
-            .build()
-    
+        val thisVersion = connectionVersion
+
+        closeCurrentSocket()
+
+        val request = Request.Builder().url(WS_URL).build()
+        Log.d(TAG, "Opening WebSocket (version=$thisVersion)")
+
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
-                if (thisConnectionVersion != connectionVersion) {
-                    Log.d(TAG, "Ignoring old connection onOpen")
+                if (thisVersion != connectionVersion) {
+                    Log.d(TAG, "Ignoring stale onOpen (v$thisVersion)")
                     return
                 }
-                Log.d(TAG, "WebSocket connected")
+                Log.d(TAG, "WebSocket connected (v$thisVersion)")
                 isConnected = true
                 _connectionState.value = true
                 lastHeartbeatAckTime = System.currentTimeMillis()
                 sendLogin(userId, token, deviceId, platform)
                 startHeartbeat()
-                scope.launch {
-                    _messageFlow.emit(WsEvent.Connected)
-                }
+                scope.launch { _messageFlow.emit(WsEvent.Connected) }
             }
-    
+
             override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-                if (thisConnectionVersion != connectionVersion) return
+                if (thisVersion != connectionVersion) return
                 handleBinaryMessage(bytes.toByteArray())
             }
-    
+
             override fun onMessage(webSocket: WebSocket, text: String) {
-                if (thisConnectionVersion != connectionVersion) return
+                if (thisVersion != connectionVersion) return
                 Log.d(TAG, "Received text message: $text")
                 handleTextMessage(text)
             }
-    
+
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                if (thisConnectionVersion != connectionVersion) return
+                if (thisVersion != connectionVersion) return
                 Log.d(TAG, "WebSocket closing: $code / $reason")
-                handleDisconnect()
-                if (code != 1000) {
-                    startReconnect()
-                }
             }
-    
+
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                if (thisConnectionVersion != connectionVersion) return
+                if (thisVersion != connectionVersion) return
                 Log.d(TAG, "WebSocket closed: $code / $reason")
+                onConnectionLost()
             }
-    
+
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
-                if (thisConnectionVersion != connectionVersion) return
+                if (thisVersion != connectionVersion) return
                 Log.e(TAG, "WebSocket failure: ${t.message}", t)
-                handleDisconnect()
-                startReconnect()
+                onConnectionLost()
             }
         })
+    }
+
+    private fun onConnectionLost() {
+        if (isConnected) {
+            handleDisconnect()
+        }
+        connectionSignal.trySend(Unit)
+    }
+
+    private suspend fun waitForConnectionOrTimeout(timeoutMs: Long): Boolean {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            if (isConnected) return true
+            delay(100)
+        }
+        return isConnected
+    }
+
+    private fun closeCurrentSocket() {
+        webSocket?.let {
+            try {
+                it.cancel()
+            } catch (_: Exception) {
+            }
+        }
+        webSocket = null
     }
 
     private fun handleDisconnect() {
@@ -159,42 +234,22 @@ class WebSocketManager private constructor() {
         }
     }
 
-    private fun startReconnect() {
-        if (!isReconnecting.compareAndSet(false, true)) return
-        
-        reconnectJob = scope.launch {
-            var delayMs = 1000L
-            while (currentUserId != null && currentToken != null) {
-                if (isConnected) break
-                
-                delay(delayMs)
-                if (!isConnected && currentUserId != null) {
-                    connect(currentUserId!!, currentToken!!, currentDeviceId!!, currentPlatform ?: "android")
-                    delayMs = minOf(delayMs * 2, 30000L)
-                }
-            }
-            isReconnecting.set(false)
-        }
-    }
-
     fun manualReconnect() {
-        if (isConnected) return
-        reconnectJob?.cancel()
-        isReconnecting.set(false)
-        scope.launch {
-            delay(100)
-            if (!isConnected && currentUserId != null) {
-                connect(currentUserId!!, currentToken!!, currentDeviceId!!, currentPlatform ?: "android")
-            }
+        if (isConnected) {
+            connectionVersion++
+            closeCurrentSocket()
+            handleDisconnect()
         }
+        startMaintainer()
+        connectionSignal.trySend(Unit)
     }
 
     fun notifyNetworkLost() {
         Log.d(TAG, "Network lost")
         if (isConnected) {
+            connectionVersion++
+            closeCurrentSocket()
             handleDisconnect()
-            reconnectJob?.cancel()
-            isReconnecting.set(false)
         }
     }
     
@@ -226,8 +281,9 @@ class WebSocketManager private constructor() {
                 val now = System.currentTimeMillis()
                 if (now - lastHeartbeatAckTime > HEARTBEAT_INTERVAL * 2) {
                     Log.w(TAG, "Heartbeat timeout, triggering reconnect")
-                    handleDisconnect()
-                    startReconnect()
+                    connectionVersion++
+                    closeCurrentSocket()
+                    onConnectionLost()
                     break
                 }
                 
@@ -420,12 +476,14 @@ class WebSocketManager private constructor() {
     }
 
     fun disconnect() {
-        reconnectJob?.cancel()
-        isReconnecting.set(false)
-        webSocket?.close(1000, "Client disconnecting")
-        webSocket = null
+        currentUserId = null
+        currentToken = null
+        maintainerJob?.cancel()
+        maintainerJob = null
+        connectionVersion++
+        closeCurrentSocket()
+        stopHeartbeat()
         isConnected = false
         _connectionState.value = false
-        stopHeartbeat()
     }
 }
