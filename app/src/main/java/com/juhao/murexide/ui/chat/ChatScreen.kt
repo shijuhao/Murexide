@@ -1,5 +1,8 @@
 package com.juhao.murexide.ui.chat
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 import android.content.Context
 import android.content.ContentResolver
 import android.database.Cursor
@@ -90,17 +93,45 @@ fun ChatScreen(
     var viewerInitialPage by remember { mutableIntStateOf(0) }
     var viewerVisible by remember { mutableStateOf(false) }
     
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (allGranted) {
+            imagePickerLauncher.launch("image/*")
+        } else {
+            Toast.makeText(context, "需要存储权限才能选择图片", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            // 获取真实路径
             val realPath = getRealPathFromUri(context, it)
             if (realPath != null) {
                 viewModel.uploadAndSendImage(realPath)
             } else {
                 Toast.makeText(context, "无法获取图片路径", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+    
+    fun openImagePicker() {
+        val permissions = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            arrayOf(Manifest.permission.READ_MEDIA_IMAGES)
+        } else {
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+        
+        val needRequest = permissions.any {
+            ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
+        }
+        
+        if (needRequest) {
+            permissionLauncher.launch(permissions)
+        } else {
+            imagePickerLauncher.launch("image/*")
         }
     }
 
@@ -389,9 +420,7 @@ fun ChatScreen(
                     bigScreenMode = bigScreenMode,
                     onTextChange = { viewModel.updateInputText(it) },
                     onSendClick = { viewModel.sendMessage() },
-                    onAddImageClick = {
-                        imagePickerLauncher.launch("image/*")
-                    },
+                    onAddImageClick = { openImagePicker() },
                     onToggleMarkdown = { viewModel.toggleMarkdown() },
                     onEmojiClick = {
                         viewModel.toggleStickerPanel()

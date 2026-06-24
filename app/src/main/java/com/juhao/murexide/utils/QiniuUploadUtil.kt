@@ -181,17 +181,27 @@ class QiniuImageUploader(
             val keyRegex = """"key"\s*:\s*"([^"]+)"""".toRegex()
             val key = keyRegex.find(responseBody)?.groupValues?.get(1)
             if (key != null) {
+                if (key.startsWith("http://") || key.startsWith("https://")) {
+                    return key
+                }
                 return "$IMAGE_BASE_URL$key"
             }
             
             val hashRegex = """"hash"\s*:\s*"([^"]+)"""".toRegex()
             val hash = hashRegex.find(responseBody)?.groupValues?.get(1)
             if (hash != null) {
+                if (hash.startsWith("http://") || hash.startsWith("https://")) {
+                    return hash
+                }
                 return "$IMAGE_BASE_URL$hash"
             }
             
             if (responseBody.matches(Regex("^[a-zA-Z0-9._-]+$"))) {
                 return "$IMAGE_BASE_URL$responseBody"
+            }
+            
+            if (responseBody.startsWith("http://") || responseBody.startsWith("https://")) {
+                return responseBody
             }
             
             throw IOException("Cannot parse upload response: $responseBody")
