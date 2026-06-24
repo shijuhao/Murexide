@@ -1,5 +1,9 @@
 package com.juhao.murexide.ui.chat
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -82,6 +86,20 @@ fun ChatScreen(
     var viewerImages by remember { mutableStateOf<List<String>>(emptyList()) }
     var viewerInitialPage by remember { mutableIntStateOf(0) }
     var viewerVisible by remember { mutableStateOf(false) }
+    
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            // 获取真实路径
+            val realPath = getRealPathFromUri(context, it)
+            if (realPath != null) {
+                viewModel.uploadAndSendImage(realPath)
+            } else {
+                Toast.makeText(context, "无法获取图片路径", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     val floatingAvatarState by remember {
         derivedStateOf {
@@ -368,7 +386,9 @@ fun ChatScreen(
                     bigScreenMode = bigScreenMode,
                     onTextChange = { viewModel.updateInputText(it) },
                     onSendClick = { viewModel.sendMessage() },
-                    onAddImageClick = { },
+                    onAddImageClick = {
+                        imagePickerLauncher.launch("image/*")
+                    },
                     onToggleMarkdown = { viewModel.toggleMarkdown() },
                     onEmojiClick = {
                         viewModel.toggleStickerPanel()
@@ -660,5 +680,19 @@ fun AnimatedScrollToBottomButton(
                 )
             }
         }
+    }
+}
+
+private fun getRealPathFromUri(context: Context, uri: Uri): String? {
+    return try {
+        val projection = arrayOf(MediaStore.Images.Media.DATA)
+        context.contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+            val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+            cursor.moveToFirst()
+            cursor.getString(columnIndex)
+        }
+    } catch (e: Exception) {
+        // 如果无法获取真实路径，尝试直接使用 Uri
+        uri.toString()
     }
 }

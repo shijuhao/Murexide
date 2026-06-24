@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.juhao.murexide.data.*
+import com.juhao.murexide.utils.QiniuImageUploader
 import com.juhao.murexide.network.WebSocketManager
 import com.juhao.murexide.repository.MessageRepository
 import androidx.core.net.toUri
@@ -323,6 +324,61 @@ class ChatViewModel(
             }.onFailure { error ->
                 _uiState.update { it.copy(isSending = false) }
                 _toastMessage.emit(error.message ?: "发送失败")
+            }
+        }
+    }
+    
+    fun uploadAndSendImage(imageUri: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSending = true) }
+            
+            try {
+                val uploader = QiniuImageUploader(
+                    context = context,
+                    userToken = token,
+                    enableWebp = false,
+                    debug = true
+                )
+                
+                val result = uploader.upload(imageUri)
+                result.onSuccess { imageUrl ->
+                    // 发送图片消息
+                    sendImageMessage(imageUrl)
+                }.onFailure { error ->
+                    _toastMessage.emit("图片上传失败: ${error.message}")
+                    _uiState.update { it.copy(isSending = false) }
+                }
+            } catch (e: Exception) {
+                _toastMessage.emit("上传失败: ${e.message}")
+                _uiState.update { it.copy(isSending = false) }
+            }
+        }
+    }
+    
+    private fun sendImageMessage(imageUrl: String) {
+        viewModelScope.launch {
+            val content = MessageContent(
+                image = imageUrl,
+                text = ""
+            )
+            
+            repository.sendMessage(
+                token = token,
+                chatId = chatId,
+                chatType = chatType,
+                content = content,
+                contentType = MessageItem.CONTENT_TYPE_IMAGE,
+                quoteMsgId = _uiState.value.replyTo?.msgId
+            ).onSuccess {
+                _uiState.update { 
+                    it.copy(
+                        replyTo = null,
+                        isSending = false
+                    )
+                }
+            }.onFailure { error ->
+                _uiState.update { it.copy(isSending = false) }
+                _toastMessage.emit("发送失败: ${error.message}")
             }
         }
     }
