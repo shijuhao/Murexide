@@ -2,13 +2,6 @@ package com.juhao.murexide.data
 
 import kotlinx.serialization.Serializable
 
-const val STICKER_IMAGE_BASE = "https://chat-img.jwznb.com/"
-
-fun resolveStickerUrl(url: String?): String? {
-    if (url.isNullOrEmpty()) return null
-    return if (url.startsWith("http")) url else STICKER_IMAGE_BASE + url
-}
-
 // ---------- 表情包 (sticker/list) ----------
 
 @Serializable

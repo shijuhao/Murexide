@@ -454,7 +454,7 @@ class ChatViewModel(
 
     /** 发送个人收藏表情 */
     fun sendExpression(expression: ExpressionItem) {
-        val url = resolveStickerUrl(expression.url) ?: return
+        val url = expression.url
         sendStickerMessage(
             imageUrl = url,
             expressionId = expression.id.toString()
@@ -463,7 +463,7 @@ class ChatViewModel(
 
     /** 发送表情包里的单个表情 */
     fun sendStickerItem(item: StickerItem) {
-        val url = resolveStickerUrl(item.url) ?: return
+        val url = item.url
         sendStickerMessage(
             imageUrl = url,
             stickerItemId = item.id,
