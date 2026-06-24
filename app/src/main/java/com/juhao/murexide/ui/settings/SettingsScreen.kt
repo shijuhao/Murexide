@@ -33,6 +33,7 @@ fun SettingsScreen(
     val scrollState = rememberScrollState()
         
     val context = LocalContext.current
+    val updateEnabled = context.getAppVersionInfo().commitHash != "dev"
     val settingsStorage = remember { SettingsStorage(context) }
     val scope = rememberCoroutineScope()
     
@@ -157,7 +158,11 @@ fun SettingsScreen(
                 SettingsItem(
                     icon = Icons.Rounded.Update,
                     title = "检查更新",
-                    subtitle = "访问仓库获取最新版本",
+                    isEnabled = updateEnabled,
+                    subtitle = if (updateEnabled)
+                        "访问仓库获取最新版本"
+                    else
+                        "Dev版本无法检查更新",
                     onClick = {
                         scope.launch {
                             val includePreRelease = updateChannel == "preRelease"

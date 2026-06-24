@@ -60,14 +60,24 @@ fun SettingsItem(
     title: String,
     subtitle: String? = null,
     showDivider: Boolean = false,
+    isEnabled: Boolean = true,
     isDestructive: Boolean = false,
     onClick: () -> Unit = {}
 ) {
+    val alpha = if (isEnabled) 1f else 0.38f
+    
     Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable(onClick = onClick)
+                .alpha(alpha)
+                .then(
+                    if (isEnabled) {
+                        Modifier.clickable(onClick = onClick)
+                    } else {
+                        Modifier
+                    }
+                )
                 .padding(horizontal = 20.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -128,12 +138,22 @@ fun SettingsItemCell(
     title: String,
     subtitle: String? = null,
     onClick: () -> Unit,
+    isEnabled: Boolean = true,
     isDestructive: Boolean = false
 ) {
+    val alpha = if (isEnabled) 1f else 0.38f
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .alpha(alpha)
+            .then(
+                if (isEnabled) {
+                    Modifier.clickable(onClick = onClick)
+                } else {
+                    Modifier
+                }
+            )
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -279,8 +299,8 @@ fun SettingsDropdownItem(
         Icon(
             imageVector = Icons.Rounded.KeyboardArrowDown,
             contentDescription = "选择",
-            modifier = Modifier.size(24.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            modifier = Modifier.size(20.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
         )
 
         DropdownMenu(

@@ -59,7 +59,7 @@ jobs:
           if [ "${{ steps.commit.outputs.release }}" = "true" ]; then
             FINAL_VERSION="${BASE_VERSION}-${COMMIT_HASH}"
           else
-            FINAL_VERSION="$BASE_VERSION"
+            FINAL_VERSION="${BASE_VERSION}-dev"
           fi
           echo "final_version=$FINAL_VERSION" >> $GITHUB_OUTPUT
 
