@@ -250,14 +250,15 @@ private fun MainNavHost(
     ) {
         composable("conversations") {
             Row(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxSize()
             ) {
                 ConversationListScreen(
                     modifier = Modifier
                         .weight(if (bigScreenMode) 4f else 1f)
                         .fillMaxSize(),
                     token = token,
-                    currentConversation = currentConversation,
                     onConversationClick = onConversationClick,
                     bigScreenMode = bigScreenMode
                 )
@@ -284,6 +285,7 @@ private fun MainNavHost(
                                             return ChatViewModel(
                                                 token = token,
                                                 chatId = currentConversation!!.chatId,
+                                                context = context,
                                                 chatType = currentConversation!!.chatType,
                                                 deviceId = getDeviceId()
                                             ) as T
