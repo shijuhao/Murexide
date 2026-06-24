@@ -65,8 +65,7 @@ jobs:
 
       - name: Build and Sign APK
         run: |
-          if [ "${{ steps.commit.outputs.release }}" = "true" ]; then
-            cat > ci-version.gradle << 'EOF'
+          cat > ci-version.gradle << 'EOF'
           allprojects { project ->
             project.afterEvaluate {
               if (project.hasProperty('android')) {
@@ -75,21 +74,14 @@ jobs:
             }
           }
           EOF
-
-            ./gradlew assembleRelease \
-              -I ci-version.gradle \
-              -PcustomVersion="${{ steps.version.outputs.final_version }}" \
-              -Pandroid.injected.signing.store.file=$(pwd)/keystore.jks \
-              -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
-              -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
-              -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
-          else
-            ./gradlew assembleRelease \
-              -Pandroid.injected.signing.store.file=$(pwd)/keystore.jks \
-              -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
-              -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
-              -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
-          fi
+        
+          ./gradlew assembleRelease \
+            -I ci-version.gradle \
+            -PcustomVersion="${{ steps.version.outputs.final_version }}" \
+            -Pandroid.injected.signing.store.file=$(pwd)/keystore.jks \
+            -Pandroid.injected.signing.store.password=${{ secrets.KEYSTORE_PASSWORD }} \
+            -Pandroid.injected.signing.key.alias=${{ secrets.KEY_ALIAS }} \
+            -Pandroid.injected.signing.key.password=${{ secrets.KEY_PASSWORD }}
 
       - name: Upload Signed APK
         uses: actions/upload-artifact@v4
