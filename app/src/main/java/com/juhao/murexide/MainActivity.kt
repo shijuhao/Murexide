@@ -259,6 +259,7 @@ private fun MainNavHost(
                         .weight(if (bigScreenMode) 4f else 1f)
                         .fillMaxSize(),
                     token = token,
+                    currentConversation = currentConversation,
                     onConversationClick = onConversationClick,
                     bigScreenMode = bigScreenMode
                 )
