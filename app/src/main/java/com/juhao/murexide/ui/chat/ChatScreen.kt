@@ -93,17 +93,6 @@ fun ChatScreen(
     var viewerInitialPage by remember { mutableIntStateOf(0) }
     var viewerVisible by remember { mutableStateOf(false) }
     
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        val allGranted = permissions.values.all { it }
-        if (allGranted) {
-            imagePickerLauncher.launch("image/*")
-        } else {
-            Toast.makeText(context, "需要存储权限才能选择图片", Toast.LENGTH_SHORT).show()
-        }
-    }
-    
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
@@ -114,6 +103,17 @@ fun ChatScreen(
             } else {
                 Toast.makeText(context, "无法获取图片路径", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+    
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (allGranted) {
+            imagePickerLauncher.launch("image/*")
+        } else {
+            Toast.makeText(context, "需要存储权限才能选择图片", Toast.LENGTH_SHORT).show()
         }
     }
     
