@@ -90,6 +90,6 @@ class SettingsStorage(private val context: Context) {
     }
 
     suspend fun getUpdateChannel(): String {
-        return themeModeFlow.first()
+        return updateChannelFlow.first()
     }
 }
