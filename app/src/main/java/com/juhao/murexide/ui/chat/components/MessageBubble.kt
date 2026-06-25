@@ -37,9 +37,9 @@ import com.juhao.murexide.data.MessageItem
 import com.juhao.murexide.ui.chat.EditDialogState
 import com.juhao.murexide.ui.components.Avatar
 import com.juhao.murexide.ui.components.UnifiedHtmlWebView
+import com.juhao.murexide.ui.components.MultiImageViewer
 import com.juhao.murexide.ui.components.MarkdownRenderer
 import kotlinx.coroutines.launch
-import kotlin.text.Regex
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
