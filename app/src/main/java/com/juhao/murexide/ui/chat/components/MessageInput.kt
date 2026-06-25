@@ -94,7 +94,7 @@ fun MessageInput(
                             }
                         )
                         
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 4.dp))
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                         
                         DropdownMenuItem(
                             text = { Text("文本") },
