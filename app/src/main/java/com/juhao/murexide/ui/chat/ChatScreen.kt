@@ -65,7 +65,7 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.MoreVert
 
-@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class)
+@OptIn(ExperimentalMaterial3Api::class, FlowPreview::class, ExperimentalComposeUiApi::class)
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier,
@@ -100,13 +100,16 @@ fun ChatScreen(
     
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+    val imeInsets = WindowInsets.ime
     
-    val isImeVisible = WindowInsets.ime.isImeVisible
-    
-    LaunchedEffect(isImeVisible) {
-        if (isImeVisible && viewModel.stickerPanel.value.isVisible) {
-            viewModel.hideStickerPanel()
-        }
+    LaunchedEffect(Unit) {
+        snapshotFlow { imeInsets.getBottom() }
+            .collect { imeBottom ->
+                val isKeyboardVisible = imeBottom > 0
+                if (isKeyboardVisible && viewModel.stickerPanel.value.isVisible) {
+                    viewModel.hideStickerPanel()
+                }
+            }
     }
     
     val imagePickerLauncher = rememberLauncherForActivityResult(
