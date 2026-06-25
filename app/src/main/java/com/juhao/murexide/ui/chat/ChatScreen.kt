@@ -108,7 +108,7 @@ fun ChatScreen(
         snapshotFlow { imeInsets.getBottom(density) }
             .collect { imeBottom ->
                 val isKeyboardVisible = imeBottom > 0
-                if (isKeyboardVisible && viewModel.stickerPanel.value.isVisible) {
+                if (isKeyboardVisible && expressions.isVisible) {
                     viewModel.hideStickerPanel()
                 }
             }
