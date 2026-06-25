@@ -122,8 +122,7 @@ object MarkdownRenderer {
                 components = components,
                 imageTransformer = Coil2ImageTransformerImpl,
                 animations = markdownAnimations(
-                    animateTextSize = { this },
-                    animateImageLoading = { this }
+                    animateTextSize = { this }
                 ),
                 typography = markdownTypography(
                     h1 = MaterialTheme.typography.headlineLarge,
