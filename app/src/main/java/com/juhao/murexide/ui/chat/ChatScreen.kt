@@ -100,9 +100,11 @@ fun ChatScreen(
     
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+    
+    val windowInsetsIme = WindowInsets.ime
     val isKeyboardOpen by remember {
         derivedStateOf {
-            WindowInsets.ime.getBottom(density) > 0
+            windowInsetsIme.getBottom(density) > 0
         }
     }
     
