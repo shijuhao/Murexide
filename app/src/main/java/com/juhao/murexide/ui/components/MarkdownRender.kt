@@ -31,7 +31,6 @@ import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownTypography
 import org.intellij.markdown.ast.findChildOfType
 import org.intellij.markdown.ast.getTextInNode
-import com.mikepenz.markdown.model.markdownAnimations
 
 object MarkdownRenderer {
     @Composable
@@ -121,9 +120,6 @@ object MarkdownRenderer {
                 modifier = modifier,
                 components = components,
                 imageTransformer = Coil2ImageTransformerImpl,
-                animations = markdownAnimations(
-                    animateTextSize = { this }
-                ),
                 typography = markdownTypography(
                     h1 = MaterialTheme.typography.headlineLarge,
                     h2 = MaterialTheme.typography.headlineMedium,
