@@ -94,7 +94,7 @@ fun MessageInput(
                             }
                         )
                         
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
                         
                         DropdownMenuItem(
                             text = { Text("文本") },
@@ -163,7 +163,7 @@ fun MessageInput(
                     onValueChange = onTextChange,
                     modifier = Modifier.weight(1f),
                     placeholder = { Text("输入消息...") },
-                    shape = RoundedCornerShape(50.dp),
+                    shape = RoundedCornerShape(16.dp),
                     maxLines = 5
                 )
 
