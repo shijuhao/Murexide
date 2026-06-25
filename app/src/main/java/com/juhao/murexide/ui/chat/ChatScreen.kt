@@ -2,7 +2,6 @@ package com.juhao.murexide.ui.chat
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalFocusManager
 import android.Manifest
@@ -59,7 +58,6 @@ import com.juhao.murexide.datastore.SettingsStorage
 import com.juhao.murexide.data.MessageItem
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.delay
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
@@ -102,16 +100,16 @@ fun ChatScreen(
     
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    val imeInsets = WindowInsets.ime
+    val isKeyboardOpen by remember {
+        derivedStateOf {
+            WindowInsets.ime.getBottom(LocalDensity.current) > 0
+        }
+    }
     
-    LaunchedEffect(Unit) {
-        snapshotFlow { imeInsets.getBottom(density) }
-            .collect { imeBottom ->
-                val isKeyboardVisible = imeBottom > 0
-                if (isKeyboardVisible && expressions.isVisible) {
-                    viewModel.hideStickerPanel()
-                }
-            }
+    LaunchedEffect(isKeyboardOpen) {
+        if (isKeyboardOpen) {
+            viewModel.hideStickerPanel()
+        }
     }
     
     val imagePickerLauncher = rememberLauncherForActivityResult(
@@ -448,10 +446,7 @@ fun ChatScreen(
                         } else {
                             focusManager.clearFocus()
                             keyboardController?.hide()
-                            scope.launch {
-                                delay(100)
-                                viewModel.toggleStickerPanel()
-                            }
+                            viewModel.toggleStickerPanel()
                         }
                     }
                 )
