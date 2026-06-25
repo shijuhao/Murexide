@@ -13,6 +13,7 @@ import java.io.IOException
 import java.security.MessageDigest
 import java.util.UUID
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -212,6 +213,8 @@ class QiniuImageUploader(
             val filesToClean = mutableListOf<File>()
             
             try {
+                coroutineContext.ensureActive()
+                
                 val inputPath = input.trim()
                 if (inputPath.isEmpty()) {
                     return@withContext Result.failure(IllegalArgumentException("Input is empty"))
@@ -241,6 +244,7 @@ class QiniuImageUploader(
                             downloadFile.outputStream().use { outputStream ->
                                 var bytesRead: Int
                                 while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                                    coroutineContext.ensureActive()
                                     outputStream.write(buffer, 0, bytesRead)
                                     uploadedBytes += bytesRead
                                     if (totalBytes > 0) {
@@ -266,6 +270,8 @@ class QiniuImageUploader(
                     onProgress(0.3f)
                     file
                 }
+    
+                coroutineContext.ensureActive()
     
                 val originalExt = if (isRemoteUrl) {
                     getFileExtension(inputPath)
@@ -332,6 +338,8 @@ class QiniuImageUploader(
     
                 onProgress(0.8f)
     
+                coroutineContext.ensureActive()
+    
                 var request = Request.Builder()
                     .url(uploadUrl)
                     .post(requestBody)
@@ -374,6 +382,9 @@ class QiniuImageUploader(
                     response.close()
                 }
     
+            } catch (e: CancellationException) {
+                debugLog("Upload cancelled")
+                Result.failure(e)
             } catch (e: Exception) {
                 debugLog("Upload failed: ${e.message}")
                 Result.failure(e)

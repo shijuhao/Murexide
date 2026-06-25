@@ -33,11 +33,10 @@ fun UploadProgressBar(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
                 .padding(top = 12.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(
@@ -49,7 +48,6 @@ fun UploadProgressBar(
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = imagePath.substringAfterLast("/"),
                         fontSize = 12.sp,

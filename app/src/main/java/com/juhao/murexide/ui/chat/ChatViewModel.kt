@@ -9,6 +9,9 @@ import com.juhao.murexide.utils.QiniuImageUploader
 import com.juhao.murexide.network.WebSocketManager
 import com.juhao.murexide.repository.MessageRepository
 import androidx.core.net.toUri
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -50,6 +53,8 @@ class ChatViewModel(
     private var lastUserInputTime = 0L
     private var lastAppliedDraft = ""
     private var draftClearJob: kotlinx.coroutines.Job? = null
+    
+    private var uploadJob: Job? = null
 
     private val msgIdCache = mutableSetOf<String>()
 
@@ -331,7 +336,8 @@ class ChatViewModel(
     }
     
     fun uploadAndSendImage(imagePath: String) {
-        viewModelScope.launch {
+        uploadJob?.cancel()
+        uploadJob = viewModelScope.launch {
             _uiState.update { 
                 it.copy(
                     isUploading = true,
@@ -345,7 +351,8 @@ class ChatViewModel(
                 val uploader = QiniuImageUploader(
                     context = context,
                     userToken = token,
-                    enableWebp = true
+                    enableWebp = false,
+                    debug = true
                 )
                 
                 val result = uploader.upload(
@@ -354,6 +361,17 @@ class ChatViewModel(
                         _uiState.update { it.copy(uploadProgress = progress) }
                     }
                 )
+                
+                if (!isActive) {
+                    _uiState.update { 
+                        it.copy(
+                            isUploading = false,
+                            uploadProgress = 0f,
+                            uploadImagePath = null
+                        )
+                    }
+                    return@launch
+                }
                 
                 result.onSuccess { imageUrl ->
                     _uiState.update { 
@@ -374,6 +392,15 @@ class ChatViewModel(
                     }
                     _toastMessage.emit("图片上传失败: ${error.message}")
                 }
+            } catch (e: CancellationException) {
+                _uiState.update { 
+                    it.copy(
+                        isUploading = false,
+                        uploadProgress = 0f,
+                        uploadImagePath = null
+                    )
+                }
+                _toastMessage.emit("已取消上传")
             } catch (e: Exception) {
                 _uiState.update { 
                     it.copy(
@@ -388,6 +415,7 @@ class ChatViewModel(
     }
     
     fun cancelUpload() {
+        uploadJob?.cancel()
         _uiState.update { 
             it.copy(
                 isUploading = false,
