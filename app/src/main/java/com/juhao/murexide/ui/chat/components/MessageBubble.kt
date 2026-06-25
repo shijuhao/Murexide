@@ -39,6 +39,7 @@ import com.juhao.murexide.ui.components.Avatar
 import com.juhao.murexide.ui.components.UnifiedHtmlWebView
 import com.juhao.murexide.ui.components.MarkdownRenderer
 import kotlinx.coroutines.launch
+import kotlin.text.Regex
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
