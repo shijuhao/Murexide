@@ -4,6 +4,9 @@ import android.content.ClipData
 import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -605,30 +608,46 @@ fun EditMessageDialog(
     onDismiss: () -> Unit,
     onContentChange: (String) -> Unit,
     onSave: () -> Unit,
-    onToggleMarkdown: () -> Unit
+    onToggleSendType: (String) -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("编辑消息") },
         text = {
-            Column {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+            ) {
                 OutlinedTextField(
                     value = state.newContent,
                     onValueChange = onContentChange,
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text("新内容") },
-                    minLines = 3
+                    minLines = 5
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    Text("Markdown")
-                    Switch(
-                        checked = state.isMarkdown,
-                        onCheckedChange = { onToggleMarkdown() }
+                    Text("消息类型：", style = MaterialTheme.typography.bodyMedium)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    FilterChip(
+                        selected = state.sendType == "text",
+                        onClick = { onToggleSendType("text") },
+                        label = { Text("文本") }
+                    )
+                    FilterChip(
+                        selected = state.sendType == "markdown",
+                        onClick = { onToggleSendType("markdown") },
+                        label = { Text("Markdown") }
+                    )
+                    FilterChip(
+                        selected = state.sendType == "html",
+                        onClick = { onToggleSendType("html") },
+                        label = { Text("HTML") }
                     )
                 }
             }

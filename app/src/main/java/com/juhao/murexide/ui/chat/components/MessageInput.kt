@@ -36,13 +36,13 @@ import com.juhao.murexide.R
 @Composable
 fun MessageInput(
     inputText: String,
-    isMarkdown: Boolean,
+    sendType: String,
     isSending: Boolean = false,
     bigScreenMode: Boolean = false,
     onTextChange: (String) -> Unit,
     onSendClick: () -> Unit,
     onAddImageClick: () -> Unit,
-    onToggleMarkdown: () -> Unit,
+    onToggleSendType: (String) -> Unit,
     onEmojiClick: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -93,20 +93,61 @@ fun MessageInput(
                                 Icon(Icons.Rounded.Image, contentDescription = null)
                             }
                         )
+                        
+                        HorizontalDivider()
+                        
+                        DropdownMenuItem(
+                            text = { Text("文本") },
+                            onClick = {
+                                showMenu = false
+                                onToggleSendType("text")
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Rounded.TextFields, contentDescription = null)
+                            },
+                            trailingIcon = {
+                                if (sendType == "text") {
+                                    Icon(
+                                        Icons.Rounded.Check,
+                                        contentDescription = "已选择",
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                        )
                         DropdownMenuItem(
                             text = { Text("Markdown") },
                             onClick = {
                                 showMenu = false
-                                onToggleMarkdown()
+                                onToggleSendType("markdown")
                             },
                             leadingIcon = {
                                 Icon(painterResource(R.drawable.markdown), contentDescription = null)
                             },
                             trailingIcon = {
-                                if (isMarkdown) {
+                                if (sendType == "markdown") {
                                     Icon(
                                         Icons.Rounded.Check,
-                                        contentDescription = "已开启",
+                                        contentDescription = "已选择",
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("HTML") },
+                            onClick = {
+                                showMenu = false
+                                onToggleSendType("html")
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Rounded.Code, contentDescription = null)
+                            },
+                            trailingIcon = {
+                                if (sendType == "html") {
+                                    Icon(
+                                        Icons.Rounded.Check,
+                                        contentDescription = "已选择",
                                         modifier = Modifier.size(18.dp)
                                     )
                                 }

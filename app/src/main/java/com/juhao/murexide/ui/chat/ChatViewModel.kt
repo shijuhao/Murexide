@@ -286,8 +286,8 @@ class ChatViewModel(
         }
     }
 
-    fun toggleMarkdown() {
-        _uiState.update { it.copy(isMarkdown = !it.isMarkdown) }
+    fun toggleSendType(type: String) {
+        _uiState.update { it.copy(sendType = type) }
     }
 
     fun setReplyTo(message: MessageItem) {
@@ -304,7 +304,11 @@ class ChatViewModel(
 
         viewModelScope.launch {
             _uiState.update { it.copy(isSending = true) }
-            val contentType = if (state.isMarkdown) MessageItem.CONTENT_TYPE_MARKDOWN else MessageItem.CONTENT_TYPE_TEXT
+            val contentType = when (state.sendType) {
+                "markdown" -> MessageItem.CONTENT_TYPE_MARKDOWN
+                "html" -> MessageItem.CONTENT_TYPE_HTML
+                else -> MessageItem.CONTENT_TYPE_TEXT
+            }
             val content = MessageContent(
                 text = state.inputText,
                 quoteMsgText = state.replyTo?.let {
@@ -489,7 +493,11 @@ class ChatViewModel(
             isOpen = true,
             message = message,
             newContent = message.content,
-            isMarkdown = message.contentType == MessageItem.CONTENT_TYPE_MARKDOWN
+            sendType = when (message.contentType) {
+                MessageItem.CONTENT_TYPE_MARKDOWN -> "markdown"
+                MessageItem.CONTENT_TYPE_HTML -> "html"
+                else -> "text"
+            }
         )
     }
 
@@ -501,14 +509,18 @@ class ChatViewModel(
         _editDialog.update { it.copy(newContent = content) }
     }
 
-    fun toggleEditMarkdown() {
-        _editDialog.update { it.copy(isMarkdown = !it.isMarkdown) }
+    fun toggleEditSendType(type: String) {
+        _editDialog.update { it.copy(sendType = type) }
     }
 
     fun editMessage() {
         val state = _editDialog.value
         val message = state.message ?: return
-        val contentType = if (state.isMarkdown) MessageItem.CONTENT_TYPE_MARKDOWN else MessageItem.CONTENT_TYPE_TEXT
+        val contentType = when (state.sendType) {
+            "markdown" -> MessageItem.CONTENT_TYPE_MARKDOWN
+            "html" -> MessageItem.CONTENT_TYPE_HTML
+            else -> MessageItem.CONTENT_TYPE_TEXT
+        }
 
         viewModelScope.launch {
             val content = MessageContent(text = state.newContent)
@@ -691,7 +703,7 @@ data class EditDialogState(
     val isOpen: Boolean = false,
     val message: MessageItem? = null,
     val newContent: String = "",
-    val isMarkdown: Boolean = false
+    val sendType: String = "text"
 )
 
 data class StickerPanelState(

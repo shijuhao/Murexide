@@ -412,13 +412,15 @@ fun ChatScreen(
     
                 MessageInput(
                     inputText = uiState.inputText,
-                    isMarkdown = uiState.isMarkdown,
+                    sendType = uiState.sendType,
                     isSending = uiState.isSending,
                     bigScreenMode = bigScreenMode,
                     onTextChange = { viewModel.updateInputText(it) },
                     onSendClick = { viewModel.sendMessage() },
                     onAddImageClick = { openImagePicker() },
-                    onToggleMarkdown = { viewModel.toggleMarkdown() },
+                    onToggleSendType = { type ->
+                        viewModel.toggleSendType(type)
+                    },
                     onEmojiClick = {
                         viewModel.toggleStickerPanel()
                     }
@@ -638,7 +640,9 @@ fun ChatScreen(
             onDismiss = { viewModel.hideEditDialog() },
             onContentChange = { viewModel.updateEditContent(it) },
             onSave = { viewModel.editMessage() },
-            onToggleMarkdown = { viewModel.toggleEditMarkdown() }
+            onToggleSendType = { type ->
+                viewModel.toggleEditSendType(type) 
+            }
         )
     }
 }

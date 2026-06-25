@@ -97,7 +97,7 @@ data class ChatUiState(
     val error: String? = null,
     val inputText: String = "",
     val replyTo: MessageItem? = null,
-    val isMarkdown: Boolean = false,
+    val sendType: String = "text",
     val hasMore: Boolean = true,
     val chatName: String = "",
     val chatAvatar: String = "",
