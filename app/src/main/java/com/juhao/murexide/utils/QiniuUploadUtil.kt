@@ -204,7 +204,10 @@ class QiniuImageUploader(
         }
     }
 
-    suspend fun upload(input: String): Result<String> {
+    suspend fun upload(
+        input: String,
+        onProgress: (Float) -> Unit = {}
+    ): Result<String> {
         return withContext(Dispatchers.IO) {
             val filesToClean = mutableListOf<File>()
             
@@ -213,7 +216,7 @@ class QiniuImageUploader(
                 if (inputPath.isEmpty()) {
                     return@withContext Result.failure(IllegalArgumentException("Input is empty"))
                 }
-
+    
                 val cacheDir = appContext.cacheDir
                 val timestamp = System.currentTimeMillis()
                 val uniqueId = UUID.randomUUID().toString().take(8)
@@ -231,8 +234,22 @@ class QiniuImageUploader(
                         }
                         
                         response.body?.byteStream()?.use { inputStream ->
+                            val totalBytes = response.body?.contentLength() ?: -1L
+                            var uploadedBytes = 0L
+                            val buffer = ByteArray(8192)
+                            
                             downloadFile.outputStream().use { outputStream ->
-                                inputStream.copyTo(outputStream)
+                                var bytesRead: Int
+                                while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                                    outputStream.write(buffer, 0, bytesRead)
+                                    uploadedBytes += bytesRead
+                                    if (totalBytes > 0) {
+                                        val progress = uploadedBytes.toFloat() / totalBytes
+                                        withContext(Dispatchers.Main) {
+                                            onProgress(progress)
+                                        }
+                                    }
+                                }
                             }
                         } ?: throw IOException("Downloaded file is empty")
                     } finally {
@@ -246,15 +263,16 @@ class QiniuImageUploader(
                     if (!file.exists()) {
                         return@withContext Result.failure(IOException("File not found: $inputPath"))
                     }
+                    onProgress(0.3f)
                     file
                 }
-
+    
                 val originalExt = if (isRemoteUrl) {
                     getFileExtension(inputPath)
                 } else {
                     inputPath.substringAfterLast(".", "bin")
                 }
-
+    
                 val uploadFile: File
                 val ext: String
                 
@@ -274,29 +292,33 @@ class QiniuImageUploader(
                     uploadFile = srcFile
                     ext = originalExt
                 }
-
+    
+                onProgress(0.5f)
+    
                 val safeExt = ext.replace(Regex("[^a-zA-Z0-9]"), "").ifEmpty { "bin" }
                 if (!ALLOWED_EXTENSIONS.contains(safeExt.lowercase())) {
                     debugLog("Unsupported extension: $safeExt, using bin")
                 }
-
+    
                 val md5 = md5Hex(uploadFile)
                 val key = "$md5.$safeExt"
-
+    
                 debugLog("Uploading file: key=$key, size=${uploadFile.length()}")
-
+    
                 val uploadToken = try {
                     getUploadToken()
                 } catch (e: Exception) {
                     return@withContext Result.failure(IOException("Failed to get upload token: ${e.message}"))
                 }
-
+    
+                onProgress(0.7f)
+    
                 val host = queryUploadHost(uploadToken)
                 val uploadUrl = "https://$host"
-
+    
                 val mediaType = "application/octet-stream".toMediaTypeOrNull()
                     ?: throw IllegalStateException("Invalid media type")
-
+    
                 val requestBody = MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
                     .addFormDataPart("token", uploadToken)
@@ -307,16 +329,18 @@ class QiniuImageUploader(
                         uploadFile.asRequestBody(mediaType)
                     )
                     .build()
-
+    
+                onProgress(0.8f)
+    
                 var request = Request.Builder()
                     .url(uploadUrl)
                     .post(requestBody)
                     .build()
-
+    
                 var response = client.newCall(request).execute()
                 try {
                     var responseBody = response.body?.string() ?: ""
-
+    
                     if (!response.isSuccessful && responseBody.contains("no such domain")) {
                         debugLog("Domain error, switching to default domain")
                         val fallbackUrl = "https://$DEFAULT_UPLOAD_HOST"
@@ -332,22 +356,24 @@ class QiniuImageUploader(
                                 return@withContext Result.failure(IOException("Upload failed: ${fallbackResponse.code} - $fallbackBody"))
                             }
                             val imageUrl = parseUploadResponse(fallbackBody)
+                            onProgress(1f)
                             return@withContext Result.success(imageUrl)
                         } finally {
                             fallbackResponse.close()
                         }
                     }
-
+    
                     if (!response.isSuccessful) {
                         return@withContext Result.failure(IOException("Upload failed: ${response.code} - $responseBody"))
                     }
-
+    
                     val imageUrl = parseUploadResponse(responseBody)
+                    onProgress(1f)
                     Result.success(imageUrl)
                 } finally {
                     response.close()
                 }
-
+    
             } catch (e: Exception) {
                 debugLog("Upload failed: ${e.message}")
                 Result.failure(e)

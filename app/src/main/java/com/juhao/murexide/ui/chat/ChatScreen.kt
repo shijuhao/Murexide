@@ -48,6 +48,7 @@ import com.juhao.murexide.ui.chat.components.EditMessageDialog
 import com.juhao.murexide.ui.chat.components.MessageBubble
 import com.juhao.murexide.ui.chat.components.MessageInput
 import com.juhao.murexide.ui.chat.components.EmojiPanel
+import com.juhao.murexide.ui.chat.components.UploadProgressBar
 import com.juhao.murexide.datastore.SettingsStorage
 import com.juhao.murexide.data.MessageItem
 import kotlinx.coroutines.FlowPreview
@@ -363,6 +364,14 @@ fun ChatScreen(
             Column(
                 modifier = Modifier.imePadding()
             ) {
+                if (uiState.isUploading) {
+                    UploadProgressBar(
+                        progress = uiState.uploadProgress,
+                        imagePath = uiState.uploadImagePath ?: "",
+                        onCancel = { viewModel.cancelUpload() }
+                    )
+                }
+                
                 AnimatedVisibility(
                     visible = uiState.replyTo != null,
                     enter = fadeIn() + expandVertically(),

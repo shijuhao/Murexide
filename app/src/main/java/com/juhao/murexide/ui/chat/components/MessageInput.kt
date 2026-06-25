@@ -28,8 +28,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.juhao.murexide.R
 
 @Composable
 fun MessageInput(
@@ -98,12 +100,7 @@ fun MessageInput(
                                 onToggleMarkdown()
                             },
                             leadingIcon = {
-                                Text(
-                                    text = "M",
-                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                    fontSize = 18.sp,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
+                                Icon(painterResource(R.drawable.markdown), contentDescription = null)
                             },
                             trailingIcon = {
                                 if (isMarkdown) {

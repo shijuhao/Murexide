@@ -106,5 +106,8 @@ data class ChatUiState(
     val isSending: Boolean = false,
     val isRemoteDraft: Boolean = false,
     val draftSource: String? = null,
-    val backgroundUrl: String? = null
+    val backgroundUrl: String? = null,
+    val isUploading: Boolean = false,
+    val uploadProgress: Float = 0f,
+    val uploadImagePath: String? = null
 )

@@ -330,30 +330,70 @@ class ChatViewModel(
         }
     }
     
-    fun uploadAndSendImage(imageUri: String) {
+    fun uploadAndSendImage(imagePath: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isSending = true) }
+            _uiState.update { 
+                it.copy(
+                    isUploading = true,
+                    uploadProgress = 0f,
+                    uploadImagePath = imagePath,
+                    isSending = false
+                )
+            }
             
             try {
                 val uploader = QiniuImageUploader(
                     context = context,
                     userToken = token,
-                    enableWebp = false,
-                    debug = true
+                    enableWebp = true
                 )
                 
-                val result = uploader.upload(imageUri)
+                val result = uploader.upload(
+                    input = imagePath,
+                    onProgress = { progress ->
+                        _uiState.update { it.copy(uploadProgress = progress) }
+                    }
+                )
+                
                 result.onSuccess { imageUrl ->
-                    // 发送图片消息
+                    _uiState.update { 
+                        it.copy(
+                            isUploading = false,
+                            uploadProgress = 1f,
+                            uploadImagePath = null
+                        )
+                    }
                     sendImageMessage(imageUrl)
                 }.onFailure { error ->
+                    _uiState.update { 
+                        it.copy(
+                            isUploading = false,
+                            uploadProgress = 0f,
+                            uploadImagePath = null
+                        )
+                    }
                     _toastMessage.emit("图片上传失败: ${error.message}")
-                    _uiState.update { it.copy(isSending = false) }
                 }
             } catch (e: Exception) {
+                _uiState.update { 
+                    it.copy(
+                        isUploading = false,
+                        uploadProgress = 0f,
+                        uploadImagePath = null
+                    )
+                }
                 _toastMessage.emit("上传失败: ${e.message}")
-                _uiState.update { it.copy(isSending = false) }
             }
+        }
+    }
+    
+    fun cancelUpload() {
+        _uiState.update { 
+            it.copy(
+                isUploading = false,
+                uploadProgress = 0f,
+                uploadImagePath = null
+            )
         }
     }
     
