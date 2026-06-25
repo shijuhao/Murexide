@@ -42,21 +42,21 @@ fun UnifiedHtmlWebView(
         generateStyledHtml(htmlContent, backgroundColor, textColor, linkColor, codeBackgroundColor, isDarkTheme)
     }
     
-    var webViewRef by remember { mutableStateOf<WebView?>(null) }
+    val webViewRef = remember { mutableStateOf<WebView?>(null) }
     
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_PAUSE -> {
-                    webViewRef?.onPause()
-                    webViewRef?.pauseTimers()
+                    webViewRef.value?.onPause()
+                    webViewRef.value?.pauseTimers()
                 }
                 Lifecycle.Event.ON_RESUME -> {
-                    webViewRef?.onResume()
-                    webViewRef?.resumeTimers()
+                    webViewRef.value?.onResume()
+                    webViewRef.value?.resumeTimers()
                 }
                 Lifecycle.Event.ON_DESTROY -> {
-                    webViewRef?.let {
+                    webViewRef.value?.let {
                         it.loadUrl("about:blank")
                         it.destroy()
                     }
@@ -68,7 +68,7 @@ fun UnifiedHtmlWebView(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
-            webViewRef?.let {
+            webViewRef.value?.let {
                 it.loadUrl("about:blank")
                 it.destroy()
             }
