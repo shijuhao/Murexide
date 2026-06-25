@@ -1,12 +1,10 @@
 package com.juhao.murexide.ui.chat
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.ViewCompat
-import android.view.View
-import androidx.core.view.OnApplyWindowInsetsListener
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
@@ -102,26 +100,12 @@ fun ChatScreen(
     
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-    val view = LocalView.current
     
-    var isKeyboardVisible by remember { mutableStateOf(false) }
+    val isImeVisible = WindowInsets.ime.isImeVisible
     
-    DisposableEffect(view) {
-        val listener = OnApplyWindowInsetsListener { _, insets ->
-            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            if (imeVisible != isKeyboardVisible) {
-                isKeyboardVisible = imeVisible
-                if (imeVisible && viewModel.stickerPanel.value.isVisible) {
-                    viewModel.hideStickerPanel()
-                }
-            }
-            insets
-        }
-        
-        val oldListener = ViewCompat.setOnApplyWindowInsetsListener(view, listener)
-        
-        onDispose {
-            ViewCompat.setOnApplyWindowInsetsListener(view, oldListener)
+    LaunchedEffect(isImeVisible) {
+        if (isImeVisible && viewModel.stickerPanel.value.isVisible) {
+            viewModel.hideStickerPanel()
         }
     }
     
