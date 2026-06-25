@@ -107,7 +107,7 @@ fun ChatScreen(
     var isKeyboardVisible by remember { mutableStateOf(false) }
     
     DisposableEffect(view) {
-        val listener = View.OnApplyWindowInsetsListener { v, insets ->
+        val listener = OnApplyWindowInsetsListener { _, insets ->
             val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
             if (imeVisible != isKeyboardVisible) {
                 isKeyboardVisible = imeVisible
@@ -117,9 +117,11 @@ fun ChatScreen(
             }
             insets
         }
-        ViewCompat.setOnApplyWindowInsetsListener(view, listener)
+        
+        val oldListener = ViewCompat.setOnApplyWindowInsetsListener(view, listener)
+        
         onDispose {
-            ViewCompat.setOnApplyWindowInsetsListener(view, null)
+            ViewCompat.setOnApplyWindowInsetsListener(view, oldListener)
         }
     }
     
