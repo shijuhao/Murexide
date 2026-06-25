@@ -49,15 +49,15 @@ fun UnifiedHtmlWebView(
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_PAUSE -> {
-                    webViewRef.value?.onPause()
-                    webViewRef.value?.pauseTimers()
+                    webViewRef?.onPause()
+                    webViewRef?.pauseTimers()
                 }
                 Lifecycle.Event.ON_RESUME -> {
-                    webViewRef.value?.onResume()
-                    webViewRef.value?.resumeTimers()
+                    webViewRef?.onResume()
+                    webViewRef?.resumeTimers()
                 }
                 Lifecycle.Event.ON_DESTROY -> {
-                    webViewRef.value?.let {
+                    webViewRef?.let {
                         it.loadUrl("about:blank")
                         it.destroy()
                     }
@@ -69,7 +69,7 @@ fun UnifiedHtmlWebView(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
-            webViewRef.value?.let {
+            webViewRef?.let {
                 it.loadUrl("about:blank")
                 it.destroy()
             }
