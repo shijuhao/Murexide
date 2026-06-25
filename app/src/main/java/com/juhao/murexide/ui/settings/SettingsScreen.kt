@@ -147,7 +147,7 @@ fun SettingsScreen(
                 SettingsSwitchItem(
                     icon = Icons.Rounded.LaptopChromebook,
                     title = "大屏模式",
-                    subtitle = "在横屏下使用大屏模式",
+                    subtitle = "在大屏幕下使用大屏模式",
                     checked = bigScreen,
                     onCheckedChange = { checked ->
                         bigScreen = checked
