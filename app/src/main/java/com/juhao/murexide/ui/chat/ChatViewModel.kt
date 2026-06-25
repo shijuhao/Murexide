@@ -1,5 +1,6 @@
 package com.juhao.murexide.ui.chat
 
+import android.net.Uri
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -335,18 +336,18 @@ class ChatViewModel(
         }
     }
     
-    fun uploadAndSendImage(imagePath: String) {
+    fun uploadAndSendImage(uri: Uri) {
         uploadJob?.cancel()
         uploadJob = viewModelScope.launch {
-            _uiState.update { 
+            _uiState.update {
                 it.copy(
                     isUploading = true,
                     uploadProgress = 0f,
-                    uploadImagePath = imagePath,
+                    uploadImagePath = uri.toString(),
                     isSending = false
                 )
             }
-            
+    
             try {
                 val uploader = QiniuImageUploader(
                     context = context,
@@ -354,16 +355,17 @@ class ChatViewModel(
                     enableWebp = false,
                     debug = true
                 )
-                
-                val result = uploader.upload(
-                    input = imagePath,
+    
+                val result = uploader.uploadFromUri(
+                    context = context,
+                    uri = uri,
                     onProgress = { progress ->
                         _uiState.update { it.copy(uploadProgress = progress) }
                     }
                 )
-                
+    
                 if (!isActive) {
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
                             isUploading = false,
                             uploadProgress = 0f,
@@ -372,9 +374,9 @@ class ChatViewModel(
                     }
                     return@launch
                 }
-                
+    
                 result.onSuccess { imageUrl ->
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
                             isUploading = false,
                             uploadProgress = 1f,
@@ -383,7 +385,7 @@ class ChatViewModel(
                     }
                     sendImageMessage(imageUrl)
                 }.onFailure { error ->
-                    _uiState.update { 
+                    _uiState.update {
                         it.copy(
                             isUploading = false,
                             uploadProgress = 0f,
@@ -393,7 +395,7 @@ class ChatViewModel(
                     _toastMessage.emit("图片上传失败: ${error.message}")
                 }
             } catch (e: CancellationException) {
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
                         isUploading = false,
                         uploadProgress = 0f,
@@ -402,7 +404,7 @@ class ChatViewModel(
                 }
                 _toastMessage.emit("已取消上传")
             } catch (e: Exception) {
-                _uiState.update { 
+                _uiState.update {
                     it.copy(
                         isUploading = false,
                         uploadProgress = 0f,

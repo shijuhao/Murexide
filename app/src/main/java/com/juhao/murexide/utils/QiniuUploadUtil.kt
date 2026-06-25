@@ -1,5 +1,6 @@
 package com.juhao.murexide.utils
 
+import android.net.Uri
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -395,6 +396,29 @@ class QiniuImageUploader(
                     } catch (e: Exception) {
                     }
                 }
+            }
+        }
+    }
+    
+    suspend fun uploadFromUri(
+        context: Context,
+        uri: Uri,
+        onProgress: (Float) -> Unit = {}
+    ): Result<String> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val cacheFile = File(context.cacheDir, "temp_${System.currentTimeMillis()}.jpg")
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    cacheFile.outputStream().use { output ->
+                        input.copyTo(output)
+                    }
+                } ?: return@withContext Result.failure(IOException("无法读取图片"))
+                
+                val result = upload(cacheFile.absolutePath, onProgress)
+                cacheFile.delete()
+                result
+            } catch (e: Exception) {
+                Result.failure(e)
             }
         }
     }

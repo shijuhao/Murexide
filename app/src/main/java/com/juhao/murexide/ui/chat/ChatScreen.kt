@@ -98,12 +98,7 @@ fun ChatScreen(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            val realPath = getRealPathFromUri(context, it)
-            if (realPath != null) {
-                viewModel.uploadAndSendImage(realPath)
-            } else {
-                Toast.makeText(context, "无法获取图片路径", Toast.LENGTH_SHORT).show()
-            }
+            viewModel.uploadAndSendImage(it)
         }
     }
     
