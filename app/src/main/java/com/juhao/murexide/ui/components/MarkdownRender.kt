@@ -1,11 +1,14 @@
 package com.juhao.murexide.ui.components
 
 import android.content.Intent
+import android.os.Build
+import android.webkit.WebSettings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -29,6 +32,18 @@ import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.m3.markdownTypography
 import org.intellij.markdown.ast.findChildOfType
 import org.intellij.markdown.ast.getTextInNode
+
+private fun getUserAgent(context: Context): String {
+    return try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            WebSettings.getDefaultUserAgent(context)
+        } else {
+            System.getProperty("http.agent") ?: "Mozilla/5.0 (Linux; Android ${Build.VERSION.RELEASE}; Mobile) AppleWebKit/537.36"
+        }
+    } catch (e: Exception) {
+        "Mozilla/5.0 (Linux; Android ${Build.VERSION.RELEASE}; Mobile) AppleWebKit/537.36"
+    }
+}
 
 object MarkdownRenderer {
     @Composable
@@ -92,13 +107,15 @@ object MarkdownRenderer {
                                 ) {
                                     setHeader("Referer", "https://myapp.jwznb.com")
                                 }
+                                val userAgent = getUserAgent(context)
+                                setHeader("User-Agent", userAgent)
                             }
                             .build()
                     }
 
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
                             .padding(vertical = 4.dp)
                             .clickable {
                                 onImageClick?.invoke(url, altText)
@@ -107,7 +124,6 @@ object MarkdownRenderer {
                         AsyncImage(
                             model = imageRequest,
                             contentDescription = altText.ifEmpty { null },
-                            modifier = Modifier.fillMaxWidth(),
                             contentScale = ContentScale.FillWidth
                         )
                     }
