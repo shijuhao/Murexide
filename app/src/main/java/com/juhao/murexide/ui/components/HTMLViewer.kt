@@ -188,9 +188,9 @@ fun UnifiedHtmlWebView(
             }
         },
         update = { webView ->
-            val lastLoadedHtml = webView.getTag(android.R.id.content) as? String
+            val lastLoadedHtml = webView.getTag(androidx.core.R.id.content) as? String
             if (lastLoadedHtml != styledHtml) {
-                webView.setTag(android.R.id.content, styledHtml)
+                webView.setTag(androidx.core.R.id.content, styledHtml)
                 val encoded = android.util.Base64.encodeToString(
                     styledHtml.toByteArray(Charsets.UTF_8),
                     android.util.Base64.NO_PADDING

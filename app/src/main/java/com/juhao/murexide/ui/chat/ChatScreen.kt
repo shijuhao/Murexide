@@ -84,7 +84,6 @@ fun ChatScreen(
     val listState = rememberLazyListState()
     var showScrollToBottom by remember { mutableStateOf(false) }
     var unreadCount by remember { mutableIntStateOf(0) }
-    var isScrollingToBottom by remember { mutableStateOf(false) }
     var firstMessageId by remember { mutableStateOf<String?>(null) }
     
     val settingsStorage = remember { SettingsStorage(context) }
@@ -253,7 +252,7 @@ fun ChatScreen(
                     return@collect
                 }
                 
-                if (isScrollingToBottom || listState.isScrollInProgress) {
+                if (listState.isScrollInProgress) {
                     firstMessageId = msgId
                     return@collect
                 }
@@ -265,12 +264,10 @@ fun ChatScreen(
                 
                 if (isAtBottom && !listState.isScrollInProgress) {
                     showMenuMsgId = null
-                    isScrollingToBottom = true
                     if (!listState.isScrollInProgress) {
                         listState.animateScrollToItem(0)
                         unreadCount = 0
                     }
-                    isScrollingToBottom = false
                     pendingCount = 0
                 } else {
                     if (!message.isMine) {
@@ -282,15 +279,11 @@ fun ChatScreen(
     }
     
     val scrollToBottom: () -> Unit = {
-        if (!isScrollingToBottom) {
-            scope.launch {
-                isScrollingToBottom = true
-                listState.animateScrollToItem(0)
-                unreadCount = 0
-                if (uiState.messages.isNotEmpty()) {
-                    firstMessageId = uiState.messages.first().msgId
-                }
-                isScrollingToBottom = false
+        scope.launch {
+            listState.animateScrollToItem(0)
+            unreadCount = 0
+            if (uiState.messages.isNotEmpty()) {
+                firstMessageId = uiState.messages.first().msgId
             }
         }
     }
