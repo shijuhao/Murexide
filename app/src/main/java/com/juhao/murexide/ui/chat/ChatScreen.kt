@@ -1,5 +1,11 @@
 package com.juhao.murexide.ui.chat
 
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.ViewCompat
+import android.view.View
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
@@ -92,6 +98,29 @@ fun ChatScreen(
     var viewerImages by remember { mutableStateOf<List<String>>(emptyList()) }
     var viewerInitialPage by remember { mutableIntStateOf(0) }
     var viewerVisible by remember { mutableStateOf(false) }
+    
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    val view = LocalView.current
+    
+    var isKeyboardVisible by remember { mutableStateOf(false) }
+    
+    DisposableEffect(view) {
+        val listener = View.OnApplyWindowInsetsListener { v, insets ->
+            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            if (imeVisible != isKeyboardVisible) {
+                isKeyboardVisible = imeVisible
+                if (imeVisible && viewModel.stickerPanel.value.isVisible) {
+                    viewModel.hideStickerPanel()
+                }
+            }
+            insets
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(view, listener)
+        onDispose {
+            ViewCompat.setOnApplyWindowInsetsListener(view, null)
+        }
+    }
     
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -422,7 +451,13 @@ fun ChatScreen(
                         viewModel.toggleSendType(type)
                     },
                     onEmojiClick = {
-                        viewModel.toggleStickerPanel()
+                        if (expressions.isVisible) {
+                            viewModel.hideStickerPanel()
+                        } else {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                            viewModel.toggleStickerPanel()
+                        }
                     }
                 )
                 

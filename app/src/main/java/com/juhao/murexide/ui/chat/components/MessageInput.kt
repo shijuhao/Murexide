@@ -162,9 +162,8 @@ fun MessageInput(
                     value = inputText,
                     onValueChange = onTextChange,
                     modifier = Modifier.weight(1f),
-                    enabled = !isSending,
                     placeholder = { Text("输入消息...") },
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(50.dp),
                     maxLines = 5
                 )
 
