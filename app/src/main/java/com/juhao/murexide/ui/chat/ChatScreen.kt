@@ -35,6 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -103,7 +104,7 @@ fun ChatScreen(
     val imeInsets = WindowInsets.ime
     
     LaunchedEffect(Unit) {
-        snapshotFlow { imeInsets.getBottom() }
+        snapshotFlow { imeInsets.getBottom(density) }
             .collect { imeBottom ->
                 val isKeyboardVisible = imeBottom > 0
                 if (isKeyboardVisible && viewModel.stickerPanel.value.isVisible) {
