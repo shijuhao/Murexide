@@ -344,8 +344,8 @@ fun ChatScreen(
                         title = {
                             AnimatedContent(
                                 targetState = selectedMessageIds.size,
-                                transitionSpec = { targetCount, currentCount ->
-                                    if (targetCount > currentCount) {
+                                transitionSpec = {
+                                    if (targetState > initialState) {
                                         slideInVertically(
                                             initialOffsetY = { fullHeight -> fullHeight },
                                             animationSpec = tween(300)
