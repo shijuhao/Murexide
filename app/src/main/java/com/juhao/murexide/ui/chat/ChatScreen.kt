@@ -335,8 +335,12 @@ fun ChatScreen(
     var showScreenshotSheet by remember { mutableStateOf(false) }
     
     if (showScreenshotSheet) {
+        val orderedSelected = uiState.messages
+            .filter { it in selectedMessages }
+            .reversed()
+            
         ScreenshotBottomSheet(
-            messages = selectedMessages.toList(),
+            messages = orderedSelected,
             chatName = chatName,
             chatAvatar = chatAvatar,
             onDismiss = { showScreenshotSheet = false },

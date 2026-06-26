@@ -33,7 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.ImageLoader
-import coil.Coil
+import coil.compose.LocalImageLoader
 import androidx.compose.ui.viewinterop.AndroidView
 import com.juhao.murexide.data.MessageItem
 import com.juhao.murexide.ui.components.Avatar
@@ -84,14 +84,16 @@ fun ScreenshotBottomSheet(
                 factory = { ctx ->
                     ComposeView(activity!!).apply {
                         setContent {
-                            Coil.setImageLoader(screenshotImageLoader)
-                            
-                            MurexideTheme {
-                                ScreenshotContent(
-                                    needMessages = messages,
-                                    chatName = chatName,
-                                    chatAvatar = chatAvatar
-                                )
+                            CompositionLocalProvider(
+                                LocalImageLoader provides screenshotImageLoader
+                            ) {
+                                MurexideTheme {
+                                    ScreenshotContent(
+                                        messages = messages,
+                                        chatName = chatName,
+                                        chatAvatar = chatAvatar
+                                    )
+                                }
                             }
                         }
                         screenshotView = this
@@ -146,12 +148,10 @@ fun ScreenshotBottomSheet(
 
 @Composable
 private fun ScreenshotContent(
-    needMessages: List<MessageItem>,
+    messages: List<MessageItem>,
     chatName: String,
     chatAvatar: String
-) {
-    val messages = needMessages.reversed()
-    
+) {    
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceContainer,
@@ -195,7 +195,8 @@ private fun ScreenshotContent(
                     .background(
                         MaterialTheme.colorScheme.surface,
                         RoundedCornerShape(12.dp)
-                    )
+                    ),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 messages.forEachIndexed { index, message ->
                     val olderMessage = messages.getOrNull(index - 1)
