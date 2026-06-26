@@ -53,8 +53,8 @@ fun MessageBubble(
     message: MessageItem,
     isSelectionMode: Boolean = false,
     isSelected: Boolean = false,
-    onLongPress: (String) -> Unit = {},
-    onClickInSelectionMode: (String) -> Unit = {},
+    onLongPress: (MessageItem) -> Unit = {},
+    onClickInSelectionMode: (MessageItem) -> Unit = {},
     onRecall: () -> Unit,
     onEdit: () -> Unit,
     onReply: () -> Unit,
@@ -136,14 +136,14 @@ fun MessageBubble(
                 indication = null,
                 onClick = {
                     if (isSelectionMode) {
-                        onClickInSelectionMode(message.msgId)
+                        onClickInSelectionMode(message)
                     } else if (!message.isRecalled && message.contentType != MessageItem.CONTENT_TYPE_TIP) {
                         showMenuChanged(message.msgId)
                     }
                 },
                 onLongClick = {
                     if (!isSelectionMode) {
-                        onLongPress(message.msgId)
+                        onLongPress(message)
                     }
                 }
             )

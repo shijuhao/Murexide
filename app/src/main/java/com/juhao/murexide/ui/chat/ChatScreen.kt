@@ -393,7 +393,7 @@ fun ChatScreen(
                             }
                         },
                         actions = {
-                            if (selectedMessageIds.size == 1) {
+                            if (selectedMessages.size == 1) {
                                 IconButton(onClick = { 
                                     selectedMessages.firstOrNull()?.let { viewModel.setReplyTo(it) }
                                 }) {
