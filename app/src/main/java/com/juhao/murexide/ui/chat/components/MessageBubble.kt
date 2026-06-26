@@ -55,9 +55,9 @@ fun MessageBubble(
     isSelected: Boolean = false,
     onLongPress: (MessageItem) -> Unit = {},
     onClickInSelectionMode: (MessageItem) -> Unit = {},
-    onRecall: () -> Unit,
-    onEdit: () -> Unit,
-    onReply: () -> Unit,
+    onRecall: () -> Unit = {},
+    onEdit: () -> Unit = {},
+    onReply: () -> Unit = {},
     isAdmin: Boolean = false,
     isLastFromSender: Boolean = true,
     isFirstFromSender: Boolean = true,
@@ -66,9 +66,9 @@ fun MessageBubble(
     showAvatar: Boolean = true,
     showMenu: Boolean = false,
     showMenuMsgId: String? = null,
-    showMenuChanged: (String?) -> Unit,
+    showMenuChanged: (String?) -> Unit = {},
     onImageClick: (String) -> Unit = {},
-    onAvatarClick: () -> Unit,
+    onAvatarClick: () -> Unit = {},
     avatarAlignment: Alignment.Vertical = Alignment.Bottom
 ) {
     val clipboardManager = LocalClipboard.current

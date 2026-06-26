@@ -10,6 +10,8 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.view.View
 import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -99,7 +101,7 @@ fun ScreenshotBottomSheet(
                         scope.launch {
                             val view = screenshotView ?: return@launch
                             withContext(Dispatchers.Main) {
-                                val bitmap = Bitmap.createBitmap(view.width, view.height)
+                                val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
                                 val canvas = Canvas(bitmap)
                                 view.draw(canvas)
                                 onSaveImage(bitmap)
@@ -116,7 +118,7 @@ fun ScreenshotBottomSheet(
                         scope.launch {
                             val view = screenshotView ?: return@launch
                             withContext(Dispatchers.Main) {
-                                val bitmap = Bitmap.createBitmap(view.width, view.height)
+                                val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
                                 val canvas = Canvas(bitmap)
                                 view.draw(canvas)
                                 saveAndShareBitmap(context, bitmap)
@@ -205,12 +207,7 @@ private fun ScreenshotContent(
                         isFirstFromSender = isFirstFromSender,
                         isOlderSameSender = isOlderSameSender,
                         isNewerSameSender = isNewerSameSender,
-                        showAvatar = isFirstFromSender,
-                        avatarAlignment = Alignment.Bottom,
-                        isSelectionMode = false,
-                        isSelected = false,
-                        showMenu = false,
-                        showMenuChanged = {}
+                        showAvatar = isFirstFromSender
                     )
                 }
             }
