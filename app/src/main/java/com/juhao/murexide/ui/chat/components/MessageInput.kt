@@ -43,6 +43,7 @@ fun MessageInput(
     onSendClick: () -> Unit,
     onAddImageClick: () -> Unit,
     onToggleSendType: (String) -> Unit,
+    isEmojiPanelVisible: Boolean = false,
     onEmojiClick: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -94,7 +95,7 @@ fun MessageInput(
                             }
                         )
                         
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 4.dp))
                         
                         DropdownMenuItem(
                             text = { Text("文本") },
@@ -163,7 +164,7 @@ fun MessageInput(
                     onValueChange = onTextChange,
                     modifier = Modifier.weight(1f),
                     placeholder = { Text("输入消息...") },
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(50.dp),
                     maxLines = 5
                 )
 
@@ -174,8 +175,12 @@ fun MessageInput(
                     modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
-                        Icons.Rounded.Mood,
-                        contentDescription = "表情"
+                        imageVector = if (isEmojiPanelVisible) {
+                            Icons.Rounded.Keyboard
+                        } else {
+                            Icons.Rounded.EmojiEmotions
+                        },
+                        contentDescription = if (isEmojiPanelVisible) "键盘" else "表情"
                     )
                 }
 
