@@ -150,7 +150,7 @@ private fun ScreenshotContent(
     chatName: String,
     chatAvatar: String
 ) {
-    val messages = messages.reversed()
+    val messages = needMessages.reversed()
     
     Surface(
         modifier = Modifier.fillMaxWidth(),
