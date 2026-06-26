@@ -88,7 +88,7 @@ fun ScreenshotBottomSheet(
                             
                             MurexideTheme {
                                 ScreenshotContent(
-                                    messages = messages,
+                                    needMessages = messages,
                                     chatName = chatName,
                                     chatAvatar = chatAvatar
                                 )
@@ -146,15 +146,19 @@ fun ScreenshotBottomSheet(
 
 @Composable
 private fun ScreenshotContent(
-    messages: List<MessageItem>,
+    needMessages: List<MessageItem>,
     chatName: String,
     chatAvatar: String
 ) {
+    val messages = messages.reversed()
+    
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .clip(RoundedCornerShape(12.dp))
+            .background(
+                MaterialTheme.colorScheme.surfaceContainer,
+                RoundedCornerShape(12.dp)
+            )
     ) {
         Column(
             modifier = Modifier
@@ -196,7 +200,7 @@ private fun ScreenshotContent(
                         RoundedCornerShape(12.dp)
                     )
             ) {
-                messages.reversed().forEachIndexed { index, message ->
+                messages.forEachIndexed { index, message ->
                     if (!message.isRecalled && message.contentType != MessageItem.CONTENT_TYPE_TIP) {
                         val newerMessage = if (index > 0) messages[index - 1] else null
                         val olderMessage = if (index < messages.size - 1) messages[index + 1] else null
