@@ -35,8 +35,6 @@ import com.juhao.murexide.data.StickerPack
 import com.juhao.murexide.data.resolveStickerUrl
 import kotlinx.coroutines.launch
 
-private const val PANEL_HEIGHT_RATIO = 0.55f
-
 @Composable
 fun EmojiPanel(
     expressions: List<ExpressionItem>,

@@ -284,7 +284,6 @@ private fun MainNavHost(
                                             return ChatViewModel(
                                                 token = token,
                                                 chatId = currentConversation.chatId,
-                                                context = context,
                                                 chatType = currentConversation.chatType,
                                                 deviceId = getDeviceId()
                                             ) as T

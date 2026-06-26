@@ -7,13 +7,9 @@ import androidx.compose.ui.platform.LocalFocusManager
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
-import android.content.Context
-import android.content.ContentResolver
-import android.database.Cursor
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -120,7 +116,7 @@ fun ChatScreen(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            viewModel.uploadAndSendImage(it)
+            viewModel.uploadAndSendImage(it, context)
         }
     }
     
@@ -865,19 +861,5 @@ fun AnimatedScrollToBottomButton(
                 )
             }
         }
-    }
-}
-
-private fun getRealPathFromUri(context: Context, uri: Uri): String? {
-    return try {
-        val projection = arrayOf(MediaStore.Images.Media.DATA)
-        val cursor: Cursor? = context.contentResolver.query(uri, projection, null, null, null)
-        cursor?.use { 
-            val columnIndex = it.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-            it.moveToFirst()
-            it.getString(columnIndex)
-        }
-    } catch (e: Exception) {
-        uri.toString()
     }
 }

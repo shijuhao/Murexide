@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.juhao.murexide.datastore.TokenStorage
 import com.juhao.murexide.ui.theme.MurexideTheme
@@ -26,8 +25,6 @@ class ChatActivity : ComponentActivity() {
 
         setContent {
             MurexideTheme {
-                val context = LocalContext.current
-                
                 ChatScreen(
                     chatType = chatType,
                     chatName = chatName,
@@ -41,7 +38,6 @@ class ChatActivity : ComponentActivity() {
                                     token = token,
                                     chatId = chatId,
                                     chatType = chatType,
-                                    context = context,
                                     deviceId = com.juhao.murexide.ui.chat.getDeviceId()
                                 ) as T
                             }

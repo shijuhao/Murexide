@@ -1,6 +1,5 @@
 package com.juhao.murexide.ui.components
 
-import android.os.Build
 import android.webkit.JavascriptInterface
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -24,6 +23,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import java.net.HttpURLConnection
 import java.net.URL
+import androidx.core.net.toUri
 
 @Composable
 fun UnifiedHtmlWebView(
@@ -83,6 +83,7 @@ fun UnifiedHtmlWebView(
                 setLayerType(WebView.LAYER_TYPE_SOFTWARE, null)
                 
                 webViewClient = object : WebViewClient() {
+                    @Deprecated("Deprecated in Java")
                     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                         if (url == null) return true
                         
@@ -94,7 +95,8 @@ fun UnifiedHtmlWebView(
                         
                         if (url.startsWith("yunhu://")) {
                             try {
-                                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(url))
+                                val intent = android.content.Intent(android.content.Intent.ACTION_VIEW,
+                                    url.toUri())
                                 intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                                 context.startActivity(intent)
                             } catch (e: Exception) {
@@ -109,7 +111,8 @@ fun UnifiedHtmlWebView(
                             } else {
                                 url
                             }
-                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(finalUrl))
+                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW,
+                                finalUrl.toUri())
                             intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
                             context.startActivity(intent)
                         } catch (e: Exception) {
@@ -166,12 +169,8 @@ fun UnifiedHtmlWebView(
                     cacheMode = android.webkit.WebSettings.LOAD_NO_CACHE
                     loadsImagesAutomatically = true
                     blockNetworkImage = false
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                        mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
-                    }
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        offscreenPreRaster = false
-                    }
+                    mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
+                    offscreenPreRaster = false
                 }
                 setBackgroundColor(backgroundColor)
                 

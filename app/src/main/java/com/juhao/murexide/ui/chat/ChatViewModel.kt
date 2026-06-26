@@ -38,7 +38,6 @@ class ChatViewModel(
     private val chatId: String,
     private val chatType: Int,
     private val deviceId: String,
-    private val context: Context,
     private val repository: MessageRepository = MessageRepository(),
     private val backgroundRepository: ChatBackgroundRepository = ChatBackgroundRepository(),
     private val stickerRepository: StickerRepository = StickerRepository(),
@@ -53,7 +52,7 @@ class ChatViewModel(
     
     private var lastUserInputTime = 0L
     private var lastAppliedDraft = ""
-    private var draftClearJob: kotlinx.coroutines.Job? = null
+    private var draftClearJob: Job? = null
     
     private var uploadJob: Job? = null
 
@@ -330,7 +329,8 @@ class ChatViewModel(
                     it.copy(
                         inputText = "",
                         replyTo = null,
-                        isSending = false
+                        isSending = false,
+                        requestInputFocus = true
                     )
                 }
             }.onFailure { error ->
@@ -340,7 +340,7 @@ class ChatViewModel(
         }
     }
     
-    fun uploadAndSendImage(uri: Uri) {
+    fun uploadAndSendImage(uri: Uri, context: Context) {
         uploadJob?.cancel()
         uploadJob = viewModelScope.launch {
             _uiState.update {
@@ -398,7 +398,7 @@ class ChatViewModel(
                     }
                     _toastMessage.emit("图片上传失败: ${error.message}")
                 }
-            } catch (e: CancellationException) {
+            } catch (_: CancellationException) {
                 _uiState.update {
                     it.copy(
                         isUploading = false,
@@ -777,7 +777,7 @@ class ChatViewModel(
             when {
                 failCount == 0 -> _toastMessage.emit("撤回成功")
                 successCount == 0 -> _toastMessage.emit("撤回失败")
-                else -> _toastMessage.emit("成功撤回 ${successCount} 条，失败 ${failCount} 条")
+                else -> _toastMessage.emit("成功撤回 $successCount 条，失败 $failCount 条")
             }
         }
     }

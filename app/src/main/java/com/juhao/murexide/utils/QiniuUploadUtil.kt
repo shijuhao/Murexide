@@ -92,13 +92,13 @@ class QiniuImageUploader(
 
         return withContext(Dispatchers.IO) {
             val response = client.newCall(request).execute()
-            try {
+            response.use { response ->
                 if (!response.isSuccessful) {
                     throw IOException("Failed to get upload token: ${response.code}")
                 }
 
-                val body = response.body?.string() ?: throw IOException("Empty response")
-                
+                val body = response.body.string()
+
                 try {
                     val codeRegex = """"code"\s*:\s*(\d+)""".toRegex()
                     val code = codeRegex.find(body)?.groupValues?.get(1)?.toIntOrNull() ?: 0
@@ -112,8 +112,6 @@ class QiniuImageUploader(
                 } catch (e: Exception) {
                     throw IOException("Failed to parse response: ${e.message}")
                 }
-            } finally {
-                response.close()
             }
         }
     }
@@ -125,19 +123,17 @@ class QiniuImageUploader(
         return withContext(Dispatchers.IO) {
             try {
                 val response = client.newCall(Request.Builder().url(url).get().build()).execute()
-                try {
+                response.use { response ->
                     if (!response.isSuccessful) return@withContext DEFAULT_UPLOAD_HOST
 
-                    val body = response.body?.string() ?: return@withContext DEFAULT_UPLOAD_HOST
-                    
+                    val body = response.body.string()
+
                     val domainRegex = """"domains"\s*:\s*\[\s*"([^"]+)"""".toRegex()
                     val domain = domainRegex.find(body)?.groupValues?.get(1)
                         ?.replace(Regex("^https?://"), "")
                         ?.substringBefore("/")
 
                     domain ?: DEFAULT_UPLOAD_HOST
-                } finally {
-                    response.close()
                 }
             } catch (e: Exception) {
                 debugLog("Failed to query upload host: ${e.message}")
@@ -161,12 +157,8 @@ class QiniuImageUploader(
                     quality,
                     outputFile.outputStream()
                 )
-                
-                if (success && outputFile.exists() && outputFile.length() > 0) {
-                    true
-                } else {
-                    false
-                }
+
+                success && outputFile.exists() && outputFile.length() > 0
             } catch (e: Exception) {
                 debugLog("WebP conversion failed: ${e.message}")
                 false
@@ -230,16 +222,16 @@ class QiniuImageUploader(
                     
                     val request = Request.Builder().url(inputPath).build()
                     val response = client.newCall(request).execute()
-                    try {
+                    response.use { response ->
                         if (!response.isSuccessful) {
                             return@withContext Result.failure(IOException("Download failed: ${response.code}"))
                         }
-                        
-                        response.body?.byteStream()?.use { inputStream ->
-                            val totalBytes = response.body?.contentLength() ?: -1L
+
+                        response.body.byteStream().use { inputStream ->
+                            val totalBytes = response.body.contentLength()
                             var uploadedBytes = 0L
                             val buffer = ByteArray(8192)
-                            
+
                             downloadFile.outputStream().use { outputStream ->
                                 var bytesRead: Int
                                 while (inputStream.read(buffer).also { bytesRead = it } != -1) {
@@ -254,9 +246,7 @@ class QiniuImageUploader(
                                     }
                                 }
                             }
-                        } ?: throw IOException("Downloaded file is empty")
-                    } finally {
-                        response.close()
+                        }
                     }
                     
                     filesToClean.add(downloadFile)
@@ -339,15 +329,15 @@ class QiniuImageUploader(
     
                 coroutineContext.ensureActive()
     
-                var request = Request.Builder()
+                val request = Request.Builder()
                     .url(uploadUrl)
                     .post(requestBody)
                     .build()
     
-                var response = client.newCall(request).execute()
-                try {
-                    var responseBody = response.body?.string() ?: ""
-    
+                val response = client.newCall(request).execute()
+                response.use { response ->
+                    val responseBody = response.body.string()
+
                     if (!response.isSuccessful && responseBody.contains("no such domain")) {
                         debugLog("Domain error, switching to default domain")
                         val fallbackUrl = "https://$DEFAULT_UPLOAD_HOST"
@@ -355,30 +345,26 @@ class QiniuImageUploader(
                             .url(fallbackUrl)
                             .post(requestBody)
                             .build()
-                        
+
                         val fallbackResponse = client.newCall(fallbackRequest).execute()
-                        try {
-                            val fallbackBody = fallbackResponse.body?.string() ?: ""
+                        fallbackResponse.use { fallbackResponse ->
+                            val fallbackBody = fallbackResponse.body.string()
                             if (!fallbackResponse.isSuccessful) {
                                 return@withContext Result.failure(IOException("Upload failed: ${fallbackResponse.code} - $fallbackBody"))
                             }
                             val imageUrl = parseUploadResponse(fallbackBody)
                             onProgress(1f)
                             return@withContext Result.success(imageUrl)
-                        } finally {
-                            fallbackResponse.close()
                         }
                     }
-    
+
                     if (!response.isSuccessful) {
                         return@withContext Result.failure(IOException("Upload failed: ${response.code} - $responseBody"))
                     }
-    
+
                     val imageUrl = parseUploadResponse(responseBody)
                     onProgress(1f)
                     Result.success(imageUrl)
-                } finally {
-                    response.close()
                 }
     
             } catch (e: CancellationException) {
@@ -393,7 +379,7 @@ class QiniuImageUploader(
                         if (file.exists()) {
                             file.delete()
                         }
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                     }
                 }
             }
