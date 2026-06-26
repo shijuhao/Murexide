@@ -555,11 +555,13 @@ fun ChatScreen(
                             onToggleSendType = { type ->
                                 viewModel.toggleSendType(type)
                             },
+                            requestFocus = uiState.requestInputFocus,
+                            onFocusConsumed = { viewModel.onInputFocusConsumed() },
                             isEmojiPanelVisible = expressions.isVisible,
                             onEmojiClick = {
                                 if (expressions.isVisible) {
                                     viewModel.hideStickerPanel()
-                                    keyboardController?.show()
+                                    viewModel.showKeyboard()
                                 } else {
                                     focusManager.clearFocus()
                                     keyboardController?.hide()

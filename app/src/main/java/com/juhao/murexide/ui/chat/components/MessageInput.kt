@@ -28,6 +28,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,9 +45,20 @@ fun MessageInput(
     onSendClick: () -> Unit,
     onAddImageClick: () -> Unit,
     onToggleSendType: (String) -> Unit,
+    requestFocus: Boolean = false,
+    onFocusConsumed: () -> Unit = {},
     isEmojiPanelVisible: Boolean = false,
     onEmojiClick: () -> Unit
 ) {
+    val focusRequester = remember { FocusRequester() }
+    
+    LaunchedEffect(requestFocus) {
+        if (requestFocus) {
+            focusRequester.requestFocus()
+            onFocusConsumed()
+        }
+    }
+    
     var showMenu by remember { mutableStateOf(false) }
 
     Surface(
@@ -163,6 +176,7 @@ fun MessageInput(
                     value = inputText,
                     onValueChange = onTextChange,
                     modifier = Modifier.weight(1f),
+                    modifier = Modifier.focusRequester(focusRequester),
                     placeholder = { Text("输入消息...") },
                     shape = RoundedCornerShape(16.dp),
                     maxLines = 5
@@ -178,7 +192,7 @@ fun MessageInput(
                         imageVector = if (isEmojiPanelVisible) {
                             Icons.Rounded.Keyboard
                         } else {
-                            Icons.Rounded.EmojiEmotions
+                            Icons.Rounded.Mood
                         },
                         contentDescription = if (isEmojiPanelVisible) "键盘" else "表情"
                     )
