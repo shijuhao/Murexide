@@ -120,28 +120,17 @@ fun MessageBubble(
     }
     
     Row(
-        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .alpha(animatedAlpha)
             .background(
                 if (isSelected) {
-                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f)
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
                 } else {
                     Color.Transparent
                 },
                 shape = RoundedCornerShape(12.dp)
             )
     ) {
-        if (isSelectionMode) {
-            Checkbox(
-                checked = isSelected,
-                onCheckedChange = { onClickInSelectionMode(message.msgId) },
-                modifier = Modifier
-                    .padding(4.dp)
-                    .size(24.dp)
-            )
-        }
-    
         if (message.isRecalled) {
             Box(
                 modifier = Modifier
@@ -209,7 +198,9 @@ fun MessageBubble(
                         end = 8.dp,
                         top = if (isOlderSameSender) 0.dp else 4.dp,
                         bottom = if (isNewerSameSender) 0.dp else 4.dp
-                    )
+                    ),
+                verticalAlignment = avatarAlignment,
+                horizontalArrangement = if (isMine) Arrangement.End else Arrangement.Start
             ) {
                 if (isFirstFromSender || isLastFromSender) {
                     Spacer(modifier = Modifier.height(36.dp))
