@@ -124,7 +124,7 @@ fun MessageBubble(
             .alpha(animatedAlpha)
             .background(
                 if (isSelected) {
-                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                 } else {
                     Color.Transparent
                 },

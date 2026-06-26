@@ -329,8 +329,8 @@ fun ChatScreen(
             AnimatedContent(
                 targetState = selectionMode,
                 transitionSpec = {
-                    fadeIn(animationSpec = tween(300)) togetherWith 
-                    fadeOut(animationSpec = tween(300))
+                    fadeIn(animationSpec = tween(200)) togetherWith 
+                    fadeOut(animationSpec = tween(200))
                 },
                 label = "top_bar_transition"
             ) { isSelectionMode ->
@@ -348,18 +348,18 @@ fun ChatScreen(
                                     if (targetState > initialState) {
                                         slideInVertically(
                                             initialOffsetY = { fullHeight -> fullHeight },
-                                            animationSpec = tween(300)
+                                            animationSpec = tween(200)
                                         ) togetherWith slideOutVertically(
                                             targetOffsetY = { fullHeight -> -fullHeight },
-                                            animationSpec = tween(300)
+                                            animationSpec = tween(200)
                                         )
                                     } else {
                                         slideInVertically(
                                             initialOffsetY = { fullHeight -> -fullHeight },
-                                            animationSpec = tween(300)
+                                            animationSpec = tween(200)
                                         ) togetherWith slideOutVertically(
                                             targetOffsetY = { fullHeight -> fullHeight },
-                                            animationSpec = tween(300)
+                                            animationSpec = tween(200)
                                         )
                                     }
                                 },
@@ -445,8 +445,8 @@ fun ChatScreen(
             AnimatedContent(
                 targetState = selectionMode,
                 transitionSpec = {
-                    fadeIn(animationSpec = tween(300)) togetherWith 
-                    fadeOut(animationSpec = tween(300))
+                    fadeIn(animationSpec = tween(200)) togetherWith 
+                    fadeOut(animationSpec = tween(200))
                 },
                 label = "bottom_bar_transition"
             ) { isSelectionMode ->
