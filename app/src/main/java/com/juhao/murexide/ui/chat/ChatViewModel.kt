@@ -693,41 +693,41 @@ class ChatViewModel(
         }
     }
 
-    fun enterSelectionMode(msgId: String) {
+    fun enterSelectionMode(message: MessageItem) {
         _uiState.update {
             it.copy(
                 selectionMode = true,
-                selectedMessageIds = setOf(msgId)
+                selectedMessages = setOf(message)
             )
         }
     }
-
-    fun toggleMessageSelection(msgId: String) {
+    
+    fun toggleMessageSelection(message: MessageItem) {
         _uiState.update { state ->
-            if (!state.selectionMode) return@update state  // 非多选模式不处理
-            
-            val newSelected = if (msgId in state.selectedMessageIds) {
-                state.selectedMessageIds - msgId
+            if (!state.selectionMode) return@update state
+    
+            val newSelected = if (state.selectedMessages.contains(message)) {
+                state.selectedMessages - message
             } else {
-                state.selectedMessageIds + msgId
+                state.selectedMessages + message
             }
-            
+    
             if (newSelected.isEmpty()) {
                 state.copy(
                     selectionMode = false,
-                    selectedMessageIds = emptySet()
+                    selectedMessages = emptySet()
                 )
             } else {
-                state.copy(selectedMessageIds = newSelected)
+                state.copy(selectedMessages = newSelected)
             }
         }
     }
-
+    
     fun exitSelectionMode() {
         _uiState.update {
             it.copy(
                 selectionMode = false,
-                selectedMessageIds = emptySet()
+                selectedMessages = emptySet()
             )
         }
     }
@@ -751,29 +751,29 @@ class ChatViewModel(
     }*/
 
     fun recallSelectedMessages() {
-        val selectedIds = _uiState.value.selectedMessageIds
-        if (selectedIds.isEmpty()) return
-        
+        val selected = _uiState.value.selectedMessages
+        if (selected.isEmpty()) return
+    
         viewModelScope.launch {
             var successCount = 0
             var failCount = 0
-            
-            selectedIds.forEach { msgId ->
+    
+            selected.forEach { message ->
                 repository.recallMessage(
                     token = token,
-                    msgId = msgId,
+                    msgId = message.msgId,
                     chatId = chatId,
                     chatType = chatType
                 ).onSuccess {
                     successCount++
-                    deleteMessage(msgId)
+                    deleteMessage(message.msgId)
                 }.onFailure {
                     failCount++
                 }
             }
-            
+    
             exitSelectionMode()
-            
+    
             when {
                 failCount == 0 -> _toastMessage.emit("撤回成功")
                 successCount == 0 -> _toastMessage.emit("撤回失败")

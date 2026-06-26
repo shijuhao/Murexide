@@ -159,8 +159,8 @@ fun ChatScreen(
     }
 
     val selectionMode = uiState.selectionMode
-    val selectedMessageIds = uiState.selectedMessageIds
-
+    val selectedMessages = uiState.selectedMessages
+    
     BackHandler(enabled = selectionMode) {
         viewModel.exitSelectionMode()
     }
@@ -358,7 +358,7 @@ fun ChatScreen(
                         },
                         title = {
                             AnimatedContent(
-                                targetState = selectedMessageIds.size,
+                                targetState = selectedMessages.size,
                                 transitionSpec = {
                                     if (targetState > initialState) {
                                         slideInVertically(
@@ -393,6 +393,13 @@ fun ChatScreen(
                             }
                         },
                         actions = {
+                            if (selectedMessageIds.size == 1) {
+                                IconButton(onClick = { 
+                                    selectedMessages.firstOrNull()?.let { viewModel.setReplyTo(it) }
+                                }) {
+                                    Icon(Icons.Rounded.FormatQuote, contentDescription = "引用")
+                                }
+                            }
                             IconButton(onClick = { /* 截图逻辑 */ }) {
                                 Icon(Icons.Rounded.Crop, contentDescription = "截图")
                             }
@@ -473,7 +480,7 @@ fun ChatScreen(
                                             )
                                         },
                                         leadingIcon = {
-                                            Icon(Icons.Outlined.Info, contentDescription = null)
+                                            Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(18.dp))
                                         }
                                     )
                                 }
@@ -754,13 +761,9 @@ fun ChatScreen(
                                 showAvatar = shouldShowItemAvatar,
                                 avatarAlignment = avatarAlignment,
                                 isSelectionMode = selectionMode,
-                                isSelected = message.msgId in selectedMessageIds,
-                                onLongPress = { msgId -> viewModel.enterSelectionMode(msgId) },
-                                onClickInSelectionMode = { msgId ->
-                                    viewModel.toggleMessageSelection(
-                                        msgId
-                                    )
-                                },
+                                isSelected = message in selectedMessages,
+                                onLongPress = { msg -> viewModel.enterSelectionMode(msg) },
+                                onClickInSelectionMode = { msg -> viewModel.toggleMessageSelection(msg) },
                                 showMenu = showMenuMsgId == message.msgId && !selectionMode,
                                 showMenuMsgId = showMenuMsgId,
                                 showMenuChanged = { msgId ->
