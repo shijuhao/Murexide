@@ -57,6 +57,8 @@ import com.juhao.murexide.ui.chat.components.MessageBubble
 import com.juhao.murexide.ui.chat.components.MessageInput
 import com.juhao.murexide.ui.chat.components.EmojiPanel
 import com.juhao.murexide.ui.chat.components.UploadProgressBar
+import com.juhao.murexide.ui.chat.components.ScreenshotBottomSheet
+import com.juhao.murexide.ui.chat.components.saveBitmapToGallery
 import com.juhao.murexide.datastore.SettingsStorage
 import com.juhao.murexide.data.MessageItem
 import kotlinx.coroutines.FlowPreview
@@ -329,6 +331,22 @@ fun ChatScreen(
             }
         }
     }
+    
+    var showScreenshotSheet by remember { mutableStateOf(false) }
+    
+    if (showScreenshotSheet) {
+        ScreenshotBottomSheet(
+            messages = selectedMessages.toList(),
+            chatName = chatName,
+            chatAvatar = chatAvatar,
+            onDismiss = { showScreenshotSheet = false },
+            onSaveImage = { bitmap ->
+                scope.launch {
+                    saveBitmapToGallery(context, bitmap)
+                }
+            }
+        )
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -401,7 +419,7 @@ fun ChatScreen(
                                     Icon(Icons.Rounded.FormatQuote, contentDescription = "引用")
                                 }
                             }
-                            IconButton(onClick = { /* 截图逻辑 */ }) {
+                            IconButton(onClick = { showScreenshotSheet = true }) {
                                 Icon(Icons.Rounded.Crop, contentDescription = "截图")
                             }
                         },
