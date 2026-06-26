@@ -61,9 +61,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.*
 
 @OptIn(ExperimentalMaterial3Api::class, FlowPreview::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -326,7 +324,7 @@ fun ChatScreen(
         topBar = {
             if (selectionMode) {
                 TopAppBar(
-                    title = { Text("已选 ${selectedMessageIds.size} 条") },
+                    title = { Text("${selectedMessageIds.size}") },
                     navigationIcon = {
                         IconButton(onClick = { viewModel.exitSelectionMode() }) {
                             Icon(Icons.Rounded.Close, contentDescription = "退出多选")
@@ -633,7 +631,7 @@ fun ChatScreen(
                                     if (!selectionMode) {
                                         showMenuMsgId = msgId
                                     }
-                                }
+                                },
                                 onImageClick = { imageUrl ->
                                     val allImages = uiState.messages
                                         .filter { !it.isRecalled }

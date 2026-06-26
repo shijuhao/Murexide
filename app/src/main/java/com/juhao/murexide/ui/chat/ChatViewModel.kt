@@ -732,7 +732,7 @@ class ChatViewModel(
         }
     }
 
-    fun forwardSelectedMessages(targetChatId: String) {
+    /*fun forwardSelectedMessages(targetChatId: String) {
         val selectedIds = _uiState.value.selectedMessageIds
         if (selectedIds.isEmpty()) return
         
@@ -748,7 +748,7 @@ class ChatViewModel(
                 _toastMessage.emit("转发失败: ${error.message}")
             }
         }
-    }
+    }*/
 
     fun recallSelectedMessages() {
         val selectedIds = _uiState.value.selectedMessageIds
