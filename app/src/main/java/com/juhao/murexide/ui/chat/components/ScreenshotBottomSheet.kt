@@ -149,98 +149,101 @@ private fun ScreenshotContent(
     chatName: String,
     chatAvatar: String
 ) {
-    Column(
-        modifier = Modifier
-            .widthIn(max = 420.dp)
-            .padding(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Surface(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        // 顶部信息
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Avatar(url = chatAvatar, size = 24.dp)
-            Spacer(modifier = Modifier.width(8.dp))
-            
-            Column {
-                Text(
-                    text = chatName,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date()),
-                    fontSize = 10.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            }
-        }
-
-        // 消息列表 - 按实际位置计算连体效果
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    MaterialTheme.colorScheme.surface,
-                    RoundedCornerShape(12.dp)
-                )
+                .padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            messages.forEachIndexed { index, message ->
-                if (!message.isRecalled && message.contentType != MessageItem.CONTENT_TYPE_TIP) {
-                    val newerMessage = if (index > 0) messages[index - 1] else null
-                    val olderMessage = if (index < messages.size - 1) messages[index + 1] else null
-
-                    val isFirstFromSender = newerMessage == null ||
-                            newerMessage.isRecalled ||
-                            newerMessage.contentType == MessageItem.CONTENT_TYPE_TIP ||
-                            newerMessage.senderId != message.senderId
-
-                    val isLastFromSender = olderMessage == null ||
-                            olderMessage.isRecalled ||
-                            olderMessage.contentType == MessageItem.CONTENT_TYPE_TIP ||
-                            olderMessage.senderId != message.senderId
-
-                    val isOlderSameSender = olderMessage != null &&
-                            !olderMessage.isRecalled &&
-                            olderMessage.contentType != MessageItem.CONTENT_TYPE_TIP &&
-                            olderMessage.senderId == message.senderId
-
-                    val isNewerSameSender = newerMessage != null &&
-                            !newerMessage.isRecalled &&
-                            newerMessage.contentType != MessageItem.CONTENT_TYPE_TIP &&
-                            newerMessage.senderId == message.senderId
-
-                    MessageBubble(
-                        message = message,
-                        isLastFromSender = isLastFromSender,
-                        isFirstFromSender = isFirstFromSender,
-                        isOlderSameSender = isOlderSameSender,
-                        isNewerSameSender = isNewerSameSender,
-                        showAvatar = isFirstFromSender
+            // 顶部信息
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Avatar(url = chatAvatar, size = 36.dp)
+                Spacer(modifier = Modifier.width(8.dp))
+                
+                Column {
+                    Text(
+                        text = chatName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date()),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
             }
-        }
-
-        // 底部水印
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .alpha(0.6f)
-                .padding(top = 12.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "由 Murexide 生成",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            )
+    
+            // 消息列表 - 按实际位置计算连体效果
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        MaterialTheme.colorScheme.surface,
+                        RoundedCornerShape(12.dp)
+                    )
+            ) {
+                messages.forEachIndexed { index, message ->
+                    if (!message.isRecalled && message.contentType != MessageItem.CONTENT_TYPE_TIP) {
+                        val newerMessage = if (index > 0) messages[index - 1] else null
+                        val olderMessage = if (index < messages.size - 1) messages[index + 1] else null
+    
+                        val isFirstFromSender = newerMessage == null ||
+                                newerMessage.isRecalled ||
+                                newerMessage.contentType == MessageItem.CONTENT_TYPE_TIP ||
+                                newerMessage.senderId != message.senderId
+    
+                        val isLastFromSender = olderMessage == null ||
+                                olderMessage.isRecalled ||
+                                olderMessage.contentType == MessageItem.CONTENT_TYPE_TIP ||
+                                olderMessage.senderId != message.senderId
+    
+                        val isOlderSameSender = olderMessage != null &&
+                                !olderMessage.isRecalled &&
+                                olderMessage.contentType != MessageItem.CONTENT_TYPE_TIP &&
+                                olderMessage.senderId == message.senderId
+    
+                        val isNewerSameSender = newerMessage != null &&
+                                !newerMessage.isRecalled &&
+                                newerMessage.contentType != MessageItem.CONTENT_TYPE_TIP &&
+                                newerMessage.senderId == message.senderId
+    
+                        MessageBubble(
+                            message = message,
+                            isLastFromSender = isLastFromSender,
+                            isFirstFromSender = isFirstFromSender,
+                            isOlderSameSender = isOlderSameSender,
+                            isNewerSameSender = isNewerSameSender,
+                            showAvatar = isFirstFromSender
+                        )
+                    }
+                }
+            }
+    
+            // 底部水印
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .alpha(0.6f)
+                    .padding(top = 12.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "由 Murexide 生成",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                )
+            }
         }
     }
 }
