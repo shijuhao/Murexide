@@ -36,16 +36,7 @@ fun SettingsGroup(
             )
         }
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-        ) {
-            Column(content = content)
-        }
+        Column(content = content)
         
         Spacer(modifier = Modifier.height(8.dp))
     }
@@ -78,7 +69,7 @@ fun SettingsItem(
                         Modifier
                     }
                 )
-                .padding(horizontal = 20.dp, vertical = 12.dp),
+                .padding(horizontal = 24.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(

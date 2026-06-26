@@ -88,7 +88,6 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 8.dp)
                 .verticalScroll(scrollState)
         ) {
             SettingsGroup(title = "通用") {

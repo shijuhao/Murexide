@@ -48,7 +48,6 @@ fun AboutScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 8.dp)
                 .verticalScroll(scrollState)
         ) {
             // 应用信息
