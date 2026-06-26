@@ -153,12 +153,9 @@ private fun ScreenshotContent(
     val messages = messages.reversed()
     
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                MaterialTheme.colorScheme.surfaceContainer,
-                RoundedCornerShape(12.dp)
-            )
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        shape = RoundedCornerShape(12.dp)
     ) {
         Column(
             modifier = Modifier
