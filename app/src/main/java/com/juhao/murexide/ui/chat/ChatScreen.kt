@@ -499,7 +499,7 @@ fun ChatScreen(
                                             )
                                         },
                                         leadingIcon = {
-                                            Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(18.dp))
+                                            Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(24.dp))
                                         }
                                     )
                                 }

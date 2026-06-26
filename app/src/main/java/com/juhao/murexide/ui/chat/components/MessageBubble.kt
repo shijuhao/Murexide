@@ -577,7 +577,7 @@ fun MessageBubble(
                                 onReply()
                             },
                             leadingIcon = {
-                                Icon(Icons.Rounded.FormatQuote, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Icon(Icons.Rounded.FormatQuote, contentDescription = null, modifier = Modifier.size(24.dp))
                             }
                         )
     
@@ -589,7 +589,7 @@ fun MessageBubble(
                                     onRecall()
                                 },
                                 leadingIcon = {
-                                    Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = null, modifier = Modifier.size(24.dp))
                                 }
                             )
                         }
@@ -605,7 +605,7 @@ fun MessageBubble(
                                     Icon(
                                         Icons.Rounded.Edit,
                                         contentDescription = null,
-                                        modifier = Modifier.size(18.dp)
+                                        modifier = Modifier.size(24.dp)
                                     )
                                 }
                             )
