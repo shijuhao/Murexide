@@ -31,6 +31,8 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.ImageLoader
+import coil.Coil
 import androidx.compose.ui.viewinterop.AndroidView
 import com.juhao.murexide.data.MessageItem
 import com.juhao.murexide.ui.components.Avatar
@@ -58,6 +60,12 @@ fun ScreenshotBottomSheet(
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
+    
+    val screenshotImageLoader = remember {
+        ImageLoader.Builder(context)
+            .allowHardware(false)
+            .build()
+    }
 
     ModalBottomSheet(
         sheetState = sheetState,
@@ -75,6 +83,8 @@ fun ScreenshotBottomSheet(
                 factory = { ctx ->
                     ComposeView(activity!!).apply {
                         setContent {
+                            Coil.setImageLoader(screenshotImageLoader)
+                            
                             MurexideTheme {
                                 ScreenshotContent(
                                     messages = messages,
@@ -155,17 +165,20 @@ private fun ScreenshotContent(
         ) {
             Avatar(url = chatAvatar, size = 24.dp)
             Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = chatName,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date()),
-                fontSize = 10.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
+            
+            Column {
+                Text(
+                    text = chatName,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date()),
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
         }
 
         // 消息列表 - 按实际位置计算连体效果
@@ -225,8 +238,8 @@ private fun ScreenshotContent(
         ) {
             Text(
                 text = "由 Murexide 生成",
-                fontSize = 11.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
             )
         }
     }
