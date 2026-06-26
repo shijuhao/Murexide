@@ -196,7 +196,7 @@ private fun ScreenshotContent(
                         RoundedCornerShape(12.dp)
                     )
             ) {
-                messages.forEachIndexed { index, message ->
+                messages.reversed().forEachIndexed { index, message ->
                     if (!message.isRecalled && message.contentType != MessageItem.CONTENT_TYPE_TIP) {
                         val newerMessage = if (index > 0) messages[index - 1] else null
                         val olderMessage = if (index < messages.size - 1) messages[index + 1] else null
