@@ -739,9 +739,8 @@ fun ChatScreen(
                         ) { message ->
                             val index = uiState.messages.indexOf(message)
 
-                            val newerMessage = if (index > 0) uiState.messages[index - 1] else null
-                            val olderMessage =
-                                if (index < uiState.messages.size - 1) uiState.messages[index + 1] else null
+                            val newerMessage = uiState.messages.getOrNull(index - 1)
+                            val olderMessage = uiState.messages.getOrNull(index + 1)
 
                             val isFirstFromSender =
                                 newerMessage == null || newerMessage.isRecalled || newerMessage.contentType == MessageItem.CONTENT_TYPE_TIP || newerMessage.senderId != message.senderId

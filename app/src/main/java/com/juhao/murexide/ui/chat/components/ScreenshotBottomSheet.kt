@@ -198,8 +198,8 @@ private fun ScreenshotContent(
                     )
             ) {
                 messages.forEachIndexed { index, message ->
-                    val olderMessage = orderedMessages.getOrNull(index - 1)
-                    val newerMessage = orderedMessages.getOrNull(index + 1)
+                    val olderMessage = messages.getOrNull(index - 1)
+                    val newerMessage = messages.getOrNull(index + 1)
 
                     val isFirstFromSender = newerMessage == null ||
                             newerMessage.isRecalled ||
