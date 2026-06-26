@@ -50,6 +50,7 @@ fun ScreenshotBottomSheet(
     onSaveImage: (Bitmap) -> Unit
 ) {
     val context = LocalContext.current
+    val activity = context as? Activity
     val scope = rememberCoroutineScope()
     var screenshotView by remember { mutableStateOf<View?>(null) }
 
@@ -71,7 +72,7 @@ fun ScreenshotBottomSheet(
         ) {
             AndroidView(
                 factory = { ctx ->
-                    ComposeView(ctx).apply {
+                    ComposeView(activity!!).apply {
                         setContent {
                             MurexideTheme {
                                 ScreenshotContent(
