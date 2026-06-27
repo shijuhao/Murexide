@@ -16,23 +16,33 @@ import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.*
 
-class QiniuImageUploader(
+class QiniuUploader(
     context: Context,
     private val userToken: String,
     private val enableWebp: Boolean = false,
+    private val uploadType: Int = 1,
     private val webpQuality: Int = 95,
     private val debug: Boolean = false
 ) {
     companion object {
         private const val DEFAULT_UPLOAD_HOST = "upload-z2.qiniup.com"
         private const val BUCKET = "chat-68"
-        private const val TOKEN_URL = "https://chat-go.jwzhd.com/v1/misc/qiniu-token"
-        private val ALLOWED_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "webp", "bmp", "bin")
-        private const val CONNECTION_TIMEOUT_SECONDS = 30L
-        private const val READ_TIMEOUT_SECONDS = 30L
-        private const val WRITE_TIMEOUT_SECONDS = 30L
-        private const val IMAGE_BASE_URL = "https://chat-img.jwznb.com/"
+        private val ALLOWED_IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "webp", "bmp")
+        private val ALLOWED_VIDEO_EXTENSIONS = setOf("mp4", "avi", "mov", "mkv", "flv", "wmv", "3gp")
+        private const val CONNECTION_TIMEOUT_SECONDS = 60L
+        private const val READ_TIMEOUT_SECONDS = 60L
+        private const val WRITE_TIMEOUT_SECONDS = 60L
     }
+    
+    private val tokenUrl = if (uploadType == 1)
+        "https://chat-go.jwzhd.com/v1/misc/qiniu-token"
+    else
+        "https://chat-go.jwzhd.com/v1/misc/qiniu-token-video"
+    
+    private val allowedExtensions = if (uploadType == 1)
+        ALLOWED_IMAGE_EXTENSIONS
+    else
+        ALLOWED_VIDEO_EXTENSIONS
 
     private val appContext = context.applicationContext
 
@@ -85,7 +95,7 @@ class QiniuImageUploader(
         }
 
         val request = Request.Builder()
-            .url(TOKEN_URL)
+            .url(tokenUrl)
             .header("token", userToken)
             .get()
             .build()
@@ -168,6 +178,22 @@ class QiniuImageUploader(
         }
     }
 
+    private suspend fun prepareFile(file: File): Pair<File, String> {
+        return if (uploadType == 1) {
+            if (enableWebp) {
+                val webpFile = File(appContext.cacheDir, "${file.nameWithoutExtension}.webp")
+                if (convertToWebp(file, webpFile)) {
+                    return webpFile to "webp"
+                }
+            }
+            val ext = file.extension.ifEmpty { "bin" }
+            file to ext
+        } else {
+            val ext = file.extension.ifEmpty { "mp4" }
+            file to ext
+        }
+    }
+
     private fun parseUploadResponse(responseBody: String): String {
         try {
             val keyRegex = """"key"\s*:\s*"([^"]+)"""".toRegex()
@@ -183,7 +209,7 @@ class QiniuImageUploader(
             }
             
             if (responseBody.matches(Regex("^[a-zA-Z0-9._-]+$"))) {
-                return "$IMAGE_BASE_URL$responseBody"
+                return responseBody
             }
             
             if (responseBody.startsWith("http://") || responseBody.startsWith("https://")) {
@@ -262,37 +288,21 @@ class QiniuImageUploader(
     
                 coroutineContext.ensureActive()
     
-                val originalExt = if (isRemoteUrl) {
-                    getFileExtension(inputPath)
-                } else {
-                    inputPath.substringAfterLast(".", "bin")
-                }
-    
-                val uploadFile: File
-                val ext: String
-                
-                if (enableWebp) {
-                    val webpFile = File(cacheDir, "imgutil_${timestamp}_${uniqueId}.webp")
-                    filesToClean.add(webpFile)
-                    
-                    if (convertToWebp(srcFile, webpFile)) {
-                        uploadFile = webpFile
-                        ext = "webp"
-                    } else {
-                        debugLog("WebP conversion failed, using original file")
-                        uploadFile = srcFile
-                        ext = originalExt
-                    }
-                } else {
-                    uploadFile = srcFile
-                    ext = originalExt
+                val (uploadFile, ext) = prepareFile(srcFile)
+                if (uploadFile != srcFile) {
+                    filesToClean.add(uploadFile)
                 }
     
                 onProgress(0.5f)
     
                 val safeExt = ext.replace(Regex("[^a-zA-Z0-9]"), "").ifEmpty { "bin" }
-                if (!ALLOWED_EXTENSIONS.contains(safeExt.lowercase())) {
-                    debugLog("Unsupported extension: $safeExt, using bin")
+                if (!allowedExtensions.contains(safeExt.lowercase())) {
+                    debugLog("Unsupported extension: $safeExt")
+                    if (uploadType == 1) {
+                        return@withContext Result.failure(
+                            IllegalArgumentException("Unsupported image format: $safeExt")
+                        )
+                    }
                 }
     
                 val md5 = md5Hex(uploadFile)
@@ -393,12 +403,13 @@ class QiniuImageUploader(
     ): Result<String> {
         return withContext(Dispatchers.IO) {
             try {
-                val cacheFile = File(context.cacheDir, "temp_${System.currentTimeMillis()}.jpg")
+                val extension = if (uploadType == 1) "jpg" else "mp4"
+                val cacheFile = File(context.cacheDir, "temp_${System.currentTimeMillis()}.$extension")
                 context.contentResolver.openInputStream(uri)?.use { input ->
                     cacheFile.outputStream().use { output ->
                         input.copyTo(output)
                     }
-                } ?: return@withContext Result.failure(IOException("无法读取图片"))
+                } ?: return@withContext Result.failure(IOException("无法读取文件"))
                 
                 val result = upload(cacheFile.absolutePath, onProgress)
                 cacheFile.delete()

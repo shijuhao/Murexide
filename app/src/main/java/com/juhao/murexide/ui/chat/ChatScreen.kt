@@ -159,6 +159,44 @@ fun ChatScreen(
             imagePickerLauncher.launch("image/*")
         }
     }
+    
+    val videoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            viewModel.uploadAndSendVideo(it, context)
+        }
+    }
+
+    val videoPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (allGranted) {
+            videoPickerLauncher.launch("video/*")
+        } else {
+            Toast.makeText(context, "需要存储权限才能选择视频", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun openVideoPicker() {
+        val permissions =
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                arrayOf(Manifest.permission.READ_MEDIA_VIDEO)
+            } else {
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+
+        val needRequest = permissions.any {
+            ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
+        }
+
+        if (needRequest) {
+            videoPermissionLauncher.launch(permissions)
+        } else {
+            videoPickerLauncher.launch("video/*")
+        }
+    }
 
     val selectionMode = uiState.selectionMode
     val selectedMessages = uiState.selectedMessages
@@ -494,6 +532,7 @@ fun ChatScreen(
                                     DropdownMenuItem(
                                         text = { Text("会话详情") },
                                         onClick = {
+                                            showMoreMenu = false
                                             ConversationDetailActivity.start(
                                                 context = context,
                                                 chatId = viewModel.chatId,
@@ -644,6 +683,7 @@ fun ChatScreen(
                             onTextChange = { viewModel.updateInputText(it) },
                             onSendClick = { viewModel.sendMessage() },
                             onAddImageClick = { openImagePicker() },
+                            onAddVideoClick = { openVideoPicker() },
                             onToggleSendType = { type ->
                                 viewModel.toggleSendType(type)
                             },

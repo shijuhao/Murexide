@@ -6,7 +6,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.juhao.murexide.data.*
-import com.juhao.murexide.utils.QiniuImageUploader
+import com.juhao.murexide.utils.QiniuUploader
 import com.juhao.murexide.network.WebSocketManager
 import com.juhao.murexide.repository.MessageRepository
 import androidx.core.net.toUri
@@ -345,6 +345,113 @@ class ChatViewModel(
             }
         }
     }
+
+    fun uploadAndSendVideo(uri: Uri, context: Context) {
+        uploadJob?.cancel()
+        uploadJob = viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    isUploading = true,
+                    uploadProgress = 0f,
+                    uploadImagePath = uri.toString(),
+                    isSending = false
+                )
+            }
+    
+            try {
+                val uploader = QiniuUploader(
+                    context = context,
+                    userToken = token,
+                    uploadType = 2
+                )
+    
+                val result = uploader.uploadFromUri(
+                    context = context,
+                    uri = uri,
+                    onProgress = { progress ->
+                        _uiState.update { it.copy(uploadProgress = progress) }
+                    }
+                )
+    
+                if (!isActive) {
+                    _uiState.update {
+                        it.copy(
+                            isUploading = false,
+                            uploadProgress = 0f,
+                            uploadImagePath = null
+                        )
+                    }
+                    return@launch
+                }
+    
+                result.onSuccess { videoUrl ->
+                    _uiState.update {
+                        it.copy(
+                            isUploading = false,
+                            uploadProgress = 1f,
+                            uploadImagePath = null
+                        )
+                    }
+                    sendVideoMessage(videoUrl)
+                }.onFailure { error ->
+                    _uiState.update {
+                        it.copy(
+                            isUploading = false,
+                            uploadProgress = 0f,
+                            uploadImagePath = null
+                        )
+                    }
+                    _toastMessage.emit("视频上传失败: ${error.message}")
+                }
+            } catch (_: CancellationException) {
+                _uiState.update {
+                    it.copy(
+                        isUploading = false,
+                        uploadProgress = 0f,
+                        uploadImagePath = null
+                    )
+                }
+                _toastMessage.emit("已取消上传")
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isUploading = false,
+                        uploadProgress = 0f,
+                        uploadImagePath = null
+                    )
+                }
+                _toastMessage.emit("上传失败: ${e.message}")
+            }
+        }
+    }
+    
+    private fun sendVideoMessage(videoUrl: String) {
+        viewModelScope.launch {
+            val content = MessageContent(
+                video = videoUrl,
+                text = ""
+            )
+            
+            repository.sendMessage(
+                token = token,
+                chatId = chatId,
+                chatType = chatType,
+                content = content,
+                contentType = MessageItem.CONTENT_TYPE_VIDEO,
+                quoteMsgId = _uiState.value.replyTo?.msgId
+            ).onSuccess {
+                _uiState.update { 
+                    it.copy(
+                        replyTo = null,
+                        isSending = false
+                    )
+                }
+            }.onFailure { error ->
+                _uiState.update { it.copy(isSending = false) }
+                _toastMessage.emit("发送失败: ${error.message}")
+            }
+        }
+    }
     
     fun uploadAndSendImage(uri: Uri, context: Context) {
         uploadJob?.cancel()
@@ -359,7 +466,7 @@ class ChatViewModel(
             }
     
             try {
-                val uploader = QiniuImageUploader(
+                val uploader = QiniuUploader(
                     context = context,
                     userToken = token,
                     enableWebp = false,
@@ -636,7 +743,8 @@ class ChatViewModel(
                 chatId = chatId,
                 chatType = chatType,
                 content = content,
-                contentType = MessageItem.CONTENT_TYPE_STICKER
+                contentType = MessageItem.CONTENT_TYPE_STICKER,
+                quoteMsgId = _uiState.value.replyTo?.msgId
             ).onSuccess {
                 hideStickerPanel()
             }.onFailure { error ->

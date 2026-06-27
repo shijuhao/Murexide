@@ -322,7 +322,7 @@ fun MessageBubble(
                                             }
                                             Text(
                                                 text = quoteText,
-                                                style = MaterialTheme.typography.bodyMedium,
+                                                style = MaterialTheme.typography.bodySmall,
                                                 maxLines = 2,
                                                 overflow = TextOverflow.Ellipsis,
                                                 color = MaterialTheme.colorScheme.onSurface

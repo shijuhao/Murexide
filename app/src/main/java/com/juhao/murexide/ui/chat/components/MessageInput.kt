@@ -44,6 +44,7 @@ fun MessageInput(
     onTextChange: (String) -> Unit,
     onSendClick: () -> Unit,
     onAddImageClick: () -> Unit,
+    onAddVideoClick: () -> Unit,
     onToggleSendType: (String) -> Unit,
     requestFocus: Boolean = false,
     onFocusConsumed: () -> Unit = {},
@@ -105,6 +106,16 @@ fun MessageInput(
                             },
                             leadingIcon = {
                                 Icon(Icons.Rounded.Image, contentDescription = null)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("视频") },
+                            onClick = {
+                                showMenu = false
+                                onAddVideoClick()
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Rounded.VideoCameraFront, contentDescription = null)
                             }
                         )
                         
