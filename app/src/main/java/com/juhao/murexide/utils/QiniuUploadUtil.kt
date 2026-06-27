@@ -20,6 +20,14 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class QiniuUploadResponse(
+    val key: String,
+    val hash: String = "",
+    val fsize: Long = 0L
+)
 
 class QiniuUploader(
     context: Context,
@@ -240,15 +248,9 @@ class QiniuUploader(
         }
     }
 
-    private fun parseUploadResponse(responseBody: String): String {
+    private fun parseUploadResponse(responseBody: String): QiniuUploadResponse {
         return try {
-            val json = Json.parseToJsonElement(responseBody).jsonObject
-            
-            json["key"]?.jsonPrimitive?.content?.let { return it }
-
-            json["hash"]?.jsonPrimitive?.content?.let { return it }
-            
-            throw IOException("Cannot parse upload response: $responseBody")
+            Json.decodeFromString<QiniuUploadResponse>(responseBody)
         } catch (e: Exception) {
             throw IOException("Failed to parse response: ${e.message}")
         }
@@ -257,7 +259,7 @@ class QiniuUploader(
     suspend fun upload(
         input: String,
         onProgress: (Float) -> Unit = {}
-    ): Result<String> {
+    ): Result<QiniuUploadResponse> {
         return withContext(Dispatchers.IO) {
             val filesToClean = mutableListOf<File>()
             
@@ -393,9 +395,9 @@ class QiniuUploader(
                             if (!fallbackResponse.isSuccessful) {
                                 return@withContext Result.failure(IOException("Upload failed: ${fallbackResponse.code} - $fallbackBody"))
                             }
-                            val imageUrl = parseUploadResponse(fallbackBody)
+                            val uploadResponse = parseUploadResponse(fallbackBody)
                             onProgress(1f)
-                            return@withContext Result.success(imageUrl)
+                            return@withContext Result.success(uploadResponse)
                         }
                     }
 
@@ -403,9 +405,9 @@ class QiniuUploader(
                         return@withContext Result.failure(IOException("Upload failed: ${response.code} - $responseBody"))
                     }
 
-                    val imageUrl = parseUploadResponse(responseBody)
+                    val uploadResponse = parseUploadResponse(responseBody)
                     onProgress(1f)
-                    Result.success(imageUrl)
+                    Result.success(uploadResponse)
                 }
     
             } catch (e: CancellationException) {
@@ -429,7 +431,7 @@ class QiniuUploader(
         context: Context,
         uri: Uri,
         onProgress: (Float) -> Unit = {}
-    ): Result<String> {
+    ): Result<QiniuUploadResponse> {
         return withContext(Dispatchers.IO) {
             try {
                 val fileName = getFileName(context, uri)

@@ -384,7 +384,7 @@ class ChatViewModel(
                     return@launch
                 }
     
-                result.onSuccess { videoUrl ->
+                result.onSuccess { response ->
                     _uiState.update {
                         it.copy(
                             isUploading = false,
@@ -392,7 +392,7 @@ class ChatViewModel(
                             uploadImagePath = null
                         )
                     }
-                    sendVideoMessage(videoUrl)
+                    sendVideoMessage(response.key)
                 }.onFailure { error ->
                     _uiState.update {
                         it.copy(
@@ -491,7 +491,7 @@ class ChatViewModel(
                     return@launch
                 }
     
-                result.onSuccess { imageUrl ->
+                result.onSuccess { response ->
                     _uiState.update {
                         it.copy(
                             isUploading = false,
@@ -499,7 +499,7 @@ class ChatViewModel(
                             uploadImagePath = null
                         )
                     }
-                    sendImageMessage(imageUrl)
+                    sendImageMessage(response.key)
                 }.onFailure { error ->
                     _uiState.update {
                         it.copy(
@@ -609,7 +609,7 @@ class ChatViewModel(
                     return@launch
                 }
     
-                result.onSuccess { fileUrl ->
+                result.onSuccess { response ->
                     _uiState.update {
                         it.copy(
                             isUploading = false,
@@ -617,7 +617,7 @@ class ChatViewModel(
                             uploadImagePath = null
                         )
                     }
-                    sendFileMessage(fileUrl, uri, context)
+                    sendFileMessage(response.key, response.fsize, uri, context)
                 }.onFailure { error ->
                     _uiState.update {
                         it.copy(
@@ -650,10 +650,9 @@ class ChatViewModel(
         }
     }
     
-    private fun sendFileMessage(fileUrl: String, uri: Uri, context: Context) {
+    private fun sendFileMessage(fileUrl: String, fileSize: Long, uri: Uri, context: Context) {
         viewModelScope.launch {
             val fileName = getFileNameFromUri(context, uri)
-            val fileSize = getFileSizeFromUri(context, uri)
             
             val content = MessageContent(
                 text = "",
@@ -693,18 +692,6 @@ class ChatViewModel(
             }
         }
         return uri.lastPathSegment ?: "file_${System.currentTimeMillis()}"
-    }
-    
-    private fun getFileSizeFromUri(context: Context, uri: Uri): Long {
-        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
-            if (cursor.moveToFirst()) {
-                val sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE)
-                if (sizeIndex >= 0) {
-                    return cursor.getLong(sizeIndex)
-                }
-            }
-        }
-        return 0L
     }
 
     fun showRecallDialog(msgId: String) {
