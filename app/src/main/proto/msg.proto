@@ -134,7 +134,7 @@ message send_message_send {
         string text = 1; // 消息文本
         string buttons = 2; // 按钮
         string file_name = 4; // 欲发送文件名称
-        string file = 5; // 欲发送文件key/url
+        string file_key = 5; // 欲发送文件key/url
         repeated string mentioned_id = 6; // @用户ID
         string form = 7; // 表单消息
         string quote_msg_text = 8; // 引用信息文本
