@@ -469,8 +469,7 @@ class ChatViewModel(
                 val uploader = QiniuUploader(
                     context = context,
                     userToken = token,
-                    enableWebp = false,
-                    debug = true
+                    enableWebp = true
                 )
     
                 val result = uploader.uploadFromUri(
@@ -570,6 +569,142 @@ class ChatViewModel(
                 _toastMessage.emit("发送失败: ${error.message}")
             }
         }
+    }
+    
+    fun uploadAndSendFile(uri: Uri, context: Context) {
+        uploadJob?.cancel()
+        uploadJob = viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    isUploading = true,
+                    uploadProgress = 0f,
+                    uploadImagePath = uri.toString(),
+                    isSending = false
+                )
+            }
+    
+            try {
+                val uploader = QiniuUploader(
+                    context = context,
+                    userToken = token,
+                    uploadType = 3
+                )
+    
+                val result = uploader.uploadFromUri(
+                    context = context,
+                    uri = uri,
+                    onProgress = { progress ->
+                        _uiState.update { it.copy(uploadProgress = progress) }
+                    }
+                )
+    
+                if (!isActive) {
+                    _uiState.update {
+                        it.copy(
+                            isUploading = false,
+                            uploadProgress = 0f,
+                            uploadImagePath = null
+                        )
+                    }
+                    return@launch
+                }
+    
+                result.onSuccess { fileUrl ->
+                    _uiState.update {
+                        it.copy(
+                            isUploading = false,
+                            uploadProgress = 1f,
+                            uploadImagePath = null
+                        )
+                    }
+                    sendFileMessage(fileUrl, uri, context)
+                }.onFailure { error ->
+                    _uiState.update {
+                        it.copy(
+                            isUploading = false,
+                            uploadProgress = 0f,
+                            uploadImagePath = null
+                        )
+                    }
+                    _toastMessage.emit("文件上传失败: ${error.message}")
+                }
+            } catch (_: CancellationException) {
+                _uiState.update {
+                    it.copy(
+                        isUploading = false,
+                        uploadProgress = 0f,
+                        uploadImagePath = null
+                    )
+                }
+                _toastMessage.emit("已取消上传")
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isUploading = false,
+                        uploadProgress = 0f,
+                        uploadImagePath = null
+                    )
+                }
+                _toastMessage.emit("上传失败: ${e.message}")
+            }
+        }
+    }
+    
+    private fun sendFileMessage(fileUrl: String, uri: Uri, context: Context) {
+        viewModelScope.launch {
+            val fileName = getFileNameFromUri(context, uri)
+            val fileSize = getFileSizeFromUri(context, uri)
+            
+            val content = MessageContent(
+                text = "",
+                fileKey = fileUrl,
+                fileName = fileName,
+                fileSize = fileSize
+            )
+            
+            repository.sendMessage(
+                token = token,
+                chatId = chatId,
+                chatType = chatType,
+                content = content,
+                contentType = MessageItem.CONTENT_TYPE_FILE,
+                quoteMsgId = _uiState.value.replyTo?.msgId
+            ).onSuccess {
+                _uiState.update { 
+                    it.copy(
+                        replyTo = null,
+                        isSending = false
+                    )
+                }
+            }.onFailure { error ->
+                _uiState.update { it.copy(isSending = false) }
+                _toastMessage.emit("发送失败: ${error.message}")
+            }
+        }
+    }
+    
+    private fun getFileNameFromUri(context: Context, uri: Uri): String {
+        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val nameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                if (nameIndex >= 0) {
+                    return cursor.getString(nameIndex)
+                }
+            }
+        }
+        return uri.lastPathSegment ?: "file_${System.currentTimeMillis()}"
+    }
+    
+    private fun getFileSizeFromUri(context: Context, uri: Uri): Long {
+        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE)
+                if (sizeIndex >= 0) {
+                    return cursor.getLong(sizeIndex)
+                }
+            }
+        }
+        return 0L
     }
 
     fun showRecallDialog(msgId: String) {

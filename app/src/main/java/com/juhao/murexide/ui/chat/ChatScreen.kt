@@ -197,6 +197,47 @@ fun ChatScreen(
             videoPickerLauncher.launch("video/*")
         }
     }
+    
+    val filePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            viewModel.uploadAndSendFile(it, context)
+        }
+    }
+    
+    val filePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.values.all { it }
+        if (allGranted) {
+            filePickerLauncher.launch("*/*")
+        } else {
+            Toast.makeText(context, "需要存储权限才能选择文件", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    fun openFilePicker() {
+        val permissions =
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                arrayOf(
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VIDEO
+                )
+            } else {
+                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+    
+        val needRequest = permissions.any {
+            ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
+        }
+    
+        if (needRequest) {
+            filePermissionLauncher.launch(permissions)
+        } else {
+            filePickerLauncher.launch("*/*")
+        }
+    }
 
     val selectionMode = uiState.selectionMode
     val selectedMessages = uiState.selectedMessages
@@ -684,6 +725,7 @@ fun ChatScreen(
                             onSendClick = { viewModel.sendMessage() },
                             onAddImageClick = { openImagePicker() },
                             onAddVideoClick = { openVideoPicker() },
+                            onAddFileClick = { openFilePicker() },
                             onToggleSendType = { type ->
                                 viewModel.toggleSendType(type)
                             },

@@ -45,6 +45,7 @@ fun MessageInput(
     onSendClick: () -> Unit,
     onAddImageClick: () -> Unit,
     onAddVideoClick: () -> Unit,
+    onAddFileClick: () -> Unit,
     onToggleSendType: (String) -> Unit,
     requestFocus: Boolean = false,
     onFocusConsumed: () -> Unit = {},
@@ -115,7 +116,17 @@ fun MessageInput(
                                 onAddVideoClick()
                             },
                             leadingIcon = {
-                                Icon(Icons.Rounded.VideoCameraFront, contentDescription = null)
+                                Icon(Icons.Rounded.Movie, contentDescription = null)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("文件") },
+                            onClick = {
+                                showMenu = false
+                                onAddFileClick()
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Rounded.AttachFile, contentDescription = null)
                             }
                         )
                         

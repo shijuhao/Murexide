@@ -4,6 +4,7 @@ import android.net.Uri
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.provider.OpenableColumns
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
@@ -24,7 +25,7 @@ class QiniuUploader(
     context: Context,
     private val userToken: String,
     private val enableWebp: Boolean = false,
-    private val uploadType: Int = 1,
+    private val uploadType: Int = 1, //1图片2视频3文件
     private val webpQuality: Int = 95,
     private val debug: Boolean = false
 ) {
@@ -37,6 +38,10 @@ class QiniuUploader(
         private const val VIDEO_DEFAULT_UPLOAD_HOST = "upload-cn-east-2.qiniup.com"
         private const val VIDEO_BUCKET = "chat68-video"
         
+        // 文件配置
+        private const val FILE_DEFAULT_UPLOAD_HOST = "upload-z2.qiniup.com"
+        private const val FILE_BUCKET = "chat68-file"
+        
         private val ALLOWED_IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "webp", "bmp")
         private val ALLOWED_VIDEO_EXTENSIONS = setOf("mp4", "avi", "mov", "mkv", "flv", "wmv", "3gp")
         
@@ -45,19 +50,32 @@ class QiniuUploader(
         private const val WRITE_TIMEOUT_SECONDS = 60L
     }
     
-    private val tokenUrl = if (uploadType == 1)
-        "https://chat-go.jwzhd.com/v1/misc/qiniu-token"
-    else
-        "https://chat-go.jwzhd.com/v1/misc/qiniu-token-video"
+    private val tokenUrl = when (uploadType) {
+        1 -> "https://chat-go.jwzhd.com/v1/misc/qiniu-token"
+        2 -> "https://chat-go.jwzhd.com/v1/misc/qiniu-token-video"
+        else -> "https://chat-go.jwzhd.com/v1/misc/qiniu-token2"
+    }
     
     private val defaultUploadHost: String
-    get() = if (uploadType == 1) IMAGE_DEFAULT_UPLOAD_HOST else VIDEO_DEFAULT_UPLOAD_HOST
-
+        get() = when (uploadType) {
+            1 -> IMAGE_DEFAULT_UPLOAD_HOST
+            2 -> VIDEO_DEFAULT_UPLOAD_HOST
+            else -> FILE_DEFAULT_UPLOAD_HOST
+        }
+    
     private val bucket: String
-        get() = if (uploadType == 1) IMAGE_BUCKET else VIDEO_BUCKET
+        get() = when (uploadType) {
+            1 -> IMAGE_BUCKET
+            2 -> VIDEO_BUCKET
+            else -> FILE_BUCKET
+        }
     
     private val allowedExtensions: Set<String>
-        get() = if (uploadType == 1) ALLOWED_IMAGE_EXTENSIONS else ALLOWED_VIDEO_EXTENSIONS
+        get() = when (uploadType) {
+            1 -> ALLOWED_IMAGE_EXTENSIONS
+            2 -> ALLOWED_VIDEO_EXTENSIONS
+            else -> ALLOWED_FILE_EXTENSIONS
+        }
     
     private val appContext = context.applicationContext
 
@@ -209,21 +227,31 @@ class QiniuUploader(
     }
 
     private suspend fun prepareFile(file: File): Pair<File, String> {
-        return if (uploadType == 1) {
-            if (enableWebp) {
-                val webpFile = File(appContext.cacheDir, "${file.nameWithoutExtension}.webp")
-                if (convertToWebp(file, webpFile)) {
-                    return webpFile to "webp"
+        return when (uploadType) {
+            1 -> {
+                // 图片处理
+                if (enableWebp) {
+                    val webpFile = File(appContext.cacheDir, "${file.nameWithoutExtension}.webp")
+                    if (convertToWebp(file, webpFile)) {
+                        return webpFile to "webp"
+                    }
                 }
+                val ext = file.extension.ifEmpty { "bin" }
+                file to ext
             }
-            val ext = file.extension.ifEmpty { "bin" }
-            file to ext
-        } else {
-            val ext = file.extension.ifEmpty { "mp4" }
-            if (!allowedExtensions.contains(ext.lowercase())) {
-                debugLog("Unsupported video format: $ext, using mp4")
+            2 -> {
+                // 视频处理
+                val ext = file.extension.ifEmpty { "mp4" }
+                if (!allowedExtensions.contains(ext.lowercase())) {
+                    debugLog("Unsupported video format: $ext, using mp4")
+                }
+                file to ext
             }
-            file to ext
+            else -> {
+                // 文件处理
+                val ext = file.extension.ifEmpty { "bin" }
+                file to ext
+            }
         }
     }
 
@@ -436,8 +464,9 @@ class QiniuUploader(
     ): Result<String> {
         return withContext(Dispatchers.IO) {
             try {
-                val extension = if (uploadType == 1) "jpg" else "mp4"
-                val cacheFile = File(context.cacheDir, "temp_${System.currentTimeMillis()}.$extension")
+                val fileName = getFileName(context, uri)
+                val cacheFile = File(context.cacheDir, fileName)
+                
                 context.contentResolver.openInputStream(uri)?.use { input ->
                     cacheFile.outputStream().use { output ->
                         input.copyTo(output)
@@ -451,5 +480,17 @@ class QiniuUploader(
                 Result.failure(e)
             }
         }
+    }
+    
+    private fun getFileName(context: Context, uri: Uri): String {
+        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (nameIndex >= 0) {
+                    return cursor.getString(nameIndex)
+                }
+            }
+        }
+        return uri.lastPathSegment ?: "file_${System.currentTimeMillis()}"
     }
 }
