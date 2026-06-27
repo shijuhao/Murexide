@@ -58,6 +58,10 @@ class QiniuUploader(
         private const val WRITE_TIMEOUT_SECONDS = 60L
     }
     
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
+    
     private val tokenUrl = when (uploadType) {
         1 -> "https://chat-go.jwzhd.com/v1/misc/qiniu-token"
         2 -> "https://chat-go.jwzhd.com/v1/misc/qiniu-token-video"
@@ -145,7 +149,7 @@ class QiniuUploader(
                 val body = response.body.string()
     
                 try {
-                    val json = Json.parseToJsonElement(body).jsonObject
+                    val json = json.parseToJsonElement(body).jsonObject
                     val token = json["data"]
                         ?.jsonObject
                         ?.get("token")
@@ -174,7 +178,7 @@ class QiniuUploader(
                     val body = response.body.string()
     
                     try {
-                        val json = Json.parseToJsonElement(body).jsonObject
+                        val json = json.parseToJsonElement(body).jsonObject
                         val hosts = json["hosts"]?.jsonArray ?: return@withContext defaultUploadHost
                         
                         if (hosts.isNotEmpty()) {
@@ -250,7 +254,7 @@ class QiniuUploader(
 
     private fun parseUploadResponse(responseBody: String): QiniuUploadResponse {
         return try {
-            Json.decodeFromString<QiniuUploadResponse>(responseBody)
+            json.decodeFromString<QiniuUploadResponse>(responseBody)
         } catch (e: Exception) {
             throw IOException("Failed to parse response: ${e.message}")
         }
