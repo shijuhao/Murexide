@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.selects.select
+import kotlinx.coroutines.selects.onTimeout
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.WebSocket

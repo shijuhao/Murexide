@@ -134,13 +134,19 @@ class QiniuUploader(
                     throw IOException("Failed to get upload token: ${response.code}")
                 }
     
+                val body = response.body.string()
+                debugLog("Token response: $body")
+    
                 try {
-                    Json.parseToJsonElement(response.body.string())
-                        .jsonObject["data"]
+                    val json = Json.parseToJsonElement(body).jsonObject
+                    val token = json["data"]
                         ?.jsonObject
-                        ?.getValue("token")
+                        ?.get("token")
                         ?.jsonPrimitive
                         ?.content
+                        ?: throw IOException("Token not found in response")
+                    
+                    token
                 } catch (e: Exception) {
                     throw IOException("Failed to parse response: ${e.message}")
                 }
