@@ -429,7 +429,12 @@ class ChatViewModel(
         viewModelScope.launch {
             val content = MessageContent(
                 video = videoUrl,
-                text = ""
+                text = "",
+                quoteMsgText = state.replyTo?.let {
+                    "${it.senderName}: ${it.content}"
+                },
+                quoteImageUrl = state.replyTo?.imageUrl,
+                quoteImageName = state.replyTo?.imageUrl?.toUri()?.lastPathSegment
             )
             
             repository.sendMessage(
@@ -547,7 +552,12 @@ class ChatViewModel(
         viewModelScope.launch {
             val content = MessageContent(
                 image = imageUrl,
-                text = ""
+                text = "",
+                quoteMsgText = state.replyTo?.let {
+                    "${it.senderName}: ${it.content}"
+                },
+                quoteImageUrl = state.replyTo?.imageUrl,
+                quoteImageName = state.replyTo?.imageUrl?.toUri()?.lastPathSegment
             )
             
             repository.sendMessage(
@@ -856,7 +866,12 @@ class ChatViewModel(
             image = imageUrl,
             expressionId = expressionId,
             stickerItemId = stickerItemId,
-            stickerPackId = stickerPackId
+            stickerPackId = stickerPackId,
+            quoteMsgText = state.replyTo?.let {
+                "${it.senderName}: ${it.content}"
+            },
+            quoteImageUrl = state.replyTo?.imageUrl,
+            quoteImageName = state.replyTo?.imageUrl?.toUri()?.lastPathSegment
         )
 
         viewModelScope.launch {
@@ -869,6 +884,11 @@ class ChatViewModel(
                 quoteMsgId = _uiState.value.replyTo?.msgId
             ).onSuccess {
                 hideStickerPanel()
+                _uiState.update { 
+                    it.copy(
+                        replyTo = null
+                    )
+                }
             }.onFailure { error ->
                 _toastMessage.emit("表情发送失败: ${error.message}")
                 error.printStackTrace()
