@@ -119,6 +119,7 @@ class MessageRepository {
                     quote_image_url = content.quoteImageUrl ?: "",
                     quote_image_name = content.quoteImageName ?: "",
                     file_name = content.fileName ?: "",
+                    file = content.fileKey ?: "",
                     file_size = content.fileSize ?: 0L,
                     audio = content.audio ?: "",
                     audio_time = content.audioTime?.toLong() ?: 0L,
