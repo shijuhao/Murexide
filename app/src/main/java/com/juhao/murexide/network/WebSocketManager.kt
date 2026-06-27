@@ -110,7 +110,8 @@ class WebSocketManager private constructor() {
                 } else {
                     select<Unit> {
                         connectionSignal.onReceive { }
-                        backoff.onTimeout { }
+                        onTimeout(backoff) {
+                        }
                     }
                     backoff = minOf(backoff * 2, 30_000L)
                 }
