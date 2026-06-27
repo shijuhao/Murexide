@@ -139,8 +139,8 @@ class QiniuUploader(
                         .jsonObject["data"]
                         ?.jsonObject
                         ?.getValue("token")
-                        .jsonPrimitive
-                        .content
+                        ?.jsonPrimitive
+                        ?.content
                 } catch (e: Exception) {
                     throw IOException("Failed to parse response: ${e.message}")
                 }
