@@ -15,6 +15,10 @@ import java.security.MessageDigest
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 class QiniuUploader(
     context: Context,
@@ -148,13 +152,28 @@ class QiniuUploader(
                     if (!response.isSuccessful) return@withContext defaultUploadHost
     
                     val body = response.body.string()
+                    debugLog("Query response: $body")
     
-                    val domainRegex = """"domains"\s*:\s*\[\s*"([^"]+)"""".toRegex()
-                    val domain = domainRegex.find(body)?.groupValues?.get(1)
-                        ?.replace(Regex("^https?://"), "")
-                        ?.substringBefore("/")
+                    try {
+                        val json = Json.parseToJsonElement(body).jsonObject
+                        val hosts = json["hosts"]?.jsonArray ?: return@withContext defaultUploadHost
+                        
+                        if (hosts.isNotEmpty()) {
+                            val firstHost = hosts[0].jsonObject
+                            val up = firstHost["up"]?.jsonObject ?: return@withContext defaultUploadHost
+                            val domains = up["domains"]?.jsonArray ?: return@withContext defaultUploadHost
+                            
+                            if (domains.isNotEmpty()) {
+                                val domain = domains[0].jsonPrimitive.content
+                                debugLog("✅ Found upload domain: $domain")
+                                return@withContext domain
+                            }
+                        }
+                    } catch (e: Exception) {
+                        debugLog("Failed to parse JSON: ${e.message}")
+                    }
     
-                    domain ?: defaultUploadHost
+                    defaultUploadHost
                 }
             } catch (e: Exception) {
                 debugLog("Failed to query upload host: ${e.message}")
