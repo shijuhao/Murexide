@@ -137,7 +137,7 @@ fun ChatScreen(
         if (allGranted) {
             imagePickerLauncher.launch("image/*")
         } else {
-            Toast.makeText(context, "需要存储权限才能选择图片", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "需要权限才能选择图片", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -175,7 +175,7 @@ fun ChatScreen(
         if (allGranted) {
             videoPickerLauncher.launch("video/*")
         } else {
-            Toast.makeText(context, "需要存储权限才能选择视频", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "需要权限才能选择视频", Toast.LENGTH_SHORT).show()
         }
     }
 

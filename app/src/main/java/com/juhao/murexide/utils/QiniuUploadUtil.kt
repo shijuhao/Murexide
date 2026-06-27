@@ -364,7 +364,7 @@ class QiniuUploader(
 
                     if (!response.isSuccessful && responseBody.contains("no such domain")) {
                         debugLog("Domain error, switching to default domain")
-                        val fallbackUrl = "https://$DEFAULT_UPLOAD_HOST"
+                        val fallbackUrl = "https://$defaultUploadHost"
                         val fallbackRequest = Request.Builder()
                             .url(fallbackUrl)
                             .post(requestBody)
