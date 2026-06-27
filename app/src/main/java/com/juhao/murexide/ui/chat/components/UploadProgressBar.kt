@@ -43,7 +43,7 @@ fun UploadProgressBar(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "正在上传图片...",
+                        text = "正在上传...",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface

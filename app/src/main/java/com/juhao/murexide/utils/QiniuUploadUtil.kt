@@ -25,10 +25,17 @@ class QiniuUploader(
     private val debug: Boolean = false
 ) {
     companion object {
-        private const val DEFAULT_UPLOAD_HOST = "upload-z2.qiniup.com"
-        private const val BUCKET = "chat-68"
+        // 图片配置
+        private const val IMAGE_DEFAULT_UPLOAD_HOST = "upload-z2.qiniup.com"
+        private const val IMAGE_BUCKET = "chat-68"
+        
+        // 视频配置
+        private const val VIDEO_DEFAULT_UPLOAD_HOST = "up-cn-east-2.qiniup.com"
+        private const val VIDEO_BUCKET = "chat68-video"
+        
         private val ALLOWED_IMAGE_EXTENSIONS = setOf("jpg", "jpeg", "png", "gif", "webp", "bmp")
         private val ALLOWED_VIDEO_EXTENSIONS = setOf("mp4", "avi", "mov", "mkv", "flv", "wmv", "3gp")
+        
         private const val CONNECTION_TIMEOUT_SECONDS = 60L
         private const val READ_TIMEOUT_SECONDS = 60L
         private const val WRITE_TIMEOUT_SECONDS = 60L
@@ -39,11 +46,15 @@ class QiniuUploader(
     else
         "https://chat-go.jwzhd.com/v1/misc/qiniu-token-video"
     
-    private val allowedExtensions = if (uploadType == 1)
-        ALLOWED_IMAGE_EXTENSIONS
-    else
-        ALLOWED_VIDEO_EXTENSIONS
+    private val defaultUploadHost: String
+    get() = if (uploadType == 1) IMAGE_DEFAULT_UPLOAD_HOST else VIDEO_DEFAULT_UPLOAD_HOST
 
+    private val bucket: String
+        get() = if (uploadType == 1) IMAGE_BUCKET else VIDEO_BUCKET
+    
+    private val allowedExtensions: Set<String>
+        get() = if (uploadType == 1) ALLOWED_IMAGE_EXTENSIONS else ALLOWED_VIDEO_EXTENSIONS
+    
     private val appContext = context.applicationContext
 
     private val client = OkHttpClient.Builder()
@@ -128,26 +139,26 @@ class QiniuUploader(
 
     private suspend fun queryUploadHost(uploadToken: String): String {
         val ak = uploadToken.substringBefore(":")
-        val url = "https://api.qiniu.com/v4/query?ak=$ak&bucket=$BUCKET"
-
+        val url = "https://api.qiniu.com/v4/query?ak=$ak&bucket=$bucket"
+    
         return withContext(Dispatchers.IO) {
             try {
                 val response = client.newCall(Request.Builder().url(url).get().build()).execute()
                 response.use { response ->
-                    if (!response.isSuccessful) return@withContext DEFAULT_UPLOAD_HOST
-
+                    if (!response.isSuccessful) return@withContext defaultUploadHost
+    
                     val body = response.body.string()
-
+    
                     val domainRegex = """"domains"\s*:\s*\[\s*"([^"]+)"""".toRegex()
                     val domain = domainRegex.find(body)?.groupValues?.get(1)
                         ?.replace(Regex("^https?://"), "")
                         ?.substringBefore("/")
-
-                    domain ?: DEFAULT_UPLOAD_HOST
+    
+                    domain ?: defaultUploadHost
                 }
             } catch (e: Exception) {
                 debugLog("Failed to query upload host: ${e.message}")
-                DEFAULT_UPLOAD_HOST
+                defaultUploadHost
             }
         }
     }
@@ -190,6 +201,9 @@ class QiniuUploader(
             file to ext
         } else {
             val ext = file.extension.ifEmpty { "mp4" }
+            if (!allowedExtensions.contains(ext.lowercase())) {
+                debugLog("Unsupported video format: $ext, using mp4")
+            }
             file to ext
         }
     }
