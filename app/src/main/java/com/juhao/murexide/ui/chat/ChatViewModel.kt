@@ -426,6 +426,8 @@ class ChatViewModel(
     }
     
     private fun sendVideoMessage(videoUrl: String) {
+        val state = _uiState.value
+        
         viewModelScope.launch {
             val content = MessageContent(
                 video = videoUrl,
@@ -549,6 +551,8 @@ class ChatViewModel(
     }
     
     private fun sendImageMessage(imageUrl: String) {
+        val state = _uiState.value
+        
         viewModelScope.launch {
             val content = MessageContent(
                 image = imageUrl,
@@ -862,6 +866,8 @@ class ChatViewModel(
         stickerItemId: Long? = null,
         stickerPackId: Long? = null
     ) {
+        val state = _uiState.value
+        
         val content = MessageContent(
             image = imageUrl,
             expressionId = expressionId,
