@@ -33,7 +33,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -358,95 +357,143 @@ fun ChatScreen(
                 },
                 label = "top_bar_transition"
             ) { isSelectionMode ->
-                Box(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .blur(radius = 20.dp)
-                    )
-                    
-                    if (isSelectionMode) {
-                        TopAppBar(
-                            windowInsets = if (bigScreenMode) {
-                                WindowInsets(
-                                    top = WindowInsets.statusBars.asPaddingValues()
-                                        .calculateTopPadding()
-                                )
-                            } else {
-                                TopAppBarDefaults.windowInsets
-                            },
-                            title = {
-                                AnimatedContent(
-                                    targetState = selectedMessages.size,
-                                    transitionSpec = {
-                                        if (targetState > initialState) {
-                                            slideInVertically(
-                                                initialOffsetY = { fullHeight -> fullHeight },
-                                                animationSpec = tween(200)
-                                            ) togetherWith slideOutVertically(
-                                                targetOffsetY = { fullHeight -> -fullHeight },
-                                                animationSpec = tween(200)
-                                            )
-                                        } else {
-                                            slideInVertically(
-                                                initialOffsetY = { fullHeight -> -fullHeight },
-                                                animationSpec = tween(200)
-                                            ) togetherWith slideOutVertically(
-                                                targetOffsetY = { fullHeight -> fullHeight },
-                                                animationSpec = tween(200)
-                                            )
-                                        }
-                                    },
-                                    label = "selected_count"
-                                ) { count ->
-                                    Text(
-                                        text = "$count",
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            },
-                            navigationIcon = {
-                                IconButton(onClick = { viewModel.exitSelectionMode() }) {
-                                    Icon(Icons.Rounded.Close, contentDescription = "退出多选")
-                                }
-                            },
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f)
-                            ),
-                            actions = {
-                                if (selectedMessages.size == 1) {
-                                    IconButton(onClick = { 
-                                        selectedMessages.firstOrNull()?.let { viewModel.setReplyTo(it) }
-                                        viewModel.exitSelectionMode()
-                                    }) {
-                                        Icon(Icons.Rounded.FormatQuote, contentDescription = "引用")
+                if (isSelectionMode) {
+                    TopAppBar(
+                        windowInsets = if (bigScreenMode) {
+                            WindowInsets(
+                                top = WindowInsets.statusBars.asPaddingValues()
+                                    .calculateTopPadding()
+                            )
+                        } else {
+                            TopAppBarDefaults.windowInsets
+                        },
+                        title = {
+                            AnimatedContent(
+                                targetState = selectedMessages.size,
+                                transitionSpec = {
+                                    if (targetState > initialState) {
+                                        slideInVertically(
+                                            initialOffsetY = { fullHeight -> fullHeight },
+                                            animationSpec = tween(200)
+                                        ) togetherWith slideOutVertically(
+                                            targetOffsetY = { fullHeight -> -fullHeight },
+                                            animationSpec = tween(200)
+                                        )
+                                    } else {
+                                        slideInVertically(
+                                            initialOffsetY = { fullHeight -> -fullHeight },
+                                            animationSpec = tween(200)
+                                        ) togetherWith slideOutVertically(
+                                            targetOffsetY = { fullHeight -> fullHeight },
+                                            animationSpec = tween(200)
+                                        )
                                     }
-                                }
-                                IconButton(onClick = { showScreenshotSheet = true }) {
-                                    Icon(Icons.Rounded.Crop, contentDescription = "截图")
+                                },
+                                label = "selected_count"
+                            ) { count ->
+                                Text(
+                                    text = "$count",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = { viewModel.exitSelectionMode() }) {
+                                Icon(Icons.Rounded.Close, contentDescription = "退出多选")
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
+                        ),
+                        actions = {
+                            if (selectedMessages.size == 1) {
+                                IconButton(onClick = { 
+                                    selectedMessages.firstOrNull()?.let { viewModel.setReplyTo(it) }
+                                    viewModel.exitSelectionMode()
+                                }) {
+                                    Icon(Icons.Rounded.FormatQuote, contentDescription = "引用")
                                 }
                             }
-                        )
-                    } else {
-                        TopAppBar(
-                            windowInsets = if (bigScreenMode) {
-                                WindowInsets(
-                                    top = WindowInsets.statusBars.asPaddingValues()
-                                        .calculateTopPadding()
+                            IconButton(onClick = { showScreenshotSheet = true }) {
+                                Icon(Icons.Rounded.Crop, contentDescription = "截图")
+                            }
+                        }
+                    )
+                } else {
+                    TopAppBar(
+                        windowInsets = if (bigScreenMode) {
+                            WindowInsets(
+                                top = WindowInsets.statusBars.asPaddingValues()
+                                    .calculateTopPadding()
+                            )
+                        } else {
+                            TopAppBarDefaults.windowInsets
+                        },
+                        title = {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable {
+                                        ConversationDetailActivity.start(
+                                            context = context,
+                                            chatId = viewModel.chatId,
+                                            chatType = chatType,
+                                            chatName = chatName,
+                                            chatAvatar = chatAvatar
+                                        )
+                                    }
+                            ) {
+                                Avatar(
+                                    url = chatAvatar,
+                                    size = 36.dp
                                 )
-                            } else {
-                                TopAppBarDefaults.windowInsets
-                            },
-                            title = {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .clickable {
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Text(
+                                        text = chatName,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    if (chatType == 2 && uiState.memberCount != null) {
+                                        Text(
+                                            text = "${uiState.memberCount} 位成员",
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp).copy(alpha = 0.9f)
+                        ),
+                        actions = {
+                            Box {
+                                DropdownMenu(
+                                    expanded = showMoreMenu,
+                                    onDismissRequest = { showMoreMenu = false }
+                                ) {
+                                    DropdownMenuItem(
+                                        text = { Text("刷新") },
+                                        onClick = {
+                                            showMoreMenu = false
+                                            viewModel.refresh()
+                                        },
+                                        leadingIcon = {
+                                            Icon(Icons.Rounded.Refresh, contentDescription = null)
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text("会话详情") },
+                                        onClick = {
+                                            showMoreMenu = false
                                             ConversationDetailActivity.start(
                                                 context = context,
                                                 chatId = viewModel.chatId,
@@ -454,89 +501,31 @@ fun ChatScreen(
                                                 chatName = chatName,
                                                 chatAvatar = chatAvatar
                                             )
+                                        },
+                                        leadingIcon = {
+                                            Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(24.dp))
                                         }
-                                ) {
-                                    Avatar(
-                                        url = chatAvatar,
-                                        size = 36.dp
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Column {
-                                        Text(
-                                            text = chatName,
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            fontWeight = FontWeight.Bold,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                        if (chatType == 2 && uiState.memberCount != null) {
-                                            Text(
-                                                text = "${uiState.memberCount} 位成员",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                maxLines = 1
-                                            )
-                                        }
-                                    }
                                 }
-                            },
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp).copy(alpha = 0.85f)
-                            ),
-                            actions = {
-                                Box {
-                                    DropdownMenu(
-                                        expanded = showMoreMenu,
-                                        onDismissRequest = { showMoreMenu = false }
-                                    ) {
-                                        DropdownMenuItem(
-                                            text = { Text("刷新") },
-                                            onClick = {
-                                                showMoreMenu = false
-                                                viewModel.refresh()
-                                            },
-                                            leadingIcon = {
-                                                Icon(Icons.Rounded.Refresh, contentDescription = null)
-                                            }
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text("会话详情") },
-                                            onClick = {
-                                                showMoreMenu = false
-                                                ConversationDetailActivity.start(
-                                                    context = context,
-                                                    chatId = viewModel.chatId,
-                                                    chatType = chatType,
-                                                    chatName = chatName,
-                                                    chatAvatar = chatAvatar
-                                                )
-                                            },
-                                            leadingIcon = {
-                                                Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(24.dp))
-                                            }
-                                        )
-                                    }
-    
-                                    IconButton(onClick = {
-                                        showMoreMenu = true
-                                    }) {
-                                        Icon(Icons.Rounded.MoreVert, contentDescription = "更多")
-                                    }
-                                }
-                            },
-                            navigationIcon = {
-                                if (!bigScreenMode) {
-                                    IconButton(onClick = onBackClick) {
-                                        Icon(
-                                            Icons.AutoMirrored.Rounded.ArrowBack,
-                                            contentDescription = "返回"
-                                        )
-                                    }
+
+                                IconButton(onClick = {
+                                    showMoreMenu = true
+                                }) {
+                                    Icon(Icons.Rounded.MoreVert, contentDescription = "更多")
                                 }
                             }
-                        )
-                    }
+                        },
+                        navigationIcon = {
+                            if (!bigScreenMode) {
+                                IconButton(onClick = onBackClick) {
+                                    Icon(
+                                        Icons.AutoMirrored.Rounded.ArrowBack,
+                                        contentDescription = "返回"
+                                    )
+                                }
+                            }
+                        }
+                    )
                 }
             }
         },
@@ -791,7 +780,9 @@ fun ChatScreen(
             } else {
                 LazyColumn(
                     state = listState,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .align(Alignment.BottomCenter),
                     reverseLayout = true,
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
