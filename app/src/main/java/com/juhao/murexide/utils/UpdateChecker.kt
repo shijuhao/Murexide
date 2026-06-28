@@ -14,7 +14,7 @@ data class UpdateInfo(
 
 suspend fun checkForUpdateWithDetails(
     context: Context,
-    owner: String = "shijuhao",
+    owner: String = "murexide-project",
     repo: String = "Murexide",
     includePreRelease: Boolean = false
 ): UpdateInfo? = withContext(Dispatchers.IO) {

@@ -116,7 +116,7 @@ fun AboutScreen(
                     title = "GitHub",
                     subtitle = "访问项目源码",
                     onClick = {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, "https://github.com/shijuhao/Murexide".toUri()))
+                        context.startActivity(Intent(Intent.ACTION_VIEW, "https://github.com/murexide-project/Murexide".toUri()))
                     }
                 )
             }

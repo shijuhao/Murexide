@@ -533,7 +533,13 @@ fun ChatScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .then(
+                                if (!bigScreenMode)
+                                    Modifier.navigationBarsPadding()
+                                else
+                                    Modifier
+                            ),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         TextButton(
