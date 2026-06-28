@@ -140,9 +140,6 @@ private fun DetailHeader(detail: ConversationDetail) {
 @Composable
 private fun UserSection(detail: ConversationDetail) {
     SettingsGroup(title = "用户信息") {
-        detail.nameId?.let {
-            InfoItem(Icons.Rounded.Badge, "云湖号", it.toString())
-        }
         if (detail.isVip) {
             InfoItem(Icons.Rounded.WorkspacePremium, "会员", "VIP 用户")
         }
@@ -153,7 +150,7 @@ private fun UserSection(detail: ConversationDetail) {
             InfoItem(Icons.Rounded.AccessTime, "在线天数", "$it 天")
         }
         detail.continuousOnlineDay?.let {
-            InfoItem(Icons.Rounded.MoreTime, "连续在线", "$it 天")
+            InfoItem(Icons.Rounded.LocalFireDepartment, "连续在线", "$it 天")
         }
         InfoItem(
             when (detail.gender) {

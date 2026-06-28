@@ -29,7 +29,8 @@ import com.juhao.murexide.ui.about.AboutActivity
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onLogout: () -> Unit = {}
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val scrollState = rememberScrollState()
@@ -41,6 +42,7 @@ fun SettingsScreen(
     
     var showUpdateDialog by remember { mutableStateOf(false) }
     var updateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     val themeMode by ThemeState.themeMode
     var squareAvatar by remember { mutableStateOf(false) }
@@ -57,6 +59,32 @@ fun SettingsScreen(
         updateChannel = settingsStorage.getUpdateChannel()
     }
     
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            icon = {
+                Icon(Icons.AutoMirrored.Rounded.Logout, contentDescription = null)
+            },
+            title = { Text("退出登录") },
+            text = { Text("确定要退出当前账号吗？") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showLogoutDialog = false
+                        onLogout()
+                    }
+                ) {
+                    Text("退出", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text("取消")
+                }
+            }
+        )
+    }
+
     if (showUpdateDialog && updateInfo != null) {
         UpdateDialog(
             updateInfo = updateInfo!!,
@@ -229,6 +257,15 @@ fun SettingsScreen(
                         val intent = Intent(context, AboutActivity::class.java)
                         context.startActivity(intent)
                     }
+                )
+            }
+
+            SettingsGroup(title = "账号") {
+                SettingsItem(
+                    icon = Icons.AutoMirrored.Rounded.Logout,
+                    title = "退出登录",
+                    isDestructive = true,
+                    onClick = { showLogoutDialog = true }
                 )
             }
 

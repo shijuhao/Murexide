@@ -3,7 +3,6 @@ package com.juhao.murexide
 import android.content.Intent
 import com.juhao.murexide.ui.settings.SettingsActivity
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -86,14 +85,7 @@ class MainActivity : ComponentActivity() {
             setContent {
                 MurexideTheme {
                     Surface(modifier = Modifier.fillMaxSize()) {
-                        MainScreen(token) {
-                            lifecycleScope.launch {
-                                tokenStorage.clearToken()
-                                Toast.makeText(this@MainActivity, "已登出", Toast.LENGTH_SHORT).show()
-                                LoginActivity.start(this@MainActivity)
-                                finish()
-                            }
-                        }
+                        MainScreen(token)
                     }
                 }
             }
@@ -103,7 +95,7 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(token: String, onLogout: () -> Unit) {
+fun MainScreen(token: String) {
     val context = LocalContext.current
 
     val settingsStorage = remember { SettingsStorage(context) }
@@ -156,7 +148,6 @@ fun MainScreen(token: String, onLogout: () -> Unit) {
                     currentConversation = currentConversation,
                     bigScreenMode = useNavigationRail,
                     bigScreenEnabled = bigScreenEnabled,
-                    onLogout = onLogout,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxSize(),
@@ -238,7 +229,6 @@ private fun MainNavHost(
     currentConversation: ConversationItem? = null,
     bigScreenMode: Boolean = false,
     bigScreenEnabled: Boolean = true,
-    onLogout: () -> Unit,
     navController: androidx.navigation.NavHostController,
 ) {
     val context = LocalContext.current
@@ -348,7 +338,6 @@ private fun MainNavHost(
         composable("mine") {
             MineScreen(
                 token = token,
-                onLogout = onLogout,
                 onSettingsClick = {
                     context.startActivity(Intent(context, SettingsActivity::class.java))
                 }
