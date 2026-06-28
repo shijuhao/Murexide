@@ -359,11 +359,14 @@ fun ChatScreen(
                 label = "top_bar_transition"
             ) { isSelectionMode ->
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .blur(radius = 20.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .blur(radius = 20.dp)
+                    )
+                    
                     if (isSelectionMode) {
                         TopAppBar(
                             windowInsets = if (bigScreenMode) {
