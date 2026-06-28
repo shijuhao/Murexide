@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.BlurredEdgeTreatment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -363,7 +362,7 @@ fun ChatScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .statusBarsPadding()
-                        .blur(radius = 20.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+                        .blur(radius = 20.dp)
                 ) {
                     if (isSelectionMode) {
                         TopAppBar(
@@ -426,10 +425,7 @@ fun ChatScreen(
                                 IconButton(onClick = { showScreenshotSheet = true }) {
                                     Icon(Icons.Rounded.Crop, contentDescription = "截图")
                                 }
-                            },
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            )
+                            }
                         )
                     } else {
                         TopAppBar(
@@ -745,7 +741,7 @@ fun ChatScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(top = innerPadding.calculateTopPadding())
+                        .padding(top = innerPadding.calculateTopPadding() + 24.dp)
                 ) {
                     CircularProgressIndicator(
                         modifier = Modifier
@@ -756,14 +752,38 @@ fun ChatScreen(
             } else if (uiState.error != null && uiState.messages.isEmpty()) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = innerPadding.calculateTopPadding())
+                        .align(Alignment.TopCenter)
+                        .padding(top = innerPadding.calculateTopPadding() + 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        text = "错误: ${uiState.error}",
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.align(Alignment.Center)
+                    Icon(
+                        Icons.Rounded.Warning,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                        tint = MaterialTheme.colorScheme.error
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "加载失败",
+                        color = MaterialTheme.colorScheme.error,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = uiState.error ?: "未知错误",
+                        color = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = { viewModel.refresh() },
+                        modifier = Modifier
+                    ) {
+                        Icon(Icons.Rounded.Refresh, contentDescription = null)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("重试")
+                    }
                 }
             } else {
                 LazyColumn(
