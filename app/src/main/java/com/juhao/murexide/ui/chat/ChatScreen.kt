@@ -542,6 +542,16 @@ fun ChatScreen(
                             ),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
+                        Button(
+                            onClick = { viewModel.recallSelectedMessages() },
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                        ) {
+                            Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = null, tint = MaterialTheme.colorScheme.onError)
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("撤回", color = MaterialTheme.colorScheme.onError)
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
                         TextButton(
                             onClick = { /* 转发选中消息 */ },
                             modifier = Modifier.weight(1f)
@@ -554,16 +564,6 @@ fun ChatScreen(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text("转发")
                             }
-                        }
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Button(
-                            onClick = { viewModel.recallSelectedMessages() },
-                            modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-                        ) {
-                            Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = null)
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text("撤回")
                         }
                     }
                 } else {
