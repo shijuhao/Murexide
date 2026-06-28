@@ -30,9 +30,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.material3.*
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.BlurredEdgeTreatment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -357,133 +359,95 @@ fun ChatScreen(
                 },
                 label = "top_bar_transition"
             ) { isSelectionMode ->
-                if (isSelectionMode) {
-                    TopAppBar(
-                        windowInsets = if (bigScreenMode) {
-                            WindowInsets(
-                                top = WindowInsets.statusBars.asPaddingValues()
-                                    .calculateTopPadding()
-                            )
-                        } else {
-                            TopAppBarDefaults.windowInsets
-                        },
-                        title = {
-                            AnimatedContent(
-                                targetState = selectedMessages.size,
-                                transitionSpec = {
-                                    if (targetState > initialState) {
-                                        slideInVertically(
-                                            initialOffsetY = { fullHeight -> fullHeight },
-                                            animationSpec = tween(200)
-                                        ) togetherWith slideOutVertically(
-                                            targetOffsetY = { fullHeight -> -fullHeight },
-                                            animationSpec = tween(200)
-                                        )
-                                    } else {
-                                        slideInVertically(
-                                            initialOffsetY = { fullHeight -> -fullHeight },
-                                            animationSpec = tween(200)
-                                        ) togetherWith slideOutVertically(
-                                            targetOffsetY = { fullHeight -> fullHeight },
-                                            animationSpec = tween(200)
-                                        )
-                                    }
-                                },
-                                label = "selected_count"
-                            ) { count ->
-                                Text(
-                                    text = "$count",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                        .blur(radius = 20.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+                ) {
+                    if (isSelectionMode) {
+                        TopAppBar(
+                            windowInsets = if (bigScreenMode) {
+                                WindowInsets(
+                                    top = WindowInsets.statusBars.asPaddingValues()
+                                        .calculateTopPadding()
                                 )
-                            }
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = { viewModel.exitSelectionMode() }) {
-                                Icon(Icons.Rounded.Close, contentDescription = "退出多选")
-                            }
-                        },
-                        actions = {
-                            if (selectedMessages.size == 1) {
-                                IconButton(onClick = { 
-                                    selectedMessages.firstOrNull()?.let { viewModel.setReplyTo(it) }
-                                    viewModel.exitSelectionMode()
-                                }) {
-                                    Icon(Icons.Rounded.FormatQuote, contentDescription = "引用")
-                                }
-                            }
-                            IconButton(onClick = { showScreenshotSheet = true }) {
-                                Icon(Icons.Rounded.Crop, contentDescription = "截图")
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
-                        )
-                    )
-                } else {
-                    TopAppBar(
-                        windowInsets = if (bigScreenMode) {
-                            WindowInsets(
-                                top = WindowInsets.statusBars.asPaddingValues()
-                                    .calculateTopPadding()
-                            )
-                        } else {
-                            TopAppBarDefaults.windowInsets
-                        },
-                        title = {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .clickable {
-                                        ConversationDetailActivity.start(
-                                            context = context,
-                                            chatId = viewModel.chatId,
-                                            chatType = chatType,
-                                            chatName = chatName,
-                                            chatAvatar = chatAvatar
-                                        )
-                                    }
-                            ) {
-                                Avatar(
-                                    url = chatAvatar,
-                                    size = 36.dp
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Column {
+                            } else {
+                                TopAppBarDefaults.windowInsets
+                            },
+                            title = {
+                                AnimatedContent(
+                                    targetState = selectedMessages.size,
+                                    transitionSpec = {
+                                        if (targetState > initialState) {
+                                            slideInVertically(
+                                                initialOffsetY = { fullHeight -> fullHeight },
+                                                animationSpec = tween(200)
+                                            ) togetherWith slideOutVertically(
+                                                targetOffsetY = { fullHeight -> -fullHeight },
+                                                animationSpec = tween(200)
+                                            )
+                                        } else {
+                                            slideInVertically(
+                                                initialOffsetY = { fullHeight -> -fullHeight },
+                                                animationSpec = tween(200)
+                                            ) togetherWith slideOutVertically(
+                                                targetOffsetY = { fullHeight -> fullHeight },
+                                                animationSpec = tween(200)
+                                            )
+                                        }
+                                    },
+                                    label = "selected_count"
+                                ) { count ->
                                     Text(
-                                        text = chatName,
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                                        text = "$count",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold
                                     )
-                                    Spacer(modifier = Modifier.height(2.dp))
-                                    if (chatType == 2 && uiState.memberCount != null) {
-                                        Text(
-                                            text = "${uiState.memberCount} 位成员",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            maxLines = 1
-                                        )
+                                }
+                            },
+                            navigationIcon = {
+                                IconButton(onClick = { viewModel.exitSelectionMode() }) {
+                                    Icon(Icons.Rounded.Close, contentDescription = "退出多选")
+                                }
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f)
+                            ),
+                            actions = {
+                                if (selectedMessages.size == 1) {
+                                    IconButton(onClick = { 
+                                        selectedMessages.firstOrNull()?.let { viewModel.setReplyTo(it) }
+                                        viewModel.exitSelectionMode()
+                                    }) {
+                                        Icon(Icons.Rounded.FormatQuote, contentDescription = "引用")
                                     }
                                 }
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
-                        ),
-                        actions = {
-                            Box {
-                                DropdownMenu(
-                                    expanded = showMoreMenu,
-                                    onDismissRequest = { showMoreMenu = false }
-                                ) {
-                                    DropdownMenuItem(
-                                        text = { Text("会话详情") },
-                                        onClick = {
-                                            showMoreMenu = false
+                                IconButton(onClick = { showScreenshotSheet = true }) {
+                                    Icon(Icons.Rounded.Crop, contentDescription = "截图")
+                                }
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            )
+                        )
+                    } else {
+                        TopAppBar(
+                            windowInsets = if (bigScreenMode) {
+                                WindowInsets(
+                                    top = WindowInsets.statusBars.asPaddingValues()
+                                        .calculateTopPadding()
+                                )
+                            } else {
+                                TopAppBarDefaults.windowInsets
+                            },
+                            title = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .clickable {
                                             ConversationDetailActivity.start(
                                                 context = context,
                                                 chatId = viewModel.chatId,
@@ -491,31 +455,89 @@ fun ChatScreen(
                                                 chatName = chatName,
                                                 chatAvatar = chatAvatar
                                             )
-                                        },
-                                        leadingIcon = {
-                                            Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(24.dp))
                                         }
+                                ) {
+                                    Avatar(
+                                        url = chatAvatar,
+                                        size = 36.dp
                                     )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Column {
+                                        Text(
+                                            text = chatName,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Bold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        if (chatType == 2 && uiState.memberCount != null) {
+                                            Text(
+                                                text = "${uiState.memberCount} 位成员",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                maxLines = 1
+                                            )
+                                        }
+                                    }
                                 }
-
-                                IconButton(onClick = {
-                                    showMoreMenu = true
-                                }) {
-                                    Icon(Icons.Rounded.MoreVert, contentDescription = "更多")
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp).copy(alpha = 0.85f)
+                            ),
+                            actions = {
+                                Box {
+                                    DropdownMenu(
+                                        expanded = showMoreMenu,
+                                        onDismissRequest = { showMoreMenu = false }
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = { Text("刷新") },
+                                            onClick = {
+                                                showMoreMenu = false
+                                                viewModel.refresh()
+                                            },
+                                            leadingIcon = {
+                                                Icon(Icons.Rounded.Refresh, contentDescription = null)
+                                            }
+                                        )
+                                        DropdownMenuItem(
+                                            text = { Text("会话详情") },
+                                            onClick = {
+                                                showMoreMenu = false
+                                                ConversationDetailActivity.start(
+                                                    context = context,
+                                                    chatId = viewModel.chatId,
+                                                    chatType = chatType,
+                                                    chatName = chatName,
+                                                    chatAvatar = chatAvatar
+                                                )
+                                            },
+                                            leadingIcon = {
+                                                Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(24.dp))
+                                            }
+                                        )
+                                    }
+    
+                                    IconButton(onClick = {
+                                        showMoreMenu = true
+                                    }) {
+                                        Icon(Icons.Rounded.MoreVert, contentDescription = "更多")
+                                    }
+                                }
+                            },
+                            navigationIcon = {
+                                if (!bigScreenMode) {
+                                    IconButton(onClick = onBackClick) {
+                                        Icon(
+                                            Icons.AutoMirrored.Rounded.ArrowBack,
+                                            contentDescription = "返回"
+                                        )
+                                    }
                                 }
                             }
-                        },
-                        navigationIcon = {
-                            if (!bigScreenMode) {
-                                IconButton(onClick = onBackClick) {
-                                    Icon(
-                                        Icons.AutoMirrored.Rounded.ArrowBack,
-                                        contentDescription = "返回"
-                                    )
-                                }
-                            }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         },
@@ -692,7 +714,11 @@ fun ChatScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(
+                    start = innerPadding.calculateStartPadding(LayoutDirection.Ltr),
+                    end = innerPadding.calculateEndPadding(LayoutDirection.Ltr),
+                    bottom = innerPadding.calculateBottomPadding()
+                )
         ) {
             uiState.backgroundUrl?.takeIf { it.isNotEmpty() }?.let { bgUrl ->
                 val bgRequest = remember(bgUrl) {
@@ -716,119 +742,133 @@ fun ChatScreen(
             }
 
             if (uiState.isLoading && uiState.messages.isEmpty()) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (uiState.error != null && uiState.messages.isEmpty()) {
-                Text(
-                    text = "错误: ${uiState.error}",
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            } else {
-                PullToRefreshBox(
-                    isRefreshing = uiState.isRefreshing,
-                    onRefresh = { viewModel.refresh() },
-                    modifier = Modifier.fillMaxSize()
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = innerPadding.calculateTopPadding())
                 ) {
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier.fillMaxSize(),
-                        reverseLayout = true,
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        items(
-                            items = uiState.messages,
-                            key = { it.msgId }
-                        ) { message ->
-                            val index = uiState.messages.indexOf(message)
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(top = 16.dp)
+                    )
+                }
+            } else if (uiState.error != null && uiState.messages.isEmpty()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = innerPadding.calculateTopPadding())
+                ) {
+                    Text(
+                        text = "错误: ${uiState.error}",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            } else {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    reverseLayout = true,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    items(
+                        items = uiState.messages,
+                        key = { it.msgId }
+                    ) { message ->
+                        val index = uiState.messages.indexOf(message)
 
-                            val newerMessage = uiState.messages.getOrNull(index - 1)
-                            val olderMessage = uiState.messages.getOrNull(index + 1)
+                        val newerMessage = uiState.messages.getOrNull(index - 1)
+                        val olderMessage = uiState.messages.getOrNull(index + 1)
 
-                            val isFirstFromSender =
-                                newerMessage == null || newerMessage.isRecalled || newerMessage.contentType == MessageItem.CONTENT_TYPE_TIP || newerMessage.senderId != message.senderId
-                            val isLastFromSender =
-                                olderMessage == null || olderMessage.isRecalled || olderMessage.contentType == MessageItem.CONTENT_TYPE_TIP || olderMessage.senderId != message.senderId
-                            val isOlderSameSender =
-                                olderMessage != null && !olderMessage.isRecalled && olderMessage.contentType != MessageItem.CONTENT_TYPE_TIP && olderMessage.senderId == message.senderId
-                            val isNewerSameSender =
-                                newerMessage != null && !newerMessage.isRecalled && newerMessage.contentType != MessageItem.CONTENT_TYPE_TIP && newerMessage.senderId == message.senderId
+                        val isFirstFromSender =
+                            newerMessage == null || newerMessage.isRecalled || newerMessage.contentType == MessageItem.CONTENT_TYPE_TIP || newerMessage.senderId != message.senderId
+                        val isLastFromSender =
+                            olderMessage == null || olderMessage.isRecalled || olderMessage.contentType == MessageItem.CONTENT_TYPE_TIP || olderMessage.senderId != message.senderId
+                        val isOlderSameSender =
+                            olderMessage != null && !olderMessage.isRecalled && olderMessage.contentType != MessageItem.CONTENT_TYPE_TIP && olderMessage.senderId == message.senderId
+                        val isNewerSameSender =
+                            newerMessage != null && !newerMessage.isRecalled && newerMessage.contentType != MessageItem.CONTENT_TYPE_TIP && newerMessage.senderId == message.senderId
 
-                            val isTopVisibleItem = message.msgId == topVisibleMessageId
+                        val isTopVisibleItem = message.msgId == topVisibleMessageId
 
-                            val shouldShowItemAvatar = if (isTopVisibleItem) {
-                                !showFloatingAvatar && ((isLastFromSender && avatarFollowEnabled) || isFirstFromSender)
+                        val shouldShowItemAvatar = if (isTopVisibleItem) {
+                            !showFloatingAvatar && ((isLastFromSender && avatarFollowEnabled) || isFirstFromSender)
+                        } else {
+                            isFirstFromSender
+                        }
+
+                        val avatarAlignment =
+                            if (isTopVisibleItem && shouldShowItemAvatar && avatarFollowEnabled) {
+                                if (isLastFromSender) Alignment.Top else Alignment.Bottom
                             } else {
-                                isFirstFromSender
+                                Alignment.Bottom
                             }
 
-                            val avatarAlignment =
-                                if (isTopVisibleItem && shouldShowItemAvatar && avatarFollowEnabled) {
-                                    if (isLastFromSender) Alignment.Top else Alignment.Bottom
-                                } else {
-                                    Alignment.Bottom
+                        MessageBubble(
+                            message = message,
+                            onRecall = { viewModel.showRecallDialog(message.msgId) },
+                            onEdit = { viewModel.showEditDialog(message) },
+                            onReply = { viewModel.setReplyTo(message) },
+                            isAdmin = uiState.isAdmin,
+                            isLastFromSender = isLastFromSender,
+                            isFirstFromSender = isFirstFromSender,
+                            isOlderSameSender = isOlderSameSender,
+                            isNewerSameSender = isNewerSameSender,
+                            showAvatar = shouldShowItemAvatar,
+                            avatarAlignment = avatarAlignment,
+                            isSelectionMode = selectionMode,
+                            isSelected = message in selectedMessages,
+                            onLongPress = { msg -> viewModel.enterSelectionMode(msg) },
+                            onClickInSelectionMode = { msg -> viewModel.toggleMessageSelection(msg) },
+                            showMenu = showMenuMsgId == message.msgId && !selectionMode,
+                            showMenuMsgId = showMenuMsgId,
+                            showMenuChanged = { msgId ->
+                                if (!selectionMode) {
+                                    showMenuMsgId = msgId
                                 }
+                            },
+                            onImageClick = { imageUrl ->
+                                val allImages = uiState.messages
+                                    .filter { !it.isRecalled }
+                                    .mapNotNull { it.imageUrl }
+                                    .filter { it.isNotEmpty() }
+                                    .reversed()
 
-                            MessageBubble(
-                                message = message,
-                                onRecall = { viewModel.showRecallDialog(message.msgId) },
-                                onEdit = { viewModel.showEditDialog(message) },
-                                onReply = { viewModel.setReplyTo(message) },
-                                isAdmin = uiState.isAdmin,
-                                isLastFromSender = isLastFromSender,
-                                isFirstFromSender = isFirstFromSender,
-                                isOlderSameSender = isOlderSameSender,
-                                isNewerSameSender = isNewerSameSender,
-                                showAvatar = shouldShowItemAvatar,
-                                avatarAlignment = avatarAlignment,
-                                isSelectionMode = selectionMode,
-                                isSelected = message in selectedMessages,
-                                onLongPress = { msg -> viewModel.enterSelectionMode(msg) },
-                                onClickInSelectionMode = { msg -> viewModel.toggleMessageSelection(msg) },
-                                showMenu = showMenuMsgId == message.msgId && !selectionMode,
-                                showMenuMsgId = showMenuMsgId,
-                                showMenuChanged = { msgId ->
-                                    if (!selectionMode) {
-                                        showMenuMsgId = msgId
-                                    }
-                                },
-                                onImageClick = { imageUrl ->
-                                    val allImages = uiState.messages
-                                        .filter { !it.isRecalled }
-                                        .mapNotNull { it.imageUrl }
-                                        .filter { it.isNotEmpty() }
-                                        .reversed()
-
-                                    if (allImages.isNotEmpty()) {
-                                        val index = allImages.indexOf(imageUrl)
-                                        viewerImages = allImages
-                                        viewerInitialPage = if (index >= 0) index else 0
-                                        viewerVisible = true
-                                    }
-                                },
-                                onAvatarClick = {
-                                    ConversationDetailActivity.start(
-                                        context = context,
-                                        chatId = message.senderId,
-                                        chatType = message.senderType,
-                                        chatName = message.senderName,
-                                        chatAvatar = message.senderAvatar
-                                    )
+                                if (allImages.isNotEmpty()) {
+                                    val index = allImages.indexOf(imageUrl)
+                                    viewerImages = allImages
+                                    viewerInitialPage = if (index >= 0) index else 0
+                                    viewerVisible = true
                                 }
-                            )
-                        }
+                            },
+                            onAvatarClick = {
+                                ConversationDetailActivity.start(
+                                    context = context,
+                                    chatId = message.senderId,
+                                    chatType = message.senderType,
+                                    chatName = message.senderName,
+                                    chatAvatar = message.senderAvatar
+                                )
+                            }
+                        )
+                    }
 
-                        if (uiState.isLoadingMore) {
-                            item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator()
-                                }
+                    if (uiState.isLoadingMore) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
                             }
                         }
+                    }
+                    
+                    item {
+                        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
                     }
                 }
 
