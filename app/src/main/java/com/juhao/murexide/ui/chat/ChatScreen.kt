@@ -781,7 +781,7 @@ fun ChatScreen(
                 LazyColumn(
                     state = listState,
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .align(Alignment.BottomCenter),
                     reverseLayout = true,
                     verticalArrangement = Arrangement.spacedBy(4.dp)
