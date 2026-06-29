@@ -35,8 +35,6 @@ fun Avatar(
     
     var viewerVisible by remember { mutableStateOf(false) }
 
-    val shape = 
-
     val imageRequest = remember(url) {
         ImageRequest.Builder(context)
             .data(url)
