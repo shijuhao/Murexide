@@ -17,6 +17,10 @@ class SettingsStorage(private val context: Context) {
         private val BIG_SCREEN_KEY = booleanPreferencesKey("big_screen")
         private val SHOW_STICKY_KEY = booleanPreferencesKey("show_sticky")
         private val UPDATE_CHANNEL_KEY = stringPreferencesKey("update_channel")
+        
+        private val BUBBLE_CORNER_RADIUS_KEY = floatPreferencesKey("bubble_corner_radius")
+        private val BUBBLE_OPACITY_KEY = floatPreferencesKey("bubble_opacity")
+        private val SHOW_BUBBLE_AVATAR_KEY = booleanPreferencesKey("show_bubble_avatar")
     }
 
     // 主题模式
@@ -108,5 +112,50 @@ class SettingsStorage(private val context: Context) {
 
     suspend fun getUpdateChannel(): String {
         return updateChannelFlow.first()
+    }
+    
+    // ====== 气泡圆角 ======
+    val bubbleCornerRadiusFlow: Flow<Float> = context.dataStore.data.map { preferences ->
+        preferences[BUBBLE_CORNER_RADIUS_KEY] ?: 16f
+    }
+
+    suspend fun setBubbleCornerRadius(radius: Float) {
+        context.dataStore.edit { preferences ->
+            preferences[BUBBLE_CORNER_RADIUS_KEY] = radius
+        }
+    }
+
+    suspend fun getBubbleCornerRadius(): Float {
+        return bubbleCornerRadiusFlow.first()
+    }
+
+    // ====== 气泡透明度 ======
+    val bubbleOpacityFlow: Flow<Float> = context.dataStore.data.map { preferences ->
+        preferences[BUBBLE_OPACITY_KEY] ?: 0.9f
+    }
+
+    suspend fun setBubbleOpacity(opacity: Float) {
+        context.dataStore.edit { preferences ->
+            preferences[BUBBLE_OPACITY_KEY] = opacity
+        }
+    }
+
+    suspend fun getBubbleOpacity(): Float {
+        return bubbleOpacityFlow.first()
+    }
+
+    // ====== 显示气泡头像 ======
+    val showBubbleAvatarFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[SHOW_BUBBLE_AVATAR_KEY] ?: true
+    }
+
+    suspend fun setShowBubbleAvatar(show: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[SHOW_BUBBLE_AVATAR_KEY] = show
+        }
+    }
+
+    suspend fun getShowBubbleAvatar(): Boolean {
+        return showBubbleAvatarFlow.first()
     }
 }

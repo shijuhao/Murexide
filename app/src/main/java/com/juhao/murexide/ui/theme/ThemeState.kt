@@ -4,4 +4,5 @@ import androidx.compose.runtime.mutableStateOf
 
 object ThemeState {
     var themeMode = mutableStateOf("system")
+    var squareAvatar = mutableStateOf(false)
 }

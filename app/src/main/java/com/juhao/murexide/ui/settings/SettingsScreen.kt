@@ -20,11 +20,11 @@ import com.juhao.murexide.utils.checkForUpdateWithDetails
 import com.juhao.murexide.utils.getAppVersionInfo
 import com.juhao.murexide.ui.components.*
 import com.juhao.murexide.datastore.SettingsStorage
-import com.juhao.murexide.ui.theme.ThemeState
 import kotlinx.coroutines.launch
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import android.content.Intent
 import com.juhao.murexide.ui.about.AboutActivity
+import com.juhao.murexide.ui.settings.appearance.AppearanceActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,17 +44,12 @@ fun SettingsScreen(
     var updateInfo by remember { mutableStateOf<UpdateInfo?>(null) }
     var showLogoutDialog by remember { mutableStateOf(false) }
 
-    val themeMode by ThemeState.themeMode
-    var squareAvatar by remember { mutableStateOf(false) }
     var avatarFollow by remember { mutableStateOf(false) }
-    var showSticky by remember { mutableStateOf(true) }
     var bigScreen by remember { mutableStateOf(true) }
     var updateChannel by remember { mutableStateOf("stable") }
 
     LaunchedEffect(Unit) {
-        squareAvatar = settingsStorage.getSquareAvatar()
         avatarFollow = settingsStorage.getAvatarFollow()
-        showSticky = settingsStorage.getShowSticky()
         bigScreen = settingsStorage.getBigScreen()
         updateChannel = settingsStorage.getUpdateChannel()
     }
@@ -118,54 +113,14 @@ fun SettingsScreen(
                 .padding(padding)
                 .verticalScroll(scrollState)
         ) {
-            SettingsGroup(title = "通用") {
-                SettingsDropdownItem(
-                    icon = Icons.Rounded.WbSunny,
-                    title = "主题模式",
-                    subtitle = when (themeMode) {
-                        "system" -> "跟随系统"
-                        "dark" -> "深色模式"
-                        "light" -> "浅色模式"
-                        else -> "跟随系统"
-                    },
-                    options = listOf(
-                        "system" to "跟随系统",
-                        "dark" to "深色模式",
-                        "light" to "浅色模式"
-                    ),
-                    selectedValue = themeMode,
-                    onOptionSelected = { selected ->
-                        ThemeState.themeMode.value = selected
-                        scope.launch {
-                            settingsStorage.setThemeMode(selected)
-                        }
-                    }
-                )
-            }
-
             SettingsGroup(title = "外观") {
-                SettingsSwitchItem(
-                    icon = Icons.Rounded.ChatBubbleOutline,
-                    title = "显示置顶会话",
-                    subtitle = "在主页显示置顶会话",
-                    checked = showSticky,
-                    onCheckedChange = { checked ->
-                        showSticky = checked
-                        scope.launch {
-                            settingsStorage.setShowSticky(checked)
-                        }
-                    }
-                )
-                SettingsSwitchItem(
-                    icon = Icons.Rounded.People,
-                    title = "圆角正方形头像",
-                    subtitle = "将好友和群组头像显示为圆角正方形",
-                    checked = squareAvatar,
-                    onCheckedChange = { checked ->
-                        squareAvatar = checked
-                        scope.launch {
-                            settingsStorage.setSquareAvatar(checked)
-                        }
+                SettingsItem(
+                    icon = Icons.Rounded.Draw,
+                    title = "外观设置",
+                    subtitle = "主题、头像、会话等",
+                    onClick = {
+                        val intent = Intent(context, AppearanceActivity::class.java)
+                        context.startActivity(intent)
                     }
                 )
             }

@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.juhao.murexide.datastore.SettingsStorage
 import com.juhao.murexide.data.MessageItem
 import com.juhao.murexide.ui.chat.EditDialogState
 import com.juhao.murexide.ui.components.Avatar
@@ -76,6 +77,13 @@ fun MessageBubble(
 
     val isMine = message.isMine
     val context = LocalContext.current
+    
+    val settingsStorage = remember { SettingsStorage(context) }
+    val bubbleCornerRadius by settingsStorage.bubbleCornerRadiusFlow.collectAsState(initial = 16f)
+    val bubbleOpacity by settingsStorage.bubbleOpacityFlow.collectAsState(initial = 0.9f)
+    val showBubbleAvatarSetting by settingsStorage.showBubbleAvatarFlow.collectAsState(initial = true)
+    
+    val effectiveShowAvatar = showAvatar && showBubbleAvatarSetting
     
     var showImageViewer by remember { mutableStateOf(false) }
     var imageList by remember { mutableStateOf<List<String>>(emptyList()) }
@@ -207,7 +215,7 @@ fun MessageBubble(
                     Spacer(modifier = Modifier.height(36.dp))
                 }
             
-                if (!isMine && showAvatar) {
+                if (!isMine && effectiveShowAvatar) {
                     Avatar(
                         url = message.senderAvatar,
                         modifier = Modifier.clickable {
@@ -216,7 +224,7 @@ fun MessageBubble(
                         size = 36.dp
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                } else if (!isMine) {
+                } else if (!isMineisMine && showBubbleAvatarSetting) {
                     Spacer(modifier = Modifier.width(44.dp))
                 }
     
@@ -228,18 +236,18 @@ fun MessageBubble(
                     Column(horizontalAlignment = if (isMine) Alignment.End else Alignment.Start) {
                         Card(
                             shape = RoundedCornerShape(
-                                topStart = if (isMine) 16.dp else if (isLastFromSender) 16.dp else 4.dp,
-                                topEnd = if (isMine) if (isLastFromSender) 16.dp else 4.dp else 16.dp,
-                                bottomStart = if (isMine) 16.dp else if (isFirstFromSender) 16.dp else 4.dp,
-                                bottomEnd = if (isMine) if (isFirstFromSender) 16.dp else 4.dp else 16.dp
+                                topStart = if (isMine) bubbleCornerRadius.dp else if (isLastFromSender) bubbleCornerRadius.dp else (bubbleCornerRadius / 4).dp,
+                                topEnd = if (isMine) if (isLastFromSender) bubbleCornerRadius.dp else (bubbleCornerRadius / 4).dp else bubbleCornerRadius.dp,
+                                bottomStart = if (isMine) bubbleCornerRadius.dp else if (isFirstFromSender) bubbleCornerRadius.dp else (bubbleCornerRadius / 4).dp,
+                                bottomEnd = if (isMine) if (isFirstFromSender) bubbleCornerRadius.dp else (bubbleCornerRadius / 4).dp else bubbleCornerRadius.dp
                             ),
                             colors = CardDefaults.cardColors(
                                 containerColor = if (hideMsgCard)
                                     Color.Transparent
                                 else if (isMine)
-                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = bubbleOpacity)
                                 else
-                                    MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp).copy(alpha = 0.9f)
+                                    MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp).copy(alpha = bubbleOpacity)
                             )
                         ) {
                             Column(modifier = Modifier.padding(if (hideMsgCard) 0.dp else 8.dp)) {
@@ -616,7 +624,7 @@ fun MessageBubble(
                     }
                 }
     
-                if (isMine && showAvatar) {
+                if (isMine && effectiveShowAvatar) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Avatar(
                         url = message.senderAvatar,
@@ -625,7 +633,7 @@ fun MessageBubble(
                         },
                         size = 36.dp
                     )
-                } else if (isMine) {
+                } else if (isMine && showBubbleAvatarSetting) {
                     Spacer(modifier = Modifier.width(44.dp))
                 }
             }
