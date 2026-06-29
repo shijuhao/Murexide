@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.juhao.murexide.datastore.SettingsStorage
 import com.juhao.murexide.data.MessageItem
 import com.juhao.murexide.ui.chat.EditDialogState
 import com.juhao.murexide.ui.components.Avatar
@@ -70,6 +69,9 @@ fun MessageBubble(
     showMenuChanged: (String?) -> Unit = {},
     onImageClick: (String) -> Unit = {},
     onAvatarClick: () -> Unit = {},
+    bubbleCornerRadius: Float = 16f,
+    bubbleOpacity: Float = 0.9f,
+    showBubbleAvatarSetting: Boolean = true,
     avatarAlignment: Alignment.Vertical = Alignment.Bottom
 ) {
     val clipboardManager = LocalClipboard.current
@@ -77,12 +79,7 @@ fun MessageBubble(
 
     val isMine = message.isMine
     val context = LocalContext.current
-    
-    val settingsStorage = remember { SettingsStorage(context) }
-    val bubbleCornerRadius by settingsStorage.bubbleCornerRadiusFlow.collectAsState(initial = 16f)
-    val bubbleOpacity by settingsStorage.bubbleOpacityFlow.collectAsState(initial = 0.9f)
-    val showBubbleAvatarSetting by settingsStorage.showBubbleAvatarFlow.collectAsState(initial = true)
-    
+
     val effectiveShowAvatar = showAvatar && showBubbleAvatarSetting
     
     var showImageViewer by remember { mutableStateOf(false) }
@@ -390,8 +387,8 @@ fun MessageBubble(
                                                             if (isLastFromSender || message.quoteMsgText != null)
                                                                 Modifier.clip(
                                                                     RoundedCornerShape(
-                                                                        topStart = 16.dp,
-                                                                        topEnd = 16.dp
+                                                                        topStart = bubbleCornerRadius.dp,
+                                                                        topEnd = bubbleCornerRadius.dp
                                                                     )
                                                                 )
                                                              else Modifier
@@ -443,17 +440,17 @@ fun MessageBubble(
                                                         if (isLastFromSender || message.quoteMsgText != null)
                                                             Modifier.clip(
                                                                 RoundedCornerShape(
-                                                                    topStart = 16.dp,
-                                                                    topEnd = 16.dp
+                                                                    topStart = bubbleCornerRadius.dp,
+                                                                    topEnd = bubbleCornerRadius.dp
                                                                 )
                                                             )
                                                          else Modifier
                                                     )
                                                     .background(
                                                         if (isMine)
-                                                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
+                                                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = bubbleOpacity)
                                                         else
-                                                            MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp).copy(alpha = 0.9f)
+                                                            MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp).copy(alpha = bubbleOpacity)
                                                     )
                                                     .combinedClickable(
                                                         onClick = { },

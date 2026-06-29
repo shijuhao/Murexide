@@ -98,6 +98,10 @@ fun ChatScreen(
 
     val settingsStorage = remember { SettingsStorage(context) }
     val avatarFollowEnabled by settingsStorage.avatarFollowFlow.collectAsState(initial = false)
+    val bubbleCornerRadius by settingsStorage.bubbleCornerRadiusFlow.collectAsState(initial = 16f)
+    val bubbleOpacity by settingsStorage.bubbleOpacityFlow.collectAsState(initial = 0.9f)
+    val showBubbleAvatarSetting by settingsStorage.showBubbleAvatarFlow.collectAsState(initial = true)
+    
 
     var viewerImages by remember { mutableStateOf<List<String>>(emptyList()) }
     var viewerInitialPage by remember { mutableIntStateOf(0) }
@@ -830,6 +834,9 @@ fun ChatScreen(
                             isOlderSameSender = isOlderSameSender,
                             isNewerSameSender = isNewerSameSender,
                             showAvatar = shouldShowItemAvatar,
+                            showBubbleAvatarSetting = showBubbleAvatarSetting,
+                            bubbleOpacity = bubbleOpacity,
+                            bubbleCornerRadius = bubbleCornerRadius,
                             avatarAlignment = avatarAlignment,
                             isSelectionMode = selectionMode,
                             isSelected = message in selectedMessages,

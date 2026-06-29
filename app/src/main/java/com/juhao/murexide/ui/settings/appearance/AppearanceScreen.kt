@@ -2,6 +2,7 @@
 
 package com.juhao.murexide.ui.settings.appearance
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -41,9 +42,7 @@ fun AppearanceScreen(
     var showSticky by remember { mutableStateOf(true) }
     
     var bubbleCornerRadius by remember { mutableFloatStateOf(16f) }
-    
     val showBubbleAvatar by settingsStorage.showBubbleAvatarFlow.collectAsState(initial = true)
-    
     var bubbleOpacity by remember { mutableFloatStateOf(0.9f) }
 
     LaunchedEffect(Unit) {
@@ -139,8 +138,12 @@ fun AppearanceScreen(
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.15f),
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outlineVariant,
+                            shape = RoundedCornerShape(16.dp)
+                        ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(
@@ -155,7 +158,10 @@ fun AppearanceScreen(
                             isFirstFromSender = false,
                             isOlderSameSender = false,
                             isNewerSameSender = true,
-                            showAvatar = false
+                            showAvatar = false,
+                            showBubbleAvatarSetting = showBubbleAvatar,
+                            bubbleOpacity = bubbleOpacity,
+                            bubbleCornerRadius = bubbleCornerRadius
                         )
                         
                         MessageBubble(
@@ -164,7 +170,10 @@ fun AppearanceScreen(
                             isFirstFromSender = true,
                             isOlderSameSender = true,
                             isNewerSameSender = false,
-                            showAvatar = showBubbleAvatar
+                            showAvatar = showBubbleAvatar,
+                            showBubbleAvatarSetting = showBubbleAvatar,
+                            bubbleOpacity = bubbleOpacity,
+                            bubbleCornerRadius = bubbleCornerRadius
                         )
                         
                         MessageBubble(
@@ -173,7 +182,10 @@ fun AppearanceScreen(
                             isFirstFromSender = true,
                             isOlderSameSender = false,
                             isNewerSameSender = false,
-                            showAvatar = showBubbleAvatar
+                            showAvatar = showBubbleAvatar,
+                            showBubbleAvatarSetting = showBubbleAvatar,
+                            bubbleOpacity = bubbleOpacity,
+                            bubbleCornerRadius = bubbleCornerRadius
                         )
                     }
                 }
