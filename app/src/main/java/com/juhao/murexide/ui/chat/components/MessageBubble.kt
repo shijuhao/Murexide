@@ -224,7 +224,7 @@ fun MessageBubble(
                         size = 36.dp
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                } else if (!isMineisMine && showBubbleAvatarSetting) {
+                } else if (!isMine && showBubbleAvatarSetting) {
                     Spacer(modifier = Modifier.width(44.dp))
                 }
     

@@ -41,8 +41,12 @@ fun AppearanceScreen(
     var showSticky by remember { mutableStateOf(true) }
     
     val bubbleCornerRadius by settingsStorage.bubbleCornerRadiusFlow.collectAsState(initial = 16f)
+    var localBubbleCornerRadius by remember { mutableStateOf(bubbleCornerRadius) }
+    
     val showBubbleAvatar by settingsStorage.showBubbleAvatarFlow.collectAsState(initial = true)
+    
     val bubbleOpacity by settingsStorage.bubbleOpacityFlow.collectAsState(initial = 0.9f)
+    var localBubbleOpacity by remember { mutableStateOf(bubbleOpacity) }
 
     LaunchedEffect(Unit) {
         squareAvatar = settingsStorage.getSquareAvatar()
@@ -218,11 +222,11 @@ fun AppearanceScreen(
                     Spacer(modifier = Modifier.height(4.dp))
                     
                     Slider(
-                        value = bubbleCornerRadius,
-                        onValueChange = { bubbleCornerRadius = it },
+                        value = localBubbleCornerRadius,
+                        onValueChange = { localBubbleCornerRadiusadius = it },
                         onValueChangeFinished = {
                             scope.launch {
-                                settingsStorage.setBubbleCornerRadius(bubbleCornerRadius)
+                                settingsStorage.setBubbleCornerRadius(localBubbleCornerRadius)
                             }
                         },
                         valueRange = 0f..24f,
@@ -290,11 +294,11 @@ fun AppearanceScreen(
                     Spacer(modifier = Modifier.height(4.dp))
                     
                     Slider(
-                        value = bubbleOpacity,
-                        onValueChange = { bubbleOpacity = it },
+                        value = localBubbleOpacity,
+                        onValueChange = { localBubbleOpacity = it },
                         onValueChangeFinished = {
                             scope.launch {
-                                settingsStorage.setBubbleOpacity(bubbleOpacity)
+                                settingsStorage.setBubbleOpacity(localBubbleOpacity)
                             }
                         },
                         valueRange = 0.4f..1f,
@@ -327,7 +331,6 @@ fun AppearanceScreen(
                     subtitle = "在消息气泡旁显示发送者头像",
                     checked = showBubbleAvatar,
                     onCheckedChange = { checked ->
-                        showBubbleAvatar = checked
                         scope.launch {
                             settingsStorage.setShowBubbleAvatar(checked)
                         }
