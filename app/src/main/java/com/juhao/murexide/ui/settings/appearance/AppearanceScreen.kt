@@ -159,7 +159,7 @@ fun AppearanceScreen(
                             isOlderSameSender = false,
                             isNewerSameSender = true,
                             showAvatar = false,
-                            showBubbleAvatarSetting = showBubbleAvatar,
+                            showMyBubbleAvatarSetting = showMyBubbleAvatar,
                             bubbleOpacity = bubbleOpacity,
                             bubbleCornerRadius = bubbleCornerRadius
                         )
@@ -170,8 +170,8 @@ fun AppearanceScreen(
                             isFirstFromSender = true,
                             isOlderSameSender = true,
                             isNewerSameSender = false,
-                            showAvatar = showBubbleAvatar,
-                            showBubbleAvatarSetting = showBubbleAvatar,
+                            showAvatar = showMyBubbleAvatar,
+                            showMyBubbleAvatarSetting = showMyBubbleAvatar,
                             bubbleOpacity = bubbleOpacity,
                             bubbleCornerRadius = bubbleCornerRadius
                         )
@@ -182,8 +182,8 @@ fun AppearanceScreen(
                             isFirstFromSender = true,
                             isOlderSameSender = false,
                             isNewerSameSender = false,
-                            showAvatar = showBubbleAvatar,
-                            showBubbleAvatarSetting = showBubbleAvatar,
+                            showAvatar = showMyBubbleAvatar,
+                            showMyBubbleAvatarSetting = showMyBubbleAvatar,
                             bubbleOpacity = bubbleOpacity,
                             bubbleCornerRadius = bubbleCornerRadius
                         )
