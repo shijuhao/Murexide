@@ -92,7 +92,7 @@ fun AppearanceScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
-                title = { Text("设置") },
+                title = { Text("外观设置") },
                 scrollBehavior = scrollBehavior,
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -140,7 +140,7 @@ fun AppearanceScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.15f),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(
