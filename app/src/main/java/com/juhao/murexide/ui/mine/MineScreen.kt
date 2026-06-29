@@ -45,6 +45,7 @@ fun MineScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             TopAppBar(
+                windowInsets = WindowInsets(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()),
                 title = { Text("我的") },
                 scrollBehavior = scrollBehavior,
                 actions = {
