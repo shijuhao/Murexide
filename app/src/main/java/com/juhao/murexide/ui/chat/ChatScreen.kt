@@ -910,7 +910,7 @@ fun ChatScreen(
                     label = "floating_avatar_alpha"
                 )
 
-                if (showFloatingAvatar) {
+                if (showFloatingAvatar && showBubbleAvatarSetting) {
                     Column(
                         modifier = Modifier
                             .alpha(animatedAlpha)
