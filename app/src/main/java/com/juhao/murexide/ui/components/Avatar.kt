@@ -35,11 +35,7 @@ fun Avatar(
     
     var viewerVisible by remember { mutableStateOf(false) }
 
-    val shape = if (squareAvatar == true) {
-        RoundedCornerShape(size / 5)
-    } else {
-        CircleShape
-    }
+    val shape = 
 
     val imageRequest = remember(url) {
         ImageRequest.Builder(context)
@@ -60,7 +56,13 @@ fun Avatar(
         contentDescription = null,
         modifier = modifier
             .size(size)
-            .clip(shape)
+            .clip(
+                if (squareAvatar == true) {
+                    RoundedCornerShape(size / 5)
+                } else {
+                    CircleShape
+                }
+            )
             .then(
                 if (canView) 
                     Modifier.clickable { viewerVisible = true }

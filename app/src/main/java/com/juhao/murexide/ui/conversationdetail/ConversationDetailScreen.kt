@@ -101,7 +101,7 @@ fun ConversationDetailScreen(
 private fun DetailHeader(detail: ConversationDetail) {
     SettingsGroup {
         CustomItemCell {
-            Avatar(url = detail.avatarUrl, size = 64.dp)
+            Avatar(url = detail.avatarUrl, size = 64.dp, canView = true)
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(

@@ -100,7 +100,7 @@ fun ChatScreen(
     val avatarFollowEnabled by settingsStorage.avatarFollowFlow.collectAsState(initial = false)
     val bubbleCornerRadius by settingsStorage.bubbleCornerRadiusFlow.collectAsState(initial = 16f)
     val bubbleOpacity by settingsStorage.bubbleOpacityFlow.collectAsState(initial = 0.9f)
-    val showBubbleAvatarSetting by settingsStorage.showBubbleAvatarFlow.collectAsState(initial = true)
+    val showMyBubbleAvatarSetting by settingsStorage.showMyBubbleAvatarFlow.collectAsState(initial = true)
     
 
     var viewerImages by remember { mutableStateOf<List<String>>(emptyList()) }
@@ -834,7 +834,7 @@ fun ChatScreen(
                             isOlderSameSender = isOlderSameSender,
                             isNewerSameSender = isNewerSameSender,
                             showAvatar = shouldShowItemAvatar,
-                            showBubbleAvatarSetting = showBubbleAvatarSetting,
+                            showMyBubbleAvatarSetting = showMyBubbleAvatarSetting,
                             bubbleOpacity = bubbleOpacity,
                             bubbleCornerRadius = bubbleCornerRadius,
                             avatarAlignment = avatarAlignment,
@@ -849,18 +849,24 @@ fun ChatScreen(
                                     showMenuMsgId = msgId
                                 }
                             },
-                            onImageClick = { imageUrl ->
-                                val allImages = uiState.messages
-                                    .filter { !it.isRecalled }
-                                    .mapNotNull { it.imageUrl }
-                                    .filter { it.isNotEmpty() }
-                                    .reversed()
-
-                                if (allImages.isNotEmpty()) {
-                                    val index = allImages.indexOf(imageUrl)
-                                    viewerImages = allImages
-                                    viewerInitialPage = if (index >= 0) index else 0
-                                    viewerVisible = true
+                            onImageClick = { msg ->
+                                if (!selectionMode) {
+                                    msg.imageUrl?.let { url ->
+                                        val allImages = uiState.messages
+                                            .filter { !it.isRecalled }
+                                            .mapNotNull { it.imageUrl }
+                                            .filter { it.isNotEmpty() }
+                                            .reversed()
+        
+                                        if (allImages.isNotEmpty()) {
+                                            val index = allImages.indexOf(url)
+                                            viewerImages = allImages
+                                            viewerInitialPage = if (index >= 0) index else 0
+                                            viewerVisible = true
+                                        }
+                                    }
+                                } else {
+                                    viewModel.toggleMessageSelection(msg)
                                 }
                             },
                             onAvatarClick = {
@@ -910,7 +916,7 @@ fun ChatScreen(
                     label = "floating_avatar_alpha"
                 )
 
-                if (showFloatingAvatar && showBubbleAvatarSetting) {
+                if (showFloatingAvatar && (!floatingAvatarIsMine || showMyBubbleAvatarSetting)) {
                     Column(
                         modifier = Modifier
                             .alpha(animatedAlpha)

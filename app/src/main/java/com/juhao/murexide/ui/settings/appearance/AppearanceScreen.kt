@@ -42,7 +42,7 @@ fun AppearanceScreen(
     var showSticky by remember { mutableStateOf(true) }
     
     var bubbleCornerRadius by remember { mutableFloatStateOf(16f) }
-    val showBubbleAvatar by settingsStorage.showBubbleAvatarFlow.collectAsState(initial = true)
+    val showMyBubbleAvatar by settingsStorage.showMyBubbleAvatarFlow.collectAsState(initial = true)
     var bubbleOpacity by remember { mutableFloatStateOf(0.9f) }
 
     LaunchedEffect(Unit) {
@@ -265,6 +265,8 @@ fun AppearanceScreen(
                 
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                 
+                Spacer(modifier = Modifier.height(4.dp))
+                
                 // 透明度 Slider
                 Column(
                     modifier = Modifier
@@ -336,15 +338,17 @@ fun AppearanceScreen(
                 
                 HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                 
+                Spacer(modifier = Modifier.height(4.dp))
+                
                 // 显示头像开关
                 SettingsSwitchItem(
                     icon = Icons.Rounded.Face,
-                    title = "显示头像",
-                    subtitle = "在消息气泡旁显示发送者头像",
-                    checked = showBubbleAvatar,
+                    title = "显示我的头像",
+                    subtitle = "在我发送的消息气泡旁显示我的头像",
+                    checked = showMyBubbleAvatar,
                     onCheckedChange = { checked ->
                         scope.launch {
-                            settingsStorage.setShowBubbleAvatar(checked)
+                            settingsStorage.setShowMyBubbleAvatar(checked)
                         }
                     }
                 )

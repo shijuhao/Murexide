@@ -21,7 +21,7 @@ class SettingsStorage(private val context: Context) {
         
         private val BUBBLE_CORNER_RADIUS_KEY = floatPreferencesKey("bubble_corner_radius")
         private val BUBBLE_OPACITY_KEY = floatPreferencesKey("bubble_opacity")
-        private val SHOW_BUBBLE_AVATAR_KEY = booleanPreferencesKey("show_bubble_avatar")
+        private val SHOW_MY_BUBBLE_AVATAR_KEY = booleanPreferencesKey("show_my_bubble_avatar")
     }
 
     // 主题模式
@@ -145,18 +145,18 @@ class SettingsStorage(private val context: Context) {
         return bubbleOpacityFlow.first()
     }
 
-    // ====== 显示气泡头像 ======
-    val showBubbleAvatarFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
-        preferences[SHOW_BUBBLE_AVATAR_KEY] ?: true
+    // ====== 显示气泡（我）头像 ======
+    val showMyBubbleAvatarFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[SHOW_MY_BUBBLE_AVATAR_KEY] ?: true
     }
 
-    suspend fun setShowBubbleAvatar(show: Boolean) {
+    suspend fun setShowMyBubbleAvatar(show: Boolean) {
         context.dataStore.edit { preferences ->
-            preferences[SHOW_BUBBLE_AVATAR_KEY] = show
+            preferences[SHOW_MY_BUBBLE_AVATAR_KEY] = show
         }
     }
 
-    suspend fun getShowBubbleAvatar(): Boolean {
-        return showBubbleAvatarFlow.first()
+    suspend fun getShowMyBubbleAvatar(): Boolean {
+        return showMyBubbleAvatarFlow.first()
     }
 }

@@ -67,11 +67,11 @@ fun MessageBubble(
     showMenu: Boolean = false,
     showMenuMsgId: String? = null,
     showMenuChanged: (String?) -> Unit = {},
-    onImageClick: (String) -> Unit = {},
+    onImageClick: (MessageItem) -> Unit = {},
     onAvatarClick: () -> Unit = {},
     bubbleCornerRadius: Float = 16f,
     bubbleOpacity: Float = 0.9f,
-    showBubbleAvatarSetting: Boolean = true,
+    showMyBubbleAvatarSetting: Boolean = true,
     avatarAlignment: Alignment.Vertical = Alignment.Bottom
 ) {
     val clipboardManager = LocalClipboard.current
@@ -80,8 +80,6 @@ fun MessageBubble(
     val isMine = message.isMine
     val context = LocalContext.current
 
-    val effectiveShowAvatar = showAvatar && showBubbleAvatarSetting
-    
     var showImageViewer by remember { mutableStateOf(false) }
     var imageList by remember { mutableStateOf<List<String>>(emptyList()) }
     var currentImageIndex by remember { mutableIntStateOf(0) }
@@ -212,7 +210,7 @@ fun MessageBubble(
                     Spacer(modifier = Modifier.height(36.dp))
                 }
             
-                if (!isMine && effectiveShowAvatar) {
+                if (!isMine && showAvatar) {
                     Avatar(
                         url = message.senderAvatar,
                         modifier = Modifier.clickable {
@@ -221,7 +219,7 @@ fun MessageBubble(
                         size = 36.dp
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                } else if (!isMine && showBubbleAvatarSetting) {
+                } else if (!isMine) {
                     Spacer(modifier = Modifier.width(44.dp))
                 }
     
@@ -394,7 +392,7 @@ fun MessageBubble(
                                                              else Modifier
                                                         )
                                                         .combinedClickable(
-                                                            onClick = { onImageClick(url) },
+                                                            onClick = { onImageClick(message) },
                                                             onLongClick = { onLongPress(message) }
                                                         )
                                                 )
@@ -621,7 +619,7 @@ fun MessageBubble(
                     }
                 }
     
-                if (isMine && effectiveShowAvatar) {
+                if (isMine && showAvatar && showMyBubbleAvatarSetting) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Avatar(
                         url = message.senderAvatar,
@@ -630,7 +628,7 @@ fun MessageBubble(
                         },
                         size = 36.dp
                     )
-                } else if (isMine && showBubbleAvatarSetting) {
+                } else if (isMine && showMyBubbleAvatarSetting) {
                     Spacer(modifier = Modifier.width(44.dp))
                 }
             }
