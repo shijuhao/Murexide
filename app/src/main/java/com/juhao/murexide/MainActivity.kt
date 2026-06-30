@@ -173,30 +173,32 @@ fun MainScreen(token: String) {
                             BackHandler {
                                 currentConversation = null
                             }
-                            ChatScreen(
-                                modifier = Modifier
-                                    .weight(0.7f)
-                                    .fillMaxHeight(),
-                                chatAvatar = currentConversation!!.avatarUrl,
-                                chatName = currentConversation!!.name,
-                                chatType = currentConversation!!.chatType,
-                                onBackClick = { currentConversation = null },
-                                bigScreenMode = true,
-                                viewModel = viewModel(
-                                    key = "chat_" + currentConversation!!.chatId,
-                                    factory = object : ViewModelProvider.Factory {
-                                        @Suppress("UNCHECKED_CAST")
-                                        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                                            return ChatViewModel(
-                                                token = token,
-                                                chatId = currentConversation!!.chatId,
-                                                chatType = currentConversation!!.chatType,
-                                                deviceId = getDeviceId()
-                                            ) as T
+                            key(currentConversation!!.chatId) {
+                                ChatScreen(
+                                    modifier = Modifier
+                                        .weight(0.7f)
+                                        .fillMaxHeight(),
+                                    chatAvatar = currentConversation!!.avatarUrl,
+                                    chatName = currentConversation!!.name,
+                                    chatType = currentConversation!!.chatType,
+                                    onBackClick = { currentConversation = null },
+                                    bigScreenMode = true,
+                                    viewModel = viewModel(
+                                        key = "chat_" + currentConversation!!.chatId,
+                                        factory = object : ViewModelProvider.Factory {
+                                            @Suppress("UNCHECKED_CAST")
+                                            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                                                return ChatViewModel(
+                                                    token = token,
+                                                    chatId = currentConversation!!.chatId,
+                                                    chatType = currentConversation!!.chatType,
+                                                    deviceId = getDeviceId()
+                                                ) as T
+                                            }
                                         }
-                                    }
+                                    )
                                 )
-                            )
+                            }
                         } else {
                             Column(
                                 modifier = Modifier.weight(0.7f).fillMaxHeight(),
