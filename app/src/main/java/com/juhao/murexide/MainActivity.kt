@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
@@ -111,26 +112,26 @@ fun MainScreen(token: String) {
             NavigationSuiteType.NavigationBar
         },
         navigationItems = {
-            navItems.forEach {
-                item(
-                    icon = {
-                        Icon(
-                            it.icon,
-                            contentDescription = it.title
-                        )
-                    },
+            if (bigScreenEnabled && isBigScreen) {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            
+            navItems.forEach { item ->
+                val selected = navController.currentDestination?.route == item.route
+                NavigationSuiteItem(
+                    icon = { Icon(item.icon, contentDescription = item.title) },
                     label = {
                         AnimatedVisibility(
-                            visible = currentRoute == it.route,
+                            visible = selected,
                             enter = fadeIn() + expandVertically(),
                             exit = fadeOut() + shrinkVertically()
                         ) {
-                            Text(it.title)
+                            Text(item.title)
                         }
                     },
-                    selected = currentRoute == it.route,
+                    selected = selected,
                     onClick = {
-                        navController.navigate(it.route) {
+                        navController.navigate(item.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }
