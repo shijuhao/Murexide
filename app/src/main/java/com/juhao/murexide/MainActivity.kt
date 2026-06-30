@@ -112,7 +112,7 @@ fun MainScreen(token: String) {
         },
         navigationSuiteItems = {
             navItems.forEach { item ->
-                val selected = navController.currentDestination?.route == item.route
+                val selected = currentRoute == item.route
                 item(
                     icon = { Icon(item.icon, contentDescription = item.title) },
                     label = {
