@@ -26,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
@@ -106,19 +105,15 @@ fun MainScreen(token: String) {
     val isBigScreen = LocalConfiguration.current.screenWidthDp >= 600
 
     NavigationSuiteScaffold(
-        navigationSuiteType = if (bigScreenEnabled && isBigScreen) {
+        layoutType = if (bigScreenEnabled && isBigScreen) {
             NavigationSuiteType.NavigationRail
         } else {
             NavigationSuiteType.NavigationBar
         },
-        navigationItems = {
-            if (bigScreenEnabled && isBigScreen) {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-            
+        navigationSuiteItems = {
             navItems.forEach { item ->
                 val selected = navController.currentDestination?.route == item.route
-                NavigationSuiteItem(
+                item(
                     icon = { Icon(item.icon, contentDescription = item.title) },
                     label = {
                         AnimatedVisibility(
@@ -154,7 +149,7 @@ fun MainScreen(token: String) {
                 Row(modifier = Modifier.fillMaxSize()) {
                     ConversationListScreen(
                         modifier = Modifier
-                            .weight(if (isBigScreen && bigScreenEnabled && currentConversation != null) 0.4f else 1f)
+                            .weight(if (isBigScreen && bigScreenEnabled) 0.4f else 1f)
                             .fillMaxHeight(),
                         token = token,
                         currentConversation = if (isBigScreen && bigScreenEnabled) currentConversation else null,
