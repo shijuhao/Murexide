@@ -26,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
@@ -45,6 +44,7 @@ import com.juhao.murexide.ui.conversation.ConversationListScreen
 import com.juhao.murexide.ui.login.LoginActivity
 import com.juhao.murexide.ui.mine.MineScreen
 import com.juhao.murexide.ui.theme.MurexideTheme
+import com.juhao.murexide.datastore.SettingsStorage
 import com.juhao.murexide.data.ConversationItem
 import com.juhao.murexide.ui.chat.ChatScreen
 import com.juhao.murexide.ui.chat.ChatViewModel
@@ -105,12 +105,12 @@ fun MainScreen(token: String) {
     val isBigScreen = LocalConfiguration.current.screenWidthDp >= 600
 
     NavigationSuiteScaffold(
-        navigationSuiteType = if (bigScreenEnabled) {
-            NavigationSuiteScaffoldDefaults.calculateNavigationSuiteType()
+        navigationSuiteType = if (bigScreenEnabled && isBigScreen) {
+            NavigationSuiteType.NavigationRail
         } else {
             NavigationSuiteType.NavigationBar
         },
-        navigationSuiteItems = {
+        navigationItems = {
             navItems.forEach {
                 item(
                     icon = {
