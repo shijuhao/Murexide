@@ -26,6 +26,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
@@ -95,14 +99,18 @@ fun MainScreen(token: String) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     
+    val settingsStorage = remember { SettingsStorage(context) }
+    val bigScreenEnabled by settingsStorage.bigScreenFlow.collectAsState(initial = true)
+    
     val isBigScreen = LocalConfiguration.current.screenWidthDp >= 600
 
     NavigationSuiteScaffold(
+        navigationSuiteType = if (bigScreenEnabled) {
+            NavigationSuiteScaffoldDefaults.calculateNavigationSuiteType()
+        } else {
+            NavigationSuiteType.NavigationBar
+        },
         navigationSuiteItems = {
-            if (isBigScreen) {
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-            
             navItems.forEach {
                 item(
                     icon = {
@@ -145,12 +153,12 @@ fun MainScreen(token: String) {
                 Row(modifier = Modifier.fillMaxSize()) {
                     ConversationListScreen(
                         modifier = Modifier
-                            .weight(if (isBigScreen && currentConversation != null) 0.4f else 1f)
+                            .weight(if (isBigScreen && bigScreenEnabled && currentConversation != null) 0.4f else 1f)
                             .fillMaxHeight(),
                         token = token,
-                        currentConversation = if (isBigScreen) currentConversation else null,
+                        currentConversation = if (isBigScreen && bigScreenEnabled) currentConversation else null,
                         onConversationClick = { conversation ->
-                            if (isBigScreen) {
+                            if (isBigScreen && bigScreenEnabled) {
                                 currentConversation = conversation
                             } else {
                                 ChatActivity.start(
@@ -164,7 +172,7 @@ fun MainScreen(token: String) {
                         }
                     )
 
-                    if (isBigScreen) {
+                    if (isBigScreen && bigScreenEnabled) {
                         if (currentConversation != null) {
                             BackHandler {
                                 currentConversation = null
