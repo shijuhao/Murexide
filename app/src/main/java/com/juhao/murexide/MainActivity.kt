@@ -94,9 +94,15 @@ fun MainScreen(token: String) {
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    
+    val isBigScreen = LocalConfiguration.current.screenWidthDp >= 600
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
+            if (isBigScreen) {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            
             navItems.forEach {
                 item(
                     icon = {
@@ -134,8 +140,6 @@ fun MainScreen(token: String) {
             modifier = Modifier.fillMaxSize()
         ) {
             composable("conversations") {
-                val isBigScreen = LocalConfiguration.current.screenWidthDp >= 600
-
                 var currentConversation by remember { mutableStateOf<ConversationItem?>(null) }
 
                 Row(modifier = Modifier.fillMaxSize()) {
@@ -167,7 +171,7 @@ fun MainScreen(token: String) {
                             }
                             ChatScreen(
                                 modifier = Modifier
-                                    .weight(0.6f)
+                                    .weight(0.7f)
                                     .fillMaxHeight(),
                                 chatAvatar = currentConversation!!.avatarUrl,
                                 chatName = currentConversation!!.name,
@@ -191,7 +195,7 @@ fun MainScreen(token: String) {
                             )
                         } else {
                             Column(
-                                modifier = Modifier.weight(7f).fillMaxHeight(),
+                                modifier = Modifier.weight(0.7f).fillMaxHeight(),
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
