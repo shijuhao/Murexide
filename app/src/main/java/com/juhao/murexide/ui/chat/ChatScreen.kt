@@ -861,10 +861,6 @@ fun ChatScreen(
                             }
                         }
                     }
-                    
-                    item {
-                        Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
-                    }
                 }
 
                 AnimatedScrollToBottomButton(

@@ -11,9 +11,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -22,19 +20,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.juhao.murexide.datastore.TokenStorage
-import com.juhao.murexide.ui.chat.ChatActivity
-import com.juhao.murexide.ui.contact.ContactListScreen
-import com.juhao.murexide.ui.conversation.ConversationListScreen
-import com.juhao.murexide.ui.login.LoginActivity
-import com.juhao.murexide.ui.mine.MineScreen
-import com.juhao.murexide.ui.theme.MurexideTheme
 import kotlinx.coroutines.launch
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.lifecycle.ViewModel
@@ -42,6 +34,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.juhao.murexide.datastore.TokenStorage
+import com.juhao.murexide.ui.chat.ChatActivity
+import com.juhao.murexide.ui.contact.ContactListScreen
+import com.juhao.murexide.ui.conversation.ConversationListScreen
+import com.juhao.murexide.ui.login.LoginActivity
+import com.juhao.murexide.ui.mine.MineScreen
+import com.juhao.murexide.ui.theme.MurexideTheme
 import com.juhao.murexide.data.ConversationItem
 import com.juhao.murexide.ui.chat.ChatScreen
 import com.juhao.murexide.ui.chat.ChatViewModel
@@ -161,34 +160,48 @@ fun MainScreen(token: String) {
                         }
                     )
 
-                    if (isBigScreen && currentConversation != null) {
-                        BackHandler {
-                            currentConversation = null
-                        }
-                        ChatScreen(
-                            modifier = Modifier
-                                .weight(0.6f)
-                                .fillMaxHeight(),
-                            chatAvatar = currentConversation!!.avatarUrl,
-                            chatName = currentConversation!!.name,
-                            chatType = currentConversation!!.chatType,
-                            onBackClick = { currentConversation = null },
-                            bigScreenMode = true,
-                            viewModel = viewModel(
-                                key = "chat_" + currentConversation!!.chatId,
-                                factory = object : ViewModelProvider.Factory {
-                                    @Suppress("UNCHECKED_CAST")
-                                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                                        return ChatViewModel(
-                                            token = token,
-                                            chatId = currentConversation!!.chatId,
-                                            chatType = currentConversation!!.chatType,
-                                            deviceId = getDeviceId()
-                                        ) as T
+                    if (isBigScreen) {
+                        if (currentConversation != null) {
+                            BackHandler {
+                                currentConversation = null
+                            }
+                            ChatScreen(
+                                modifier = Modifier
+                                    .weight(0.6f)
+                                    .fillMaxHeight(),
+                                chatAvatar = currentConversation!!.avatarUrl,
+                                chatName = currentConversation!!.name,
+                                chatType = currentConversation!!.chatType,
+                                onBackClick = { currentConversation = null },
+                                bigScreenMode = true,
+                                viewModel = viewModel(
+                                    key = "chat_" + currentConversation!!.chatId,
+                                    factory = object : ViewModelProvider.Factory {
+                                        @Suppress("UNCHECKED_CAST")
+                                        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                                            return ChatViewModel(
+                                                token = token,
+                                                chatId = currentConversation!!.chatId,
+                                                chatType = currentConversation!!.chatType,
+                                                deviceId = getDeviceId()
+                                            ) as T
+                                        }
                                     }
-                                }
+                                )
                             )
-                        )
+                        } else {
+                            Column(
+                                modifier = Modifier.weight(7f).fillMaxHeight(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.ChatBubble,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(80.dp).alpha(0.6f)
+                                )
+                            }
+                        }
                     }
                 }
             }
