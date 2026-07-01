@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -342,22 +343,37 @@ fun MessageBubble(
                                     MessageItem.CONTENT_TYPE_TEXT,
                                     MessageItem.CONTENT_TYPE_MARKDOWN -> {
                                         if (message.contentType == MessageItem.CONTENT_TYPE_MARKDOWN) {
-                                            MarkdownRenderer.Render(
-                                                content = message.content
-                                            )
+                                            MarkdownRenderer.Render(content = message.content)
                                         } else {
                                             val timeId = "time_${message.msgId}"
+                                            val textMeasurer = rememberTextMeasurer()
+                                            
+                                            val timeText = buildString {
+                                                append(timestampDisplay)
+                                                if (message.isEdited) append(" 已编辑")
+                                            }
+                                            
+                                            val density = LocalDensity.current
+                                            val timeWidth = with(density) {
+                                                textMeasurer.measure(
+                                                    text = AnnotatedString(timeText),
+                                                    style = MaterialTheme.typography.labelSmall.copy(
+                                                        fontSize = 10.sp,
+                                                        lineHeight = 16.sp
+                                                    )
+                                                ).size.width.toDp()
+                                            }
                                             
                                             val textWithTime = buildAnnotatedString {
                                                 append(message.content)
                                                 append(" ")
-                                                appendInlineContent(timeId, '\u200B'.toString())
+                                                appendInlineContent(timeId, " ")
                                             }
                                             
                                             val inlineContent = mapOf(
                                                 timeId to InlineTextContent(
                                                     placeholder = Placeholder(
-                                                        width = 0.sp,
+                                                        width = timeWidth,
                                                         height = 1.em,
                                                         placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
                                                     )
@@ -368,20 +384,15 @@ fun MessageBubble(
                                                             fontSize = 10.sp,
                                                             lineHeight = 16.sp,
                                                             maxLines = 1,
-                                                            color = MaterialTheme.colorScheme.onSurface.copy(
-                                                                alpha = 0.7f
-                                                            )
+                                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                                         )
                                                         if (message.isEdited) {
                                                             Text(
-                                                                text = "已编辑",
+                                                                text = " 已编辑",
                                                                 fontSize = 10.sp,
                                                                 lineHeight = 16.sp,
                                                                 maxLines = 1,
-                                                                color = MaterialTheme.colorScheme.onSurface.copy(
-                                                                    alpha = 0.7f
-                                                                ),
-                                                                modifier = Modifier.padding(start = 4.dp)
+                                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                                             )
                                                         }
                                                     }
