@@ -353,16 +353,16 @@ fun MessageBubble(
                                                 if (message.isEdited) append(" 已编辑")
                                             }
                                             
+                                            val timeWidth = textMeasurer.measure(
+                                                text = AnnotatedString(timeText),
+                                                style = MaterialTheme.typography.labelSmall.copy(
+                                                    fontSize = 10.sp,
+                                                    lineHeight = 16.sp
+                                                )
+                                            ).size.width
+                                            
                                             val density = LocalDensity.current
-                                            val timeWidth = with(density) {
-                                                textMeasurer.measure(
-                                                    text = AnnotatedString(timeText),
-                                                    style = MaterialTheme.typography.labelSmall.copy(
-                                                        fontSize = 10.sp,
-                                                        lineHeight = 16.sp
-                                                    )
-                                                ).size.width.toDp()
-                                            }
+                                            val timeWidthSp = with(density) { timeWidth.toSp() }
                                             
                                             val textWithTime = buildAnnotatedString {
                                                 append(message.content)
@@ -373,7 +373,7 @@ fun MessageBubble(
                                             val inlineContent = mapOf(
                                                 timeId to InlineTextContent(
                                                     placeholder = Placeholder(
-                                                        width = timeWidth,
+                                                        width = timeWidthSp,
                                                         height = 1.em,
                                                         placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
                                                     )
