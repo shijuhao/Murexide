@@ -14,6 +14,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.InsertDriveFile
 import androidx.compose.material.icons.automirrored.rounded.Undo
@@ -366,7 +368,9 @@ fun MessageBubble(
                                                             fontSize = 10.sp,
                                                             lineHeight = 16.sp,
                                                             maxLines = 1,
-                                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                                            color = MaterialTheme.colorScheme.onSurface.copy(
+                                                                alpha = 0.7f
+                                                            )
                                                         )
                                                         if (message.isEdited) {
                                                             Text(
@@ -374,7 +378,9 @@ fun MessageBubble(
                                                                 fontSize = 10.sp,
                                                                 lineHeight = 16.sp,
                                                                 maxLines = 1,
-                                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                                color = MaterialTheme.colorScheme.onSurface.copy(
+                                                                    alpha = 0.7f
+                                                                ),
                                                                 modifier = Modifier.padding(start = 4.dp)
                                                             )
                                                         }
