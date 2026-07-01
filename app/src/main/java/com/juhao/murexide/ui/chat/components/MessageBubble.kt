@@ -443,7 +443,7 @@ fun MessageBubble(
                                                     contentScale = ContentScale.FillWidth,
                                                     modifier = Modifier
                                                         .then(
-                                                            if (isLastFromSender && message.quoteMsgText == null)
+                                                            if (isLastFromSender || message.quoteMsgText != null)
                                                                 Modifier.clip(
                                                                     RoundedCornerShape(
                                                                         topStart = bubbleCornerRadius.dp,
