@@ -375,8 +375,7 @@ fun MessageBubble(
                                                     placeholder = Placeholder(
                                                         width = timeWidthSp,
                                                         height = 1.em,
-                                                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom,
-                                                        placeholderHorizontalAlign = PlaceholderHorizontalAlign.Right
+                                                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
                                                     )
                                                 ) {
                                                     Row (
