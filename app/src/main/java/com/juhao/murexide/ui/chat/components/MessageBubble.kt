@@ -29,6 +29,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.appendInlineContent
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
@@ -342,10 +346,50 @@ fun MessageBubble(
                                                 content = message.content
                                             )
                                         } else {
+                                            val timeId = "time_${message.msgId}_${message.timestamp}_${System.currentTimeMillis()}"
+                                            
+                                            val textWithTime = buildAnnotatedString {
+                                                append(message.content)
+                                                append(" ")
+                                                appendInlineContent(timeId, "[time]")
+                                            }
+                                            
+                                            val inlineContent = mapOf(
+                                                timeId to InlineTextContent(
+                                                    placeholder = Placeholder(
+                                                        width = 0.sp,
+                                                        height = 1.em,
+                                                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
+                                                    )
+                                                ) {
+                                                    Row {
+                                                        Text(
+                                                            text = timestampDisplay,
+                                                            fontSize = 10.sp,
+                                                            lineHeight = 16.sp,
+                                                            maxLines = 1,
+                                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                                        )
+                                                        if (message.isEdited) {
+                                                            Text(
+                                                                text = "已编辑",
+                                                                fontSize = 10.sp,
+                                                                lineHeight = 16.sp,
+                                                                maxLines = 1,
+                                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                                modifier = Modifier.padding(start = 4.dp)
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            )
+                                            
                                             Text(
-                                                text = message.content,
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.onSurface
+                                                text = textWithTime,
+                                                inlineContent = inlineContent,
+                                                style = MaterialTheme.typography.bodyMedium.copy(
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
                                             )
                                         }
                                     }
@@ -382,7 +426,7 @@ fun MessageBubble(
                                                     contentScale = ContentScale.FillWidth,
                                                     modifier = Modifier
                                                         .then(
-                                                            if (isLastFromSender || message.quoteMsgText != null)
+                                                            if (isLastFromSender && message.quoteMsgText == null)
                                                                 Modifier.clip(
                                                                     RoundedCornerShape(
                                                                         topStart = bubbleCornerRadius.dp,
@@ -508,7 +552,7 @@ fun MessageBubble(
                                                 Icon(
                                                     imageVector = Icons.Rounded.Download,
                                                     contentDescription = null,
-                                                    modifier = Modifier.size(12.dp),
+                                                    modifier = Modifier.size(16.dp),
                                                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                                                 )
                                             }
@@ -524,7 +568,7 @@ fun MessageBubble(
                                     }
                                 }
     
-                                if (!hideMsgCard) {
+                                if (!hideMsgCard && message.contentType != MessageItem.CONTENT_TYPE_TEXT) {
                                     Row(
                                         modifier = Modifier.align(if (isMine) Alignment.End else Alignment.Start)
                                     ) {
@@ -704,7 +748,7 @@ private fun getFileIcon(fileName: String): androidx.compose.ui.graphics.vector.I
         "xls", "xlsx" -> Icons.Rounded.TableChart
         "ppt", "pptx" -> Icons.Rounded.Slideshow
         "zip", "rar", "7z", "tar", "gz" -> Icons.Rounded.FolderZip
-        "mp3", "wav", "aac", "flac", "ogg" -> Icons.Rounded.AudioFile
+        "mp3", "wav", "aac", "flac", "ogg", "m4a" -> Icons.Rounded.AudioFile
         "mp4", "avi", "mkv", "mov", "flv" -> Icons.Rounded.VideoFile
         "jpg", "jpeg", "png", "gif", "webp", "bmp", "svg" -> Icons.Rounded.Image
         "txt", "md", "json", "xml", "html", "css", "js", "kt", "java" -> Icons.Rounded.Code

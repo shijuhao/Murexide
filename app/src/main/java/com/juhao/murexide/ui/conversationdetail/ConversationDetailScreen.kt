@@ -111,14 +111,9 @@ private fun DetailHeader(detail: ConversationDetail) {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                val subtitle = when (detail.chatType) {
-                    2 -> "群聊"
-                    3 -> "机器人"
-                    else -> detail.nameId?.let { "ID: $it" } ?: "用户"
-                }
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = subtitle,
+                    text = "ID: ${detail.chatId}",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

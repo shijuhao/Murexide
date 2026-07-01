@@ -10,6 +10,7 @@ data class ConversationDetail(
     val avatarUrl: String,
     val introduction: String = "",
     // 群聊
+    val groupId: String? = null,
     val memberCount: Long? = null,
     val ownerId: String? = null,
     val groupCode: String? = null,

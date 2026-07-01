@@ -394,7 +394,7 @@ fun ChatScreen(
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f)
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
                         ),
                         actions = {
                             if (selectedMessages.size == 1) {
@@ -454,7 +454,7 @@ fun ChatScreen(
                             }
                         },
                         colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp).copy(alpha = 0.9f)
+                            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
                         ),
                         actions = {
                             Box {
