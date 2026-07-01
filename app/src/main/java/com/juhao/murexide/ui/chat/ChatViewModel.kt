@@ -9,6 +9,7 @@ import com.juhao.murexide.data.*
 import com.juhao.murexide.utils.QiniuUploader
 import com.juhao.murexide.network.WebSocketManager
 import com.juhao.murexide.repository.MessageRepository
+import com.juhao.murexide.repository.FriendRepository
 import androidx.core.net.toUri
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -41,6 +42,7 @@ class ChatViewModel(
     private val repository: MessageRepository = MessageRepository(),
     private val backgroundRepository: ChatBackgroundRepository = ChatBackgroundRepository(),
     private val stickerRepository: StickerRepository = StickerRepository(),
+    private val friendRepository: FriendRepository = FriendRepository(),
     private val wsManager: WebSocketManager = WebSocketManager.getInstance()
 ) : ViewModel() {
 
@@ -1050,6 +1052,25 @@ class ChatViewModel(
     
     fun onInputFocusConsumed() {
         _uiState.update { it.copy(requestInputFocus = false) }
+    }
+    
+    fun deleteFriend(
+        onSuccess: () -> Unit = {},
+        onFailure: () -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            friendRepository.deleteFriend(
+                token = token,
+                id = chatId,
+                type = chatType
+            ).onSuccess {
+                _toastMessage.emit("操作成功")
+                onSuccess()
+            }.onFailure {
+                _toastMessage.emit("操作失败")
+                onFailure()
+            }
+        }
     }
 }
 

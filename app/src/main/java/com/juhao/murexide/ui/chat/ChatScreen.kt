@@ -488,6 +488,27 @@ fun ChatScreen(
                                             Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(24.dp))
                                         }
                                     )
+                                    
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 6.dp))
+                                    
+                                    DropdownMenuItem(
+                                        text = { 
+                                            Text(
+                                                when (chatType) {
+                                                    1 -> "删除好友"
+                                                    2 -> "退出群聊"
+                                                    else -> "删除机器人"
+                                                }
+                                            )
+                                        },
+                                        onClick = {
+                                            showMoreMenu = false
+                                            viewModel.deleteFriend()
+                                        },
+                                        leadingIcon = {
+                                            Icon(Icons.AutoMirrored.Rounded.Logout, contentDescription = null)
+                                        }
+                                    )
                                 }
 
                                 IconButton(onClick = {

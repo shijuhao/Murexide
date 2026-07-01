@@ -1,5 +1,7 @@
 package com.juhao.murexide.data
 
+import kotlinx.serialization.Serializable
+
 data class ContactItem(
     val chatId: String,
     val chatType: Int,
@@ -14,4 +16,10 @@ data class ContactGroup(
     val groupName: String,
     val chatType: Int,
     val contacts: List<ContactItem>
+)
+
+@Serializable
+data class DeleteFriendResponse(
+    val code: Int,
+    val msg: String
 )
