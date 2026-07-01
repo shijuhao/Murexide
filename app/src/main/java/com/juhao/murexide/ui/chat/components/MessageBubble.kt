@@ -32,11 +32,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.appendInlineContent
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -346,12 +346,12 @@ fun MessageBubble(
                                                 content = message.content
                                             )
                                         } else {
-                                            val timeId = "time_${message.msgId}_${message.timestamp}_${System.currentTimeMillis()}"
+                                            val timeId = "time_${message.msgId}"
                                             
                                             val textWithTime = buildAnnotatedString {
                                                 append(message.content)
                                                 append(" ")
-                                                appendInlineContent(timeId, "[time]")
+                                                appendInlineContent(timeId, '\u200B'.toString())
                                             }
                                             
                                             val inlineContent = mapOf(
