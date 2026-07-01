@@ -375,10 +375,13 @@ fun MessageBubble(
                                                     placeholder = Placeholder(
                                                         width = timeWidthSp,
                                                         height = 1.em,
-                                                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
+                                                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom,
+                                                        placeholderHorizontalAlign = PlaceholderHorizontalAlign.Right
                                                     )
                                                 ) {
-                                                    Row {
+                                                    Row (
+                                                        modifier = Modifier.wrapContentWidth(unbounded = true)
+                                                    ) {
                                                         Text(
                                                             text = timestampDisplay,
                                                             fontSize = 10.sp,
