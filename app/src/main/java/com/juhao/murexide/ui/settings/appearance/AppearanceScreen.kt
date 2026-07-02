@@ -124,7 +124,7 @@ fun AppearanceScreen(
                         "system" to "跟随系统",
                         "light" to "浅色模式",
                         "dark" to "深色模式",
-                        "oled" to "纯黑模式"
+                        "oled" to "纯黑模式（禁用动态取色）"
                     ),
                     selectedValue = themeMode,
                     onOptionSelected = { selected ->
