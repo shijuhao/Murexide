@@ -38,6 +38,8 @@ fun AppearanceScreen(
     val scope = rememberCoroutineScope()
 
     val themeMode by ThemeState.themeMode
+    val themeColor by ThemeState.themeColor
+
     var squareAvatar by remember { mutableStateOf(false) }
     var showSticky by remember { mutableStateOf(true) }
     
@@ -113,21 +115,47 @@ fun AppearanceScreen(
                     icon = Icons.Rounded.WbSunny,
                     title = "主题模式",
                     subtitle = when (themeMode) {
-                        "system" -> "跟随系统"
                         "dark" -> "深色模式"
                         "light" -> "浅色模式"
+                        "oled" -> "纯黑模式"
                         else -> "跟随系统"
                     },
                     options = listOf(
                         "system" to "跟随系统",
+                        "light" to "浅色模式",
                         "dark" to "深色模式",
-                        "light" to "浅色模式"
+                        "oled" to "纯黑模式"
                     ),
                     selectedValue = themeMode,
                     onOptionSelected = { selected ->
                         ThemeState.themeMode.value = selected
                         scope.launch {
                             settingsStorage.setThemeMode(selected)
+                        }
+                    }
+                )
+                SettingsDropdownItem(
+                    icon = Icons.Rounded.Draw,
+                    title = "主题颜色",
+                    subtitle = when (themeColor) {
+                        "PURPLE" -> "紫色"
+                        "BLUE" -> "蓝色"
+                        "GREEN" -> "绿色"
+                        "ORANGE" -> "橙色"
+                        else -> "动态取色"
+                    },
+                    options = listOf(
+                        "DYNAMIC" to "动态取色",
+                        "PURPLE" to "紫色",
+                        "BLUE" to "蓝色",
+                        "GREEN" to "绿色",
+                        "ORANGE" to "橙色"
+                    ),
+                    selectedValue = themeMode,
+                    onOptionSelected = { selected ->
+                        ThemeState.themeColor.value = selected
+                        scope.launch {
+                            settingsStorage.setThemeColor(selected)
                         }
                     }
                 )
