@@ -101,21 +101,6 @@ class QiniuUploader(
         return input.startsWith("http://") || input.startsWith("https://")
     }
 
-    private fun getFileExtension(path: String): String {
-        var cleanPath = path
-        val queryIndex = cleanPath.indexOf('?')
-        if (queryIndex != -1) {
-            cleanPath = cleanPath.substring(0, queryIndex)
-        }
-        val fragmentIndex = cleanPath.indexOf('#')
-        if (fragmentIndex != -1) {
-            cleanPath = cleanPath.substring(0, fragmentIndex)
-        }
-        
-        val ext = cleanPath.substringAfterLast(".", "")
-        return if (ext.isNotEmpty() && ext.all { it.isLetterOrDigit() }) ext else "bin"
-    }
-
     private fun md5Hex(file: File): String {
         val digest = MessageDigest.getInstance("MD5")
         file.inputStream().use { input ->
@@ -195,7 +180,7 @@ class QiniuUploader(
     
                     defaultUploadHost
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 defaultUploadHost
             }
         }
@@ -218,7 +203,7 @@ class QiniuUploader(
                 )
 
                 success && outputFile.exists() && outputFile.length() > 0
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 false
             } finally {
                 bitmap?.recycle()

@@ -12,8 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.juhao.murexide.datastore.SettingsStorage
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
@@ -36,7 +34,6 @@ fun MurexideTheme(
     val context = LocalContext.current
     val settingsStorage = remember { SettingsStorage(context) }
 
-    // 初始化读取
     LaunchedEffect(Unit) {
         val saved = settingsStorage.getThemeMode()
         ThemeState.themeMode.value = saved
@@ -58,12 +55,11 @@ fun MurexideTheme(
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
-    
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         val window = (view.context as Activity).window
-        window.statusBarColor = Color.Transparent.toArgb()
-        window.navigationBarColor = Color.Transparent.toArgb()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
