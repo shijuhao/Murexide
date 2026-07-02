@@ -117,7 +117,7 @@ fun AppearanceScreen(
                     subtitle = when (themeMode) {
                         "dark" -> "深色模式"
                         "light" -> "浅色模式"
-                        "oled" -> "纯黑模式"
+                        "oled" -> "纯黑模式（禁用动态取色）"
                         else -> "跟随系统"
                     },
                     options = listOf(

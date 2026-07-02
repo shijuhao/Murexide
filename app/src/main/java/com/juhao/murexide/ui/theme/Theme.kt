@@ -16,112 +16,13 @@ import com.juhao.murexide.datastore.SettingsStorage
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-private val DarkColorScheme = darkColorScheme(
-    primary = md_theme_primary,
-    onPrimary = md_theme_onPrimary,
-    primaryContainer = md_theme_primaryContainer,
-    onPrimaryContainer = md_theme_onPrimaryContainer,
-    secondary = md_theme_secondary,
-    onSecondary = md_theme_onSecondary,
-    secondaryContainer = md_theme_secondaryContainer,
-    onSecondaryContainer = md_theme_onSecondaryContainer,
-    tertiary = md_theme_tertiary,
-    onTertiary = md_theme_onTertiary,
-    tertiaryContainer = md_theme_tertiaryContainer,
-    onTertiaryContainer = md_theme_onTertiaryContainer,
-    error = md_theme_error,
-    onError = md_theme_onError,
-    errorContainer = md_theme_errorContainer,
-    onErrorContainer = md_theme_onErrorContainer,
-    background = md_theme_background,
-    onBackground = md_theme_onBackground,
-    surface = md_theme_surface,
-    onSurface = md_theme_onSurface,
-    surfaceVariant = md_theme_surfaceVariant,
-    onSurfaceVariant = md_theme_onSurfaceVariant,
-    outline = md_theme_outline,
-    outlineVariant = md_theme_outlineVariant,
-    surfaceTint = md_theme_surfaceTint,
-    inverseSurface = md_theme_inverseSurface,
-    inverseOnSurface = md_theme_inverseOnSurface,
-    inversePrimary = md_theme_inversePrimary,
-    surfaceContainerHighest = md_theme_surfaceContainerHighest,
-    surfaceContainerHigh = md_theme_surfaceContainerHigh,
-    surfaceContainer = md_theme_surfaceContainer,
-    surfaceContainerLow = md_theme_surfaceContainerLow,
-    surfaceContainerLowest = md_theme_surfaceContainerLowest,
-    primaryFixed = md_theme_primaryFixed,
-    primaryFixedDim = md_theme_primaryFixedDim,
-    onPrimaryFixed = md_theme_onPrimaryFixed,
-    onPrimaryFixedVariant = md_theme_onPrimaryFixedVariant,
-    secondaryFixed = md_theme_secondaryFixed,
-    secondaryFixedDim = md_theme_secondaryFixedDim,
-    onSecondaryFixed = md_theme_onSecondaryFixed,
-    onSecondaryFixedVariant = md_theme_onSecondaryFixedVariant,
-    tertiaryFixed = md_theme_tertiaryFixed,
-    tertiaryFixedDim = md_theme_tertiaryFixedDim,
-    onTertiaryFixed = md_theme_onTertiaryFixed,
-    onTertiaryFixedVariant = md_theme_onTertiaryFixedVariant,
-    scrim = md_theme_scrim
-)
-
-private val LightColorScheme = lightColorScheme(
-    primary = md_theme_primary,
-    onPrimary = md_theme_onPrimary,
-    primaryContainer = md_theme_primaryContainer,
-    onPrimaryContainer = md_theme_onPrimaryContainer,
-    secondary = md_theme_secondary,
-    onSecondary = md_theme_onSecondary,
-    secondaryContainer = md_theme_secondaryContainer,
-    onSecondaryContainer = md_theme_onSecondaryContainer,
-    tertiary = md_theme_tertiary,
-    onTertiary = md_theme_onTertiary,
-    tertiaryContainer = md_theme_tertiaryContainer,
-    onTertiaryContainer = md_theme_onTertiaryContainer,
-    error = md_theme_error,
-    onError = md_theme_onError,
-    errorContainer = md_theme_errorContainer,
-    onErrorContainer = md_theme_onErrorContainer,
-    background = md_theme_background,
-    onBackground = md_theme_onBackground,
-    surface = md_theme_surface,
-    onSurface = md_theme_onSurface,
-    surfaceVariant = md_theme_surfaceVariant,
-    onSurfaceVariant = md_theme_onSurfaceVariant,
-    outline = md_theme_outline,
-    outlineVariant = md_theme_outlineVariant,
-    surfaceTint = md_theme_surfaceTint,
-    inverseSurface = md_theme_inverseSurface,
-    inverseOnSurface = md_theme_inverseOnSurface,
-    inversePrimary = md_theme_inversePrimary,
-    surfaceContainerHighest = md_theme_surfaceContainerHighest,
-    surfaceContainerHigh = md_theme_surfaceContainerHigh,
-    surfaceContainer = md_theme_surfaceContainer,
-    surfaceContainerLow = md_theme_surfaceContainerLow,
-    surfaceContainerLowest = md_theme_surfaceContainerLowest,
-    primaryFixed = md_theme_primaryFixed,
-    primaryFixedDim = md_theme_primaryFixedDim,
-    onPrimaryFixed = md_theme_onPrimaryFixed,
-    onPrimaryFixedVariant = md_theme_onPrimaryFixedVariant,
-    secondaryFixed = md_theme_secondaryFixed,
-    secondaryFixedDim = md_theme_secondaryFixedDim,
-    onSecondaryFixed = md_theme_onSecondaryFixed,
-    onSecondaryFixedVariant = md_theme_onSecondaryFixedVariant,
-    tertiaryFixed = md_theme_tertiaryFixed,
-    tertiaryFixedDim = md_theme_tertiaryFixedDim,
-    onTertiaryFixed = md_theme_onTertiaryFixed,
-    onTertiaryFixedVariant = md_theme_onTertiaryFixedVariant,
-    scrim = md_theme_scrim
-)
-
 private fun getOledColorScheme(baseScheme: String): ColorScheme {
     val baseColors = when (baseScheme) {
-        "DYNAMIC" -> DarkColorScheme
-        "PURPLE" -> PurpleDarkColorScheme
+        "PURPLE", "DYNAMIC" -> PurpleDarkColorScheme
         "BLUE" -> BlueDarkColorScheme
         "GREEN" -> GreenDarkColorScheme
         "ORANGE" -> OrangeDarkColorScheme
-        else -> DarkColorScheme
+        else -> PurpleDarkColorScheme
     }
 
     return darkColorScheme(
@@ -205,7 +106,7 @@ fun MurexideTheme(
                 val context = LocalContext.current
                 if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
             } else {
-                if (darkTheme) DarkColorScheme else LightColorScheme
+                if (darkTheme) PurpleDarkColorScheme else PurpleLightColorScheme
             }
         }
         themeColor == "PURPLE" -> {
@@ -221,7 +122,7 @@ fun MurexideTheme(
             if (darkTheme) OrangeDarkColorScheme else OrangeLightColorScheme
         }
         else -> {
-            if (darkTheme) DarkColorScheme else LightColorScheme
+            if (darkTheme) PurpleDarkColorScheme else PurpleLightColorScheme
         }
     }
 
