@@ -355,10 +355,7 @@ fun MessageBubble(
                                             
                                             val timeWidth = textMeasurer.measure(
                                                 text = AnnotatedString(timeText),
-                                                style = MaterialTheme.typography.labelSmall.copy(
-                                                    fontSize = 10.sp,
-                                                    lineHeight = 16.sp
-                                                )
+                                                style = MaterialTheme.typography.labelSmall
                                             ).size.width
                                             
                                             val density = LocalDensity.current
@@ -383,16 +380,14 @@ fun MessageBubble(
                                                     ) {
                                                         Text(
                                                             text = timestampDisplay,
-                                                            fontSize = 10.sp,
-                                                            lineHeight = 16.sp,
+                                                            style = MaterialTheme.typography.labelSmall,
                                                             maxLines = 1,
                                                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                                         )
                                                         if (message.isEdited) {
                                                             Text(
                                                                 text = " 已编辑",
-                                                                fontSize = 10.sp,
-                                                                lineHeight = 16.sp,
+                                                                style = MaterialTheme.typography.labelSmall,
                                                                 maxLines = 1,
                                                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                                                             )
